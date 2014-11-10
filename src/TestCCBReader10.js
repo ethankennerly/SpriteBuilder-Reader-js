@@ -11,7 +11,7 @@ function TestCCBReader10(parent) {
     cc.log("TestCCBReader10: version 5 CocosBuilder");
     var scene5 = cc.BuilderReader.loadAsScene("ccb/MainScene");
     parent.addChild(scene5);
-    cc.log("TestCCBReader10: version 10 SpriteBuilder");
+    cc.log("TestCCBReader10: version 10 SpriteBuilder: TODO");
     try {
         var name10 = "SpriteBuilder_Bullet";
         var scene10 = cc.BuilderReader10.loadAsScene(name10);
