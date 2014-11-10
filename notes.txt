@@ -1,0 +1,107 @@
+SPRITEBUILDER
+
+https://www.makegameswith.us/tutorials/getting-started-with-spritebuilder/installing-spritebuilder/
+
+https://www.makegameswith.us/gamernews/370/dynamic-layouts-with-spritebuilder-and-cocos2d-3x
+
+https://github.com/spritebuilder/SpriteBuilder
+
+Convert your Flash animations to SpriteBuilder.
+https://github.com/spritebuilder/SWF-Importer
+
+Convert ActionScript animation to Cocos2D actions.
+http://indiedevstories.com/2012/07/18/exporting-flash-animations-to-cocos2d-actions/
+
+
+
+
+Read CCB.
+https://github.com/diwu/CCB-X-Reader/blob/master/ccb/Classes/CCBReader.cpp
+
+CCBI is binary.
+http://stackoverflow.com/questions/16881582/what-is-cocosbuilder-ccbi-file
+
+Example CCBI
+https://github.com/soomla/cocos2dx-js-store-example/blob/master/Resources/ccb/ListItemWidget2.ccbi
+
+JavaScript reader of CCBI.
+
+loadAsScene
+https://github.com/cocos2d/cocos2d-html5/blob/develop/extensions/ccb-reader/CCBReader.js
+
+Connecting with Cocos2d JS
+https://github.com/cocos2d/CocosBuilder/blob/master/Documentation/4a.%20Connecting%20with%20Cocos2d%20JS.md
+
+CCBI file format
+https://github.com/cocos2d/CocosBuilder/blob/master/Documentation/X4.%20CCBi%20File%20Format.md
+
+https://github.com/spritebuilder/SpriteBuilder/blob/develop/Documentation/5.%20Connecting%20with%20Cocos2d.md
+
+Some idea of what's different in CCB format:
+https://github.com/sidebolt/CCBUpgrade
+
+CCBUpgrade parses plist.
+https://docs.python.org/2/library/plistlib.html
+
+https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/blob/master/PeevedPenguins.spritebuilder/SpriteBuilder%20Resources/Gameplay.ccb
+
+https://github.com/spritebuilder/SpriteBuilder/blob/develop/Documentation/X4.%20CCBi%20File%20Format.md
+
+https://github.com/spritebuilder/SpriteBuilder/blob/develop/Documentation/X5.%20Property%20Types.md
+
+
+Details of CCBI file formats:
+
+Example files in version 4 or 5:
+
+https://github.com/cocos2d/cocos2d-x/tree/f74626e94652666a568e20fd62eb90f1cd5206b3/tests/cpp-tests/Resources/ccb/ccb
+
+JavaScript implements reader version 5
+
+https://github.com/cocos2d/cocos2d-x/blob/f74626e94652666a568e20fd62eb90f1cd5206b3/cocos/editor-support/cocosbuilder/CCBReader.h
+
+https://github.com/cocos2d/cocos2d-x/blob/f74626e94652666a568e20fd62eb90f1cd5206b3/cocos/editor-support/cocosbuilder/CCBReader.cpp
+
+https://github.com/cocos2d/CCBReader/blob/master/CCBReader/CCBReader.h
+https://github.com/cocos2d/CCBReader/blob/master/CCBReader/CCBReader.m
+
+Load CCB file in code
+https://www.makegameswith.us/docs/#!/cocos2d/1.2/load-ccb
+
+Example of version 10 file:
+
+https://github.com/slembcke/CocoRoids/tree/master/Source/Resources/Published-iOS
+
+
+Cocos2D-Swift implements reader version 10
+
+https://github.com/cocos2d/cocos2d-swift/blob/398daf201e5188bc288a644e162f44d1a3ab8304/cocos2d-ui/CCBReader/CCBReader.m
+
+https://github.com/cocos2d/cocos2d-html5
+commit f8b8f4c
+
+https://github.com/cocos2d/cocos2d-swift/blob/a71a439e552b499a70ebdcf19843168425dcc1aa/cocos2d-ui/CCBReader/CCBReader_Private.h
+
+Reading integer with sign is more complicated in version 10.
+Flipped Elias Gamma Coding.
+
+Unit test examples.
+
+Version 10 deprecated JS controlled animation callbacks.
+
+Reading node graph parent:
+
+Version 10 adds node properties:  position type, scale X, scale Y.
+And replaces tag with name.
+
+Version 10 also reads physics nodes.
+
+Version 10 reads keyframe alpha.
+
+Sprite sheet framing comes from sprite frame class.
+
+Version 10 adds node properties:  corner, x unit, y unit.
+removes animation type.
+
+JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.
+
