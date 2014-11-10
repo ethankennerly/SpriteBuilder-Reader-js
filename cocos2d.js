@@ -39,7 +39,7 @@
         //SingleEngineFile:'',
         appFiles:[
             'src/resource.js',
-            // 'src/CCBReader10.js',
+            'src/CCBReader10.js',
             'src/TestCCBReader10.js',
             'src/myApp.js'//add your own files in order here
         ]

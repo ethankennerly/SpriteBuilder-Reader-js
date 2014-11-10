@@ -12,11 +12,10 @@ function TestCCBReader10(parent) {
     var scene5 = cc.BuilderReader.loadAsScene("ccb/MainScene");
     parent.addChild(scene5);
     cc.log("TestCCBReader10: version 10 SpriteBuilder: TODO");
-    try {
-        var name10 = "SpriteBuilder_Bullet";
+    var version10usable = false;
+    if (version10usable) {
+        var name10 = "ccb/SpriteBuilder_Bullet";
         var scene10 = cc.BuilderReader10.loadAsScene(name10);
-    }
-    catch (err) {
-        cc.log("TestCCBReader10: version 10 SpriteBuilder failed");
+        parent.addChild(scene10);
     }
 }

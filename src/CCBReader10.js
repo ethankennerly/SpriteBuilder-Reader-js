@@ -24,6 +24,34 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+/**
+ * Comparison of version 5 to version 10:
+ *
+ * TODO: 
+ * Version 10 deprecated JS controlled animation callbacks.
+ * 
+ * Reading node graph parent:
+ * 
+ * Version 10 adds node properties:  position type, scale X, scale Y.
+ * And replaces tag with name.
+ * 
+ * Version 10 reads keyframe alpha.
+ * 
+ * Sprite sheet framing comes from sprite frame class.
+ * 
+ * Version 10 adds node properties:  corner, x unit, y unit.
+ * removes animation type.
+ * 
+ * JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.
+ * 
+ * Not supported:
+ * 
+ * Version 10 also reads physics nodes.
+ * 
+ * To read version number in version 10 reader:
+ * Reading integer with sign OLD is more complicated in version 10.
+ * Flipped Elias Gamma Coding.
+ */
 var CCB_VERSION_10 = 10;
 
 var CCB_PROPTYPE_POSITION = 0;
