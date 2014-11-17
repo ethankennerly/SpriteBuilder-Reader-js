@@ -118,7 +118,8 @@ num: 68079829
 Sprite Builder bullet example byte array
 
 this._data
-Uint8Array[238][0 … 99]0: 105
+Uint8Array[238][0 … 99]
+0: 105
 1: 98
 2: 99
 3: 99

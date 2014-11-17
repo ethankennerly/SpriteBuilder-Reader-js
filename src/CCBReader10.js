@@ -27,8 +27,11 @@
 /**
  * Comparison of version 5 to version 10:
  *
- * TODO: 
  * Version 10 deprecated JS controlled animation callbacks.
+ *
+ * Version 10 reads integer from variable length byte array.
+ * 
+ * TODO: 
  * 
  * Reading node graph parent:
  * 
@@ -341,34 +344,22 @@ cc.BuilderReader10 = cc.Class.extend({
         return num;
     },
 
+    /**
+     * @param   signed  Divides raw value by 2.  Least significant bit indicates negative number.
+     * @return  number {int}   Parsed from this._data.  Also advances _currentByte.
+     */
     readInt:function (signed) {
-        var numBits = 0;
-        while (!this._getBit()) {
-            numBits++;
-        }
-
-        var current = 0;
-        for (var a = numBits - 1; a >= 0; a--) {
-            if (this._getBit()) {
-                current |= 1 << a;
-            }
-        }
-        current |= 1 << numBits;
-
-        var num;
+        var value = this.readVariableLengthIntFromArray(this, this._data);
+        var num = 0;
         if (signed) {
-            var s = current % 2;
-            if (s) {
-                num = 0 | (current / 2);
-            } else {
-                num = 0 | (-current / 2);
-            }
-        } else {
-            num = current - 1;
+            if (value & 0x1)
+                num = -((value+1) >> 1);
+            else
+                num = (value >> 1);
         }
-
-        this._alignBits();
-
+        else {
+            num = value;
+        }
         return num;
     },
 
