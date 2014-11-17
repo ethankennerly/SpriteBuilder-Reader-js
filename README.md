@@ -17,5 +17,5 @@ commit f8b8f4c
 CocosBuilder example MainScene.ccbi from store example by Soomla:
 https://github.com/soomla/cocos2dx-js-store-example/blob/master/Resources/ccb
 
-SpriteBuilder example Bullet.ccbi from CocoRoids by Slembcke:
-https://github.com/slembcke/CocoRoids
+SpriteBuilder example Bear.ccbi from MakeGamesWithUs:
+https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS

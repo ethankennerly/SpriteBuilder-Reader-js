@@ -22,6 +22,9 @@ CCBI is binary.
 http://stackoverflow.com/questions/16881582/what-is-cocosbuilder-ccbi-file
 
 Example CCBI
+
+https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS
+
 https://github.com/soomla/cocos2dx-js-store-example/blob/master/Resources/ccb/ListItemWidget2.ccbi
 
 JavaScript reader of CCBI.
@@ -104,4 +107,35 @@ Version 10 adds node properties:  corner, x unit, y unit.
 removes animation type.
 
 JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.
+
+JOURNAL
+
+number of sequences seems too large:
+
+current: 68079830
+num: 68079829
+
+Sprite Builder bullet example byte array
+
+this._data
+Uint8Array[238][0 … 99]0: 105
+1: 98
+2: 99
+3: 99
+4: 104
+5: 13
+6: 0
+7: 0
+8: 0
+9: 4
+10: 110
+
+
+Version 10 Objective-C readIntWithSign differs.
+
+What is a test case of JavaScript readInt in Version 10?
+
+
+https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS
+
 

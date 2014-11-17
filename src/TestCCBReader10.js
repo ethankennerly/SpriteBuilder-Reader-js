@@ -8,14 +8,46 @@ var StoreAScene = cc.Class.extend({});
 var StoreBScene = cc.Class.extend({});
 
 function TestCCBReader10(parent) {
+    testReadVariableLengthIntFromArray();
     cc.log("TestCCBReader10: version 5 CocosBuilder");
     var scene5 = cc.BuilderReader.loadAsScene("ccb/MainScene");
     parent.addChild(scene5);
     cc.log("TestCCBReader10: version 10 SpriteBuilder: TODO");
     var version10usable = false;
     if (version10usable) {
-        var name10 = "ccb/SpriteBuilder_Bullet";
+        var name10 = "ccb/Bear";
         var scene10 = cc.BuilderReader10.loadAsScene(name10);
         parent.addChild(scene10);
     }
 }
+
+function testReadVariableLengthIntFromArray() {
+    var byteArray = new Uint8Array(6);
+	byteArray[0] = 3;
+	byteArray[1] = 14;
+	byteArray[2] = 27;
+	byteArray[3] = 129;
+	byteArray[4] = 130;
+	byteArray[5] = 27;
+	var currentByteContainer = {_currentByte: 2}
+	var value = cc.BuilderReader10.prototype.readVariableLengthIntFromArray(currentByteContainer, byteArray);
+	assertEquals(27, value, "Value");
+	assertEquals(3, currentByteContainer._currentByte, "currentByte");
+	var value = cc.BuilderReader10.prototype.readVariableLengthIntFromArray(currentByteContainer, byteArray);
+	assertEquals(1 | (2 << 7) | (27 << 14), value, "Value");
+	assertEquals(6, currentByteContainer._currentByte, "currentByte");
+}
+
+// http://stackoverflow.com/questions/15313418/javascript-assert
+function assertEquals(expected, got, message) {
+    if (expected !== got) {
+        message = message || "Assertion failed.";
+	message += "  Expected <" + expected + ">.";
+	message += "  Got <" + got + ">. ";
+        if (typeof Error !== "undefined") {
+            throw new Error(message);
+        }
+        throw message; // Fallback
+    }
+}
+
