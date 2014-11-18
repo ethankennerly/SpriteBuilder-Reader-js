@@ -46,6 +46,8 @@
  *
  * TODO: 
  *
+ * Read node anchor point property.
+ *
  * Removes animation type.
  *
  * JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.  Animated properties?
@@ -746,11 +748,10 @@ cc.BuilderReader10 = cc.Class.extend({
             value = [this.readFloat(), this.readFloat()];
         } else if (type == CCB_PROPTYPE_DEGREES) {
             value = this.readFloat();
-        } else if (type == CCB_PROPTYPE_SCALELOCK || type == CCB_PROPTYPE_FLOATXY) {
+        } else if (type == CCB_PROPTYPE_SCALELOCK 
+        || type == CCB_PROPTYPE_FLOATXY
+        || type == CCB_PROPTYPE_POSITION) {
             value = [this.readFloat(), this.readFloat()];
-        } else if (type == CCB_PROPTYPE_POSITION) {
-            var pos = this.readPosition();
-            value = [pos.x, pos.y];
         } else if (type == CCB_PROPTYPE_SPRITEFRAME) {
             value = this.readSpriteFrame();
         }
@@ -1123,6 +1124,9 @@ cc.BuilderReader10 = cc.Class.extend({
     /**
      * Version 10 does not read platform.  All properties are set.
      * Version 10 adds color4 property.
+     * Does version 10 not record name property type as string?
+     *
+     * Consolidate string and text.  Read if string or text is localized.
      */
     readPropertiesForNode: function (node, parent, ccbReader, ccNodeLoader) {
         var numRegularProps = ccbReader.readInt(false);
@@ -1335,18 +1339,19 @@ cc.BuilderReader10 = cc.Class.extend({
                     break;
                 }
                 case CCB_PROPTYPE_STRING:
-                {
-                    var stringValue = ccNodeLoader.parsePropTypeString(node, parent, ccbReader);
-                    if (setProp) {
-                        ccNodeLoader.onHandlePropTypeString(node, parent, propertyName, stringValue, ccbReader);
-                    }
-                    break;
-                }
                 case CCB_PROPTYPE_TEXT:
                 {
-                    var textValue = ccNodeLoader.parsePropTypeText(node, parent, ccbReader);
-                    if (setProp) {
-                        ccNodeLoader.onHandlePropTypeText(node, parent, propertyName, textValue, ccbReader);
+                    var text = ccbReader.readCachedString();
+                    var localized = ccbReader.readBool();  // TODO
+                    if (propertyName == PROPERTY_TAG)
+                    {
+                        ccbReader.setName(node, text);
+                    }
+                    else {
+                        node[propertyName] = text;
+                        if (setProp) {
+                            ccNodeLoader.onHandlePropTypeString(node, parent, propertyName, stringValue, ccbReader);
+                        }
                     }
                     break;
                 }
@@ -1373,11 +1378,6 @@ cc.BuilderReader10 = cc.Class.extend({
                         ccNodeLoader.onHandlePropTypeCCBFile(node, parent, propertyName, ccbFileNode, ccbReader);
                     }
                     break;
-                }
-                case PROPERTY_TAG:
-                {
-                    var tag = ccbReader.readString();
-                    ccbReader.setName(node, tag);
                 }
                 // Not supported:
                 // CCB_PROPTYPE_NODE_REFERENCE
@@ -1407,6 +1407,7 @@ cc.BuilderReader10 = cc.Class.extend({
 
     /**
      * Read version 5 position in version 10 format.
+     * @param   propertyName    Expects "position".
      */
     parsePropTypePosition: function (
     node, parent, ccbReader, propertyName) {
