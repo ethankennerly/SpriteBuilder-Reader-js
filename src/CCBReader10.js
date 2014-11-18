@@ -31,29 +31,44 @@
  *
  * Version 10 reads integer from variable length byte array.
  * 
- * TODO: 
- * 
  * Reading node graph parent:
  * 
- * Version 10 adds node properties:  position type, scale X, scale Y.
- * And replaces tag with name.
+ * Reads visibility.
+ *
+ * Replaces tag with name in string cache.
  * 
- * Version 10 reads keyframe alpha.
+ * Version 10 reads keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
  * 
  * Sprite sheet framing comes from sprite frame class.
+ * If sprite frame image not found, load image file.
  * 
- * Version 10 adds node properties:  corner, x unit, y unit.
- * removes animation type.
+ * TODO: 
+ *
+ * Animation AutoPlaySequenceID.
  * 
- * JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.
- * 
+ * Size type and size xUnit and yUnit, which are handled in CCNodeLoader.
+ *
+ * Removes animation type.
+ *
+ * JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.  Animated properties?
+ *
+ * Load sprite sheet.
+ *
  * Not supported:
  * 
+ * Version 10 adds node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
+ *
+ * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
+ *
  * Version 10 also reads physics nodes.
  * 
  * To read version number in version 10 reader:
  * Reading integer with sign OLD is more complicated in version 10.
  * Flipped Elias Gamma Coding.
+ *
+ * fileLookup.plist
+ *
+ * SpriteKit sprite frame reader override.
  */
 var CCB_VERSION_10 = 10;
 
@@ -85,6 +100,7 @@ var CCB_PROPTYPE_STRING = 24;
 var CCB_PROPTYPE_BLOCKCCCONTROL = 25;
 var CCB_PROPTYPE_FLOATSCALE = 26;
 var CCB_PROPTYPE_FLOATXY = 27;
+var CCB_PROPTYPE_COLOR4 = 28;
 
 var CCB_FLOAT0 = 0;
 var CCB_FLOAT1 = 1;
@@ -225,6 +241,7 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     initWithData:function (data, owner) {
+
         //setup action manager
         this._animationManager = new cc.BuilderAnimationManager();
 
@@ -687,38 +704,63 @@ cc.BuilderReader10 = cc.Class.extend({
             value = this.readBool();
         } else if (type == CCB_PROPTYPE_BYTE) {
             value = this.readByte();
-        } else if (type == CCB_PROPTYPE_COLOR3) {
-            var c = cc.c3(this.readByte(), this.readByte(), this.readByte());
-            value = cc.Color3BWapper.create(c);
+        } else if (type == CCB_PROPTYPE_COLOR3
+        || type == CCB_PROPTYPE_COLOR4) {
+            value = this._readColor();
         } else if (type == CCB_PROPTYPE_FLOATXY) {
             value = [this.readFloat(), this.readFloat()];
         } else if (type == CCB_PROPTYPE_DEGREES) {
             value = this.readFloat();
-        } else if (type == CCB_PROPTYPE_SCALELOCK || type == CCB_PROPTYPE_POSITION || type == CCB_PROPTYPE_FLOATXY) {
+        } else if (type == CCB_PROPTYPE_SCALELOCK || type == CCB_PROPTYPE_FLOATXY) {
             value = [this.readFloat(), this.readFloat()];
+        } else if (type == CCB_PROPTYPE_POSITION) {
+            var x = this.readFloat();
+            var y = this.readFloat();
+            var corner = this.readByte();  // TODO
+            var xUnit = this.readByte();  // TODO
+            var yUnit = this.readByte();  // TODO
+            value = [x, y];
         } else if (type == CCB_PROPTYPE_SPRITEFRAME) {
-            var spriteSheet = this.readCachedString();
-            var spriteFile = this.readCachedString();
-
-            if (spriteSheet == "") {
-                spriteFile = this._ccbRootPath + spriteFile;
-                var texture = cc.TextureCache.getInstance().addImage(spriteFile);
-                var locContentSize = texture.getContentSize();
-                var bounds = cc.rect(0, 0, locContentSize.width, locContentSize.height);
-                value = cc.SpriteFrame.createWithTexture(texture, bounds);
-            } else {
-                spriteSheet = this._ccbRootPath + spriteSheet;
-                var frameCache = cc.SpriteFrameCache.getInstance();
-                // Load the sprite sheet only if it is not loaded
-                if (this._loadedSpriteSheets.indexOf(spriteSheet) == -1) {
-                    frameCache.addSpriteFrames(spriteSheet);
-                    this._loadedSpriteSheets.push(spriteSheet);
-                }
-                value = frameCache.getSpriteFrame(spriteFile);
-            }
+            value = this._readSpriteFrame();
         }
         keyframe.setValue(value);
         return keyframe;
+    },
+
+    /**
+     * Expects sprite sheets were already loaded.
+     * If sprite frame image not found, load image file.
+     */
+    _readSpriteFrame: function() 
+    {
+        var value;
+        var spriteFile = this.readCachedString();
+        var frameCache = cc.SpriteFrameCache.getInstance();
+        value = frameCache.getSpriteFrame(spriteFile);
+        if (!value) {
+            spriteFile = this._ccbRootPath + spriteFile;
+            var texture = cc.TextureCache.getInstance().addImage(spriteFile);
+            var locContentSize = texture.getContentSize();
+            var bounds = cc.rect(0, 0, locContentSize.width, locContentSize.height);
+            value = cc.SpriteFrame.createWithTexture(texture, bounds);
+            frameCache.addSpriteFrame(value, spriteFile);
+        }
+        value.setTag
+        return value;
+    },
+
+    /**
+     * Version 10 reads keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
+     */
+    _readColor: function()
+    {
+        var max = 255;
+        var r = Math.round(max * this.readFloat());
+        var g = Math.round(max * this.readFloat());
+        var b = Math.round(max * this.readFloat());
+        var a = Math.round(max * this.readFloat());
+        var c = cc.c4(r, g, b, a);
+        value = cc.Color4BWapper.create(c);
     },
 
     _readHeader:function () {
@@ -766,6 +808,9 @@ cc.BuilderReader10 = cc.Class.extend({
         return true;
     },
 
+    /**
+     * Version 10:  Replaces tag with name in string cache.
+     */
     _readStringCacheEntry:function () {
         var b0 = this.readByte();
         var b1 = this.readByte();
@@ -781,6 +826,9 @@ cc.BuilderReader10 = cc.Class.extend({
         str = decodeURIComponent(str);
 
         this._currentByte += numBytes;
+        if ("name" == str) {
+            str = "tag";
+        }
         this._stringCache.push(str);
     },
 
@@ -851,7 +899,8 @@ cc.BuilderReader10 = cc.Class.extend({
             embeddedNode.setScaleX(node.getScaleX());
             embeddedNode.setScaleY(node.getScaleY());
             embeddedNode.setTag(node.getTag());
-            embeddedNode.setVisible(true);
+            var visible = !(node._visible !== false);
+            embeddedNode.setVisible(visible);
             //embeddedNode.ignoreAnchorPointForPosition(node.isIgnoreAnchorPointForPosition());
 
             locActionManager.moveAnimationsFromNode(node, embeddedNode);
@@ -860,31 +909,21 @@ cc.BuilderReader10 = cc.Class.extend({
         }
         var target = null, locMemberAssigner = null;
         if (memberVarAssignmentType != CCB_TARGETTYPE_NONE) {
-            if (!locJsControlled) {
-                if (memberVarAssignmentType === CCB_TARGETTYPE_DOCUMENTROOT) {
-                    target = locActionManager.getRootNode();
-                } else if (memberVarAssignmentType === CCB_TARGETTYPE_OWNER) {
-                    target = this._owner;
-                }
+            if (memberVarAssignmentType === CCB_TARGETTYPE_DOCUMENTROOT) {
+                target = locActionManager.getRootNode();
+            } else if (memberVarAssignmentType === CCB_TARGETTYPE_OWNER) {
+                target = this._owner;
+            }
 
-                if (target != null) {
-                    var assigned = false;
+            if (target != null) {
+                var assigned = false;
 
-                    if (target != null && (target.onAssignCCBMemberVariable)) {
-                        assigned = target.onAssignCCBMemberVariable(target, memberVarAssignmentName, node);
-                    }
-                    locMemberAssigner = this._ccbMemberVariableAssigner;
-                    if (!assigned && locMemberAssigner != null && locMemberAssigner.onAssignCCBMemberVariable) {
-                        locMemberAssigner.onAssignCCBMemberVariable(target, memberVarAssignmentName, node);
-                    }
+                if (target != null && (target.onAssignCCBMemberVariable)) {
+                    assigned = target.onAssignCCBMemberVariable(target, memberVarAssignmentName, node);
                 }
-            } else {
-                if (memberVarAssignmentType == CCB_TARGETTYPE_DOCUMENTROOT) {
-                    locActionManager.addDocumentOutletName(memberVarAssignmentName);
-                    locActionManager.addDocumentOutletNode(node);
-                } else {
-                    this._ownerOutletNames.push(memberVarAssignmentName);
-                    this._ownerOutletNodes.push(node);
+                locMemberAssigner = this._ccbMemberVariableAssigner;
+                if (!assigned && locMemberAssigner != null && locMemberAssigner.onAssignCCBMemberVariable) {
+                    locMemberAssigner.onAssignCCBMemberVariable(target, memberVarAssignmentName, node);
                 }
             }
         }
@@ -892,18 +931,16 @@ cc.BuilderReader10 = cc.Class.extend({
         // Assign custom properties.
         if (ccNodeLoader.getCustomProperties().length > 0) {
             var customAssigned = false;
-            if(!locJsControlled) {
-                target = node;
-                if(target != null && target.onAssignCCBCustomProperty != null) {
-                    var customProperties = ccNodeLoader.getCustomProperties();
-                    var customPropKeys = customProperties.allKeys();
-                    for(i = 0;i < customPropKeys.length;i++){
-                        var customPropValue = customProperties.objectForKey(customPropKeys[i]);
-                        customAssigned = target.onAssignCCBCustomProperty(target, customPropKeys[i], customPropValue);
-                        locMemberAssigner = this._ccbMemberVariableAssigner;
-                        if(!customAssigned && (locMemberAssigner != null) && (locMemberAssigner.onAssignCCBCustomProperty != null))
-                            customAssigned = locMemberAssigner.onAssignCCBCustomProperty(target, customPropKeys[i], customPropValue);
-                    }
+            target = node;
+            if(target != null && target.onAssignCCBCustomProperty != null) {
+                var customProperties = ccNodeLoader.getCustomProperties();
+                var customPropKeys = customProperties.allKeys();
+                for(i = 0;i < customPropKeys.length;i++){
+                    var customPropValue = customProperties.objectForKey(customPropKeys[i]);
+                    customAssigned = target.onAssignCCBCustomProperty(target, customPropKeys[i], customPropValue);
+                    locMemberAssigner = this._ccbMemberVariableAssigner;
+                    if(!customAssigned && (locMemberAssigner != null) && (locMemberAssigner.onAssignCCBCustomProperty != null))
+                        customAssigned = locMemberAssigner.onAssignCCBCustomProperty(target, customPropKeys[i], customPropValue);
                 }
             }
         }
@@ -975,6 +1012,7 @@ cc.BuilderReader10.loadAsScene = function (ccbFilePath, owner, parentSize, ccbRo
 };
 
 cc.BuilderReader10.load = function (ccbFilePath, owner, parentSize, ccbRootPath) {
+    cc.SpriteFrameCache.loadSpriteFramesFromFile("spriteFrameFileList.plist");
     ccbRootPath = ccbRootPath || cc.BuilderReader10.getResourcePath();
     var reader = new cc.BuilderReader10(cc.NodeLoaderLibrary.newDefaultCCNodeLoaderLibrary());
     reader.setCCBRootPath(ccbRootPath);
@@ -1121,4 +1159,53 @@ cc.BuilderReader10.endsWith = function (sourceStr, ending) {
 
 cc.BuilderReader10.concat = function (stringA, stringB) {
     return stringA + stringB;
+};
+
+cc.Color4BWapper = cc.Class.extend({
+    _color:null,
+    ctor:function () {
+        this._color = new cc.Color4B(0, 0, 0, 0);
+    },
+    getColor:function () {
+        return this._color;
+    }
+});
+
+cc.Color4BWapper.create = function (color) {
+    var ret = new cc.Color4BWapper();
+    if (ret) {
+        ret._color.r = color.r;
+        ret._color.g = color.g;
+        ret._color.b = color.b;
+        ret._color.a = color.a;
+    }
+    return ret;
+};
+
+
+/**
+ * Load sprite sheets.
+ *
+ * @param   plist   SpriteBuilder saves "spriteFrameFileList.plist" that contains array "spriteFrameFiles" with sprite sheet file names. 
+ */
+cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
+    if (undefined == cc.SpriteFrameCache.loadedFile) {
+        cc.SpriteFrameCache.loadedFile = {};
+    }
+    if (cc.SpriteFrameCache.loadedFile[plist])
+        return;
+    if(!plist)
+        throw "cc.SpriteFrameCache.loadSpriteFramesFromFile(): plist should be non-null";
+    var TODO = true;
+    if (!TODO) {
+        var fileUtils = cc.FileUtils.getInstance();
+        var fullPath = fileUtils.fullPathForFilename(plist);
+        var dict = fileUtils.dictionaryWithContentsOfFileThreadSafe(fullPath);
+        var frameCache = cc.SpriteFrameCache.getInstance();
+        for (var s = 0; s < dict.spriteFrameFiles.length; s++) {
+            var spriteSheet = dict.spriteFrameFiles[s];
+            frameCache.addSpriteFrames(spriteSheet);
+        }
+        cc.SpriteFrameCache.loadedFile[plist] = true;
+    }
 };

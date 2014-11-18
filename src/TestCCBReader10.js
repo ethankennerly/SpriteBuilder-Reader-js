@@ -64,12 +64,15 @@ function TestCCBReader10(parent) {
     cc.log("TestCCBReader10: version 5 CocosBuilder");
     var scene5 = cc.BuilderReader.loadAsScene("ccb/MainScene");
     parent.addChild(scene5);
-    cc.log("TestCCBReader10: version 10 SpriteBuilder: TODO");
+    cc.log("TestCCBReader10: version 10 SpriteBuilder");
     var version10usable = false;
     if (version10usable) {
         var name10 = "ccb/Bear";
         var scene10 = cc.BuilderReader10.loadAsScene(name10);
         parent.addChild(scene10);
+    }
+    else {
+        cc.log("    TODO.  Not usable.");
     }
 }
 

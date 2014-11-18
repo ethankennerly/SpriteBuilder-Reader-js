@@ -19,3 +19,5 @@ https://github.com/soomla/cocos2dx-js-store-example/blob/master/Resources/ccb
 
 SpriteBuilder example Bear.ccbi from MakeGamesWithUs:
 https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS
+
+https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/blob/master/PeevedPenguins.spritebuilder/SpriteBuilder%20Resources/Bear.ccb
