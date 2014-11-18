@@ -1,3 +1,10 @@
+TODO
+	Unexpected property: ''! CCCommon.js:145
+	Unexpected property: 'tag'! CCCommon.js:145
+	Unexpected property: 'anchorPoint'!
+	How does writer store values differently in SpriteBuilder?
+	Sprite loader.  Color.  Position.
+
 SPRITEBUILDER
 
 https://www.makegameswith.us/tutorials/getting-started-with-spritebuilder/installing-spritebuilder/
@@ -21,9 +28,11 @@ https://github.com/diwu/CCB-X-Reader/blob/master/ccb/Classes/CCBReader.cpp
 CCBI is binary.
 http://stackoverflow.com/questions/16881582/what-is-cocosbuilder-ccbi-file
 
-Example CCBI
+Example CCBI version 10
 
 https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS
+
+	version 5
 
 https://github.com/soomla/cocos2dx-js-store-example/blob/master/Resources/ccb/ListItemWidget2.ccbi
 
@@ -138,5 +147,12 @@ What is a test case of JavaScript readInt in Version 10?
 
 
 https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS
+
+
+Tue 11/18/2014 
+05:20
+
+is there something before read sequences auto sequence ID?
+how does writer store values differently in SpriteBuilder?
 
 

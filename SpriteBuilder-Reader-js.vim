@@ -27,9 +27,9 @@ cnoremap   :simalt ~
 inoremap   :simalt ~
 map <silent> \t :call MakeGreen()
 nmap gx <Plug>NetrwBrowseX
-nnoremap <C-F4> c
-nnoremap <C-Tab> w
 nmap <S-Insert> "+gP
+nnoremap <C-Tab> w
+nnoremap <C-F4> c
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cWORD>"),0)
 onoremap <C-F4> c
 vnoremap <C-F4> c
@@ -80,25 +80,25 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 SpriteBuilder-Reader-js.vim
+badd +9 SpriteBuilder-Reader-js.vim
 badd +21 README.md
-badd +61 src\TestCCBReader10.js
-badd +375 src\CCBReader10.js
-badd +337 src\CCBReader10.m
+badd +1 src\TestCCBReader10.js
+badd +100 src\CCBReader10.js
+badd +904 src\CCBReader10.m
 badd +1 src\CCBReader.js
-badd +30 \archive\cocos2d-html5\extensions\CCBReader\CCBReader.js
+badd +89 \archive\cocos2d-html5\extensions\CCBReader\CCBReader.js
 badd +1 notes.txt
-badd +901 src\CCBReader.m
+badd +1 src\CCBReader.m
 badd +1 \archive\cocos2d-html5\extensions\CCBReader\CCBReaderUtil.js
-badd +346 \archive\cocos2d-html5\extensions\CCBReader\CCNodeLoader.js
+badd +848 \archive\cocos2d-html5\extensions\CCBReader\CCNodeLoader.js
 badd +263 \archive\cocos2d-html5\cocos2d\CCConfiguration.js
 badd +250 \archive\cocos2d-html5\cocos2d\platform\CCFileUtils.js
 badd +1 \Users\Ethan\vimfiles\ftplugin\javascript.vim
 badd +1658 \archive\cocos2d-html5\cocos2d\base_nodes\CCNode.js
 badd +549 \archive\cocos2d-html5\cocos2d\CCDirector.js
 badd +169 \archive\cocos2d-html5\cocos2d\platform\jsloader.js
-badd +40 \archive\cocos2d-html5\extensions\CCBReader\CCNodeLoaderLibrary.js
-badd +27 src\CCBReader_private.h
+badd +37 \archive\cocos2d-html5\extensions\CCBReader\CCNodeLoaderLibrary.js
+badd +79 src\CCBReader_private.h
 badd +27 \archive\cocos2d-html5\extensions\CCBReader\CCBRelativePositioning.js
 badd +471 \archive\cocos2d-html5\extensions\CCBReader\CCBAnimationManager.js
 badd +83 \archive\cocos2d-html5\extensions\CCBReader\CCBValue.js
@@ -110,9 +110,21 @@ badd +270 \archive\cocos2d-html5\cocos2d\platform\CCTypes.js
 badd +440 \archive\cocos2d-html5\cocos2d\CCLoader.js
 badd +1988 \archive\cocos2d-html5\cocos2d\actions\CCActionInterval.js
 badd +413 \archive\cocos2d-html5\cocos2d\sprite_nodes\CCSpriteFrame.js
-badd +0 \archive\cocos2d-html5\cocos2d\sprite_nodes\CCSpriteFrameCache.js
+badd +128 \archive\cocos2d-html5\cocos2d\sprite_nodes\CCSpriteFrameCache.js
 badd +29 res\Normal\main.plist
-badd +0 res\ccb\Normal\MainScene.ccbi
+badd +1 res\ccb\Normal\MainScene.ccbi
+badd +918 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d-ui\CCBReader\CCBReader.m
+badd +1 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d-ui\CCBReader\CCBReader_Private.h
+badd +314 \archive\cocos2d-html5\extensions\CCBReader\CCControlLoader.js
+badd +1 \archive\cocos2d-html5\extensions\CCBReader\CCSpriteLoader.js
+badd +506 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\UnitTests\CCNodeTests.m
+badd +99 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d\CCNode.h
+badd +1837 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d\CCNode.m
+badd +1 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d\ccTypes.h
+badd +59 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d\CCActionTween.m
+badd +539 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d\Platforms\Mac\CCDirectorMac.m
+badd +470 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d-ui\CCButton.m
+badd +1 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d-ui\CCControlSubclass.h
 args README.md
 edit README.md
 set splitbelow splitright
@@ -228,12 +240,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 23 - ((3 * winheight(0) + 15) / 31)
+let s:l = 18 - ((0 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-23
-normal! 0138l
+18
+normal! 076l
 wincmd w
 argglobal
 edit notes.txt
@@ -338,12 +350,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 141 - ((14 * winheight(0) + 15) / 31)
+let s:l = 5 - ((4 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-141
-normal! 0
+5
+normal! 033l
 wincmd w
 exe 'vert 1resize ' . ((&columns * 67 + 66) / 133)
 exe 'vert 2resize ' . ((&columns * 65 + 66) / 133)
@@ -468,12 +480,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 67 - ((9 * winheight(0) + 15) / 31)
+let s:l = 41 - ((11 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-67
-normal! 053l
+41
+normal! 04l
 wincmd w
 argglobal
 edit res\ccb\Normal\MainScene.ccbi
@@ -813,12 +825,14 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 318 - ((19 * winheight(0) + 15) / 31)
+920
+normal zo
+let s:l = 921 - ((0 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-318
-normal! 0
+921
+normal! 039l
 wincmd w
 argglobal
 edit src\CCBReader10.m
@@ -843,7 +857,7 @@ setlocal conceallevel=0
 setlocal completefunc=
 setlocal nocopyindent
 setlocal cryptmethod=
-setlocal cursorbind
+setlocal nocursorbind
 setlocal nocursorcolumn
 setlocal nocursorline
 setlocal define=
@@ -922,16 +936,19 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 476 - ((29 * winheight(0) + 15) / 31)
+1334
+normal zo
+let s:l = 1365 - ((30 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-476
-normal! 0
+1365
+normal! 014l
 wincmd w
+2wincmd w
 exe 'vert 1resize ' . ((&columns * 75 + 66) / 133)
 exe 'vert 2resize ' . ((&columns * 57 + 66) / 133)
-tabedit \archive\cocos2d-html5\extensions\CCBReader\CCNodeLoader.js
+tabedit \archive\cocos2d-html5\extensions\CCBReader\CCSpriteLoader.js
 set splitbelow splitright
 wincmd _ | wincmd |
 vsplit
@@ -940,7 +957,10 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-2wincmd k
+wincmd _ | wincmd |
+split
+3wincmd k
+wincmd w
 wincmd w
 wincmd w
 wincmd w
@@ -952,16 +972,18 @@ set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 10 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 1resize ' . ((&columns * 66 + 66) / 133)
-exe '2resize ' . ((&lines * 10 + 16) / 33)
+exe '2resize ' . ((&lines * 25 + 16) / 33)
 exe 'vert 2resize ' . ((&columns * 66 + 66) / 133)
-exe '3resize ' . ((&lines * 9 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 3resize ' . ((&columns * 66 + 66) / 133)
-exe '4resize ' . ((&lines * 15 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 4resize ' . ((&columns * 66 + 66) / 133)
-exe '5resize ' . ((&lines * 15 + 16) / 33)
+exe '5resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 5resize ' . ((&columns * 66 + 66) / 133)
+exe '6resize ' . ((&lines * 29 + 16) / 33)
+exe 'vert 6resize ' . ((&columns * 66 + 66) / 133)
 argglobal
 setlocal keymap=
 setlocal noarabic
@@ -1064,15 +1086,15 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 366 - ((2 * winheight(0) + 5) / 10)
+let s:l = 68 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-366
-normal! 0
+68
+normal! 08l
 wincmd w
 argglobal
-edit src\CCBReader_private.h
+edit \archive\cocos2d-html5\extensions\CCBReader\CCNodeLoader.js
 setlocal keymap=
 setlocal noarabic
 setlocal autoindent
@@ -1103,8 +1125,8 @@ setlocal nodiff
 setlocal equalprg=
 setlocal errorformat=
 setlocal expandtab
-if &filetype != 'objc'
-setlocal filetype=objc
+if &filetype != 'javascript'
+setlocal filetype=javascript
 endif
 setlocal foldcolumn=0
 setlocal foldenable
@@ -1161,8 +1183,8 @@ setlocal statusline=
 setlocal suffixesadd=
 setlocal noswapfile
 setlocal synmaxcol=3000
-if &syntax != 'objc'
-setlocal syntax=objc
+if &syntax != 'javascript'
+setlocal syntax=javascript
 endif
 setlocal tabstop=4
 setlocal tags=
@@ -1174,12 +1196,122 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 4 - ((3 * winheight(0) + 5) / 10)
+let s:l = 896 - ((0 * winheight(0) + 12) / 25)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-4
-normal! 01l
+896
+normal! 0
+wincmd w
+argglobal
+edit \archive\cocos2d-html5\extensions\CCBReader\CCNodeLoader.js
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'javascript'
+setlocal filetype=javascript
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'javascript'
+setlocal syntax=javascript
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+silent! normal! zE
+let s:l = 69 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+69
+normal! 04l
 wincmd w
 argglobal
 edit \archive\cocos2d-html5\extensions\CCBReader\CCBReader.js
@@ -1284,12 +1416,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 230 - ((0 * winheight(0) + 4) / 9)
+let s:l = 792 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-230
-normal! 04l
+792
+normal! 021l
 wincmd w
 argglobal
 edit src\CCBReader10.js
@@ -1394,12 +1526,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 47 - ((5 * winheight(0) + 7) / 15)
+let s:l = 65 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-47
-normal! 012l
+65
+normal! 014l
 wincmd w
 argglobal
 edit src\CCBReader10.js
@@ -1504,36 +1636,45 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 934 - ((1 * winheight(0) + 7) / 15)
+let s:l = 3 - ((2 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-934
-normal! 012l
+3
+normal! 0
 wincmd w
-4wincmd w
-exe '1resize ' . ((&lines * 10 + 16) / 33)
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 1resize ' . ((&columns * 66 + 66) / 133)
-exe '2resize ' . ((&lines * 10 + 16) / 33)
+exe '2resize ' . ((&lines * 25 + 16) / 33)
 exe 'vert 2resize ' . ((&columns * 66 + 66) / 133)
-exe '3resize ' . ((&lines * 9 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 3resize ' . ((&columns * 66 + 66) / 133)
-exe '4resize ' . ((&lines * 15 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 4resize ' . ((&columns * 66 + 66) / 133)
-exe '5resize ' . ((&lines * 15 + 16) / 33)
+exe '5resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 5resize ' . ((&columns * 66 + 66) / 133)
-tabedit \archive\cocos2d-html5\cocos2d\sprite_nodes\CCSpriteFrameCache.js
+exe '6resize ' . ((&lines * 29 + 16) / 33)
+exe 'vert 6resize ' . ((&columns * 66 + 66) / 133)
+tabedit \archive\cocos2d-html5\cocos2d\base_nodes\CCNode.js
 set splitbelow splitright
 wincmd _ | wincmd |
 vsplit
 1wincmd h
+wincmd w
+wincmd _ | wincmd |
+split
+1wincmd k
 wincmd w
 set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
 exe 'vert 1resize ' . ((&columns * 67 + 66) / 133)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 exe 'vert 2resize ' . ((&columns * 65 + 66) / 133)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe 'vert 3resize ' . ((&columns * 65 + 66) / 133)
 argglobal
 setlocal keymap=
 setlocal noarabic
@@ -1636,16 +1777,16 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 128 - ((2 * winheight(0) + 15) / 31)
+let s:l = 476 - ((13 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-128
-normal! 0
+476
+normal! 04l
 lcd C:\archive\SpriteBuilder-Reader-js
 wincmd w
 argglobal
-edit C:\archive\cocos2d-html5\cocos2d\sprite_nodes\CCSpriteFrame.js
+edit C:\archive\cocos2d-html5\extensions\CCBReader\CCBRelativePositioning.js
 setlocal keymap=
 setlocal noarabic
 setlocal autoindent
@@ -1747,18 +1888,583 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 413 - ((24 * winheight(0) + 15) / 31)
+let s:l = 29 - ((5 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-413
-normal! 0
+29
+normal! 053l
 lcd C:\archive\SpriteBuilder-Reader-js
 wincmd w
-4wincmd w
+argglobal
+enew
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=wipe
+setlocal buflisted
+setlocal buftype=quickfix
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'qf'
+setlocal filetype=qf
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal nomodifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'qf'
+setlocal syntax=qf
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal winfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+2wincmd w
 exe 'vert 1resize ' . ((&columns * 67 + 66) / 133)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 exe 'vert 2resize ' . ((&columns * 65 + 66) / 133)
-tabnext 4
+exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe 'vert 3resize ' . ((&columns * 65 + 66) / 133)
+tabedit C:\archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d-ui\CCControlSubclass.h
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+set nosplitbelow
+set nosplitright
+wincmd t
+set winheight=1 winwidth=1
+exe '1resize ' . ((&lines * 20 + 16) / 33)
+exe '2resize ' . ((&lines * 10 + 16) / 33)
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'objc'
+setlocal filetype=objc
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'objc'
+setlocal syntax=objc
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+silent! normal! zE
+let s:l = 54 - ((7 * winheight(0) + 10) / 20)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+54
+normal! 0120l
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+argglobal
+enew
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=wipe
+setlocal buflisted
+setlocal buftype=quickfix
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'qf'
+setlocal filetype=qf
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal nomodifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'qf'
+setlocal syntax=qf
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal winfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 20 + 16) / 33)
+exe '2resize ' . ((&lines * 10 + 16) / 33)
+tabedit C:\archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d\ccTypes.h
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+set nosplitbelow
+set nosplitright
+wincmd t
+set winheight=1 winwidth=1
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'cpp'
+setlocal filetype=cpp
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'cpp'
+setlocal syntax=cpp
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+silent! normal! zE
+let s:l = 431 - ((19 * winheight(0) + 14) / 29)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+431
+normal! 04l
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+argglobal
+enew
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=wipe
+setlocal buflisted
+setlocal buftype=quickfix
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'qf'
+setlocal filetype=qf
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal nomodifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'qf'
+setlocal syntax=qf
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal winfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+tabnext 3
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif

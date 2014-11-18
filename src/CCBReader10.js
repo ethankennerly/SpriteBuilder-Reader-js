@@ -42,11 +42,9 @@
  * Sprite sheet framing comes from sprite frame class.
  * If sprite frame image not found, load image file.
  * 
- * TODO: 
+ * Ignores has physics nodes.
  *
- * Animation AutoPlaySequenceID.
- * 
- * Size type and size xUnit and yUnit, which are handled in CCNodeLoader.
+ * TODO: 
  *
  * Removes animation type.
  *
@@ -56,6 +54,16 @@
  *
  * Not supported:
  * 
+ * Adapt position and size type and size xUnit and yUnit, which were handled in CCNodeLoader. 
+ *
+ * Node reference.  UUID.
+ *
+ * Float check.
+ *
+ * Float scale.
+ *
+ * Effects.
+ *
  * Version 10 adds node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
  *
  * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
@@ -100,7 +108,12 @@ var CCB_PROPTYPE_STRING = 24;
 var CCB_PROPTYPE_BLOCKCCCONTROL = 25;
 var CCB_PROPTYPE_FLOATSCALE = 26;
 var CCB_PROPTYPE_FLOATXY = 27;
+// Version 6:
 var CCB_PROPTYPE_COLOR4 = 28;
+// Version 10:
+var CCB_PROPTYPE_NODE_REFERENCE = 29;
+var CCB_PROPTYPE_FLOAT_CHECK = 30;
+var CCB_PROPTYPE_EFFECTS = 31;
 
 var CCB_FLOAT0 = 0;
 var CCB_FLOAT1 = 1;
@@ -148,6 +161,19 @@ var CCB_SIZETYPE_MULTIPLY_RESOLUTION = 5;
 
 var CCB_SCALETYPE_ABSOLUTE = 0;
 var CCB_SCALETYPE_MULTIPLY_RESOLUTION = 1;
+
+// Version 10:
+/// Content size is set in points (this is the default)
+var CCB_POSITION_UNIT_POINTS = 0;
+/// Position is UI points, on iOS this corresponds to the native point system
+var CCB_POSITION_UNIT_UI_POINTS = 1;    
+/// Position is a normalized value multiplied by the content size of the parent's container
+var CCB_POSITION_UNIT_NORMALIZED = 2;    
+/// Content size is the size of the parents container inset by the supplied value
+var CCB_SIZE_UNIT_INSET_POINTS = 3;    
+/// Content size is the size of the parents container inset by the supplied value multiplied by the UIScaleFactor (as defined by CCDirector)
+var CCB_SIZE_UNIT_INSET_UI_POINTS = 4;    
+    
 
 var _ccbGlobalContext = _ccbGlobalContext || window;
 
@@ -660,9 +686,17 @@ cc.BuilderReader10 = cc.Class.extend({
         seq.setSoundChannel(channel);
         return true;
     },
+
+    /**
+     * Reads but ignores if has physics nodes.
+     * Sets animation manager, fixedTimeStep which is ignored.
+     */
     _readSequences:function () {
         var sequences = this._animationManager.getSequences();
         var numSeqs = this.readInt(false);
+        var hasPhysicsBodies = this.readBool();
+        var hasPhysicsNodes  = this.readBool();
+
         for (var i = 0; i < numSeqs; i++) {
             var seq = new cc.BuilderSequence();
             seq.setDuration(this.readFloat());
@@ -678,6 +712,7 @@ cc.BuilderReader10 = cc.Class.extend({
             sequences.push(seq);
         }
         this._animationManager.setAutoPlaySequenceId(this.readInt(true));
+        this._animationManager.fixedTimestep = hasPhysicsBodies || hasPhysicsNodes;
         return true;
     },
 
@@ -706,7 +741,7 @@ cc.BuilderReader10 = cc.Class.extend({
             value = this.readByte();
         } else if (type == CCB_PROPTYPE_COLOR3
         || type == CCB_PROPTYPE_COLOR4) {
-            value = this._readColor();
+            value = this.readColor();
         } else if (type == CCB_PROPTYPE_FLOATXY) {
             value = [this.readFloat(), this.readFloat()];
         } else if (type == CCB_PROPTYPE_DEGREES) {
@@ -714,25 +749,101 @@ cc.BuilderReader10 = cc.Class.extend({
         } else if (type == CCB_PROPTYPE_SCALELOCK || type == CCB_PROPTYPE_FLOATXY) {
             value = [this.readFloat(), this.readFloat()];
         } else if (type == CCB_PROPTYPE_POSITION) {
-            var x = this.readFloat();
-            var y = this.readFloat();
-            var corner = this.readByte();  // TODO
-            var xUnit = this.readByte();  // TODO
-            var yUnit = this.readByte();  // TODO
-            value = [x, y];
+            var pos = this.readPosition();
+            value = [pos.x, pos.y];
         } else if (type == CCB_PROPTYPE_SPRITEFRAME) {
-            value = this._readSpriteFrame();
+            value = this.readSpriteFrame();
         }
         keyframe.setValue(value);
         return keyframe;
     },
 
     /**
+     * Ignores xUnit and yUnit.
+     * How would version 2.2.2 support these?
+     * Corner is same as type.
+     */
+    readPosition: function()
+    {
+        var pos = {};
+        pos.x = this.readFloat();
+        pos.y = this.readFloat();
+        pos.corner = this.readByte();  // Same as type
+        pos.xUnit = this.readByte();  // TODO
+        pos.yUnit = this.readByte();  // TODO
+        pos.type = this._adaptPositionType(pos.xUnit, pos.yUnit, pos.corner);
+        return pos;
+    },
+
+    _adaptPositionType: function(xUnit, yUnit, corner)
+    {
+        var type = CCB_POSITIONTYPE_RELATIVE_BOTTOM_LEFT;
+        if (CCB_POSITION_UNIT_POINTS == xUnit
+        || CCB_POSITION_UNIT_POINTS == yUnit
+        || CCB_POSITION_UNIT_INSET_POINTS == xUnit
+        || CCB_POSITION_UNIT_INSET_POINTS == yUnit) {
+            type = corner;
+        }
+        else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
+        || CCB_POSITION_UNIT_NORMALIZED == yUnit) {
+            type = CCB_POSITIONTYPE_PERCENT;
+        }
+        else if (CCB_SIZE_UNIT_INSET_UI_POINTS == xUnit
+        || CCB_SIZE_UNIT_INSET_UI_POINTS == yUnit) {
+            type = CCB_POSITIONTYPE_MULTIPLY_RESOLUTION;
+        }
+        else {
+            cc.log("Unexpected position unit");
+        }
+        return type;
+    },
+
+    readSize: function()
+    {
+        var size = {};
+        size.w = this.readFloat();
+        size.h = this.readFloat();
+        size.xUnit = this.readByte();  // TODO
+        size.yUnit = this.readByte();  // TODO
+        size.type = this._adaptSizeType(size.xUnit, size.yUnit);
+        return size;
+    },
+
+    /**
+     * Absolute position not supported.
+     */
+    _adaptSizeType: function(xUnit, yUnit)
+    {
+        var type = CCB_SIZETYPE_RELATIVE_CONTAINER;
+        if (CCB_POSITION_UNIT_POINTS == xUnit
+        || CCB_POSITION_UNIT_POINTS == yUnit) {
+            type = CCB_SIZETYPE_ABSOLUTE;
+        }
+        else if (CCB_POSITION_UNIT_INSET_POINTS == xUnit
+        || CCB_POSITION_UNIT_INSET_POINTS == yUnit) {
+            type = CCB_SIZETYPE_RELATIVE_CONTAINER;
+        }
+        else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
+        || CCB_POSITION_UNIT_NORMALIZED == yUnit) {
+            type = CCB_SIZETYPE_PERCENT;
+        }
+        else if (CCB_SIZE_UNIT_INSET_UI_POINTS == xUnit
+        || CCB_SIZE_UNIT_INSET_UI_POINTS == yUnit) {
+            type = CCB_SIZETYPE_MULTIPLY_RESOLUTION;
+        }
+        else {
+            cc.log("Unexpected size unit");
+        }
+        return type;
+    },
+
+/**
      * Expects sprite sheets were already loaded.
      * If sprite frame image not found, load image file.
      */
-    _readSpriteFrame: function() 
+    readSpriteFrame: function() 
     {
+        cc.SpriteFrameCache.loadSpriteFramesFromFile("spriteFrameFileList.plist");
         var value;
         var spriteFile = this.readCachedString();
         var frameCache = cc.SpriteFrameCache.getInstance();
@@ -745,14 +856,14 @@ cc.BuilderReader10 = cc.Class.extend({
             value = cc.SpriteFrame.createWithTexture(texture, bounds);
             frameCache.addSpriteFrame(value, spriteFile);
         }
-        value.setTag
+        this.setName(value, spriteFile);
         return value;
     },
 
     /**
      * Version 10 reads keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
      */
-    _readColor: function()
+    readColor: function()
     {
         var max = 255;
         var r = Math.round(max * this.readFloat());
@@ -761,6 +872,7 @@ cc.BuilderReader10 = cc.Class.extend({
         var a = Math.round(max * this.readFloat());
         var c = cc.c4(r, g, b, a);
         value = cc.Color4BWapper.create(c);
+        return value;
     },
 
     _readHeader:function () {
@@ -809,7 +921,7 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     /**
-     * Version 10:  Replaces tag with name in string cache.
+     * Version 10:  HACK:  Replace "name" with "tag" in string cache.
      */
     _readStringCacheEntry:function () {
         var b0 = this.readByte();
@@ -832,6 +944,9 @@ cc.BuilderReader10 = cc.Class.extend({
         this._stringCache.push(str);
     },
 
+    /**
+     * Read but ignore UUID.
+     */
     _readNodeGraph:function (parent) {
         /* Read class name. */
         var className = this.readCachedString();
@@ -887,8 +1002,12 @@ cc.BuilderReader10 = cc.Class.extend({
         if (seqs.count() > 0)
             locActionManager.addNode(node, seqs);
 
-        //read properties
-        ccNodeLoader.parseProperties(node, parent, this);
+        var uuid = this.readInt(false);
+        if(uuid)
+        {
+            this.nodeMapping[uuid] = node;
+        }
+        this.readPropertiesForNode(node, parent, this, ccNodeLoader);
 
         //handle sub ccb files(remove middle node)
         var isCCBFileNode = node instanceof cc.BuilderFile;
@@ -898,7 +1017,7 @@ cc.BuilderReader10 = cc.Class.extend({
             embeddedNode.setRotation(node.getRotation());
             embeddedNode.setScaleX(node.getScaleX());
             embeddedNode.setScaleY(node.getScaleY());
-            embeddedNode.setTag(node.getTag());
+            this.setName(node.getTag());
             var visible = !(node._visible !== false);
             embeddedNode.setVisible(visible);
             //embeddedNode.ignoreAnchorPointForPosition(node.isIgnoreAnchorPointForPosition());
@@ -968,6 +1087,16 @@ cc.BuilderReader10 = cc.Class.extend({
         return node;
     },
 
+    /**
+     * Set tag and name.  Version 2.2.2 supports integer tag.
+     * Version 3 supports string name.
+     */
+    setName: function(node, name)
+    {
+        node.setTag(name);
+        node.name = name;
+    },
+
     _getBit:function () {
         var bit = (this._data[this._currentByte] & (1 << this._currentBit)) != 0;
 
@@ -989,6 +1118,362 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     _readUTF8:function () {
+    },
+
+    /**
+     * Version 10 does not read platform.  All properties are set.
+     * Version 10 adds color4 property.
+     */
+    readPropertiesForNode: function (node, parent, ccbReader, ccNodeLoader) {
+        var numRegularProps = ccbReader.readInt(false);
+        var numExtraProps = ccbReader.readInt(false);
+        var propertyCount = numRegularProps + numExtraProps;
+
+        for (var i = 0; i < propertyCount; i++) {
+            var isExtraProp = (i >= numRegularProps);
+            var type = ccbReader.readInt(false);
+            var propertyName = ccbReader.readCachedString();
+
+            var setProp = true;
+
+            //forward properties for sub ccb files
+            if(node instanceof cc.BuilderFile){
+                if(node.getCCBFileNode() && isExtraProp){
+                    node = node.getCCBFileNode();
+                    //skip properties that doesn't have a value to override
+                    var getExtraPropsNames = node.getUserObject();
+                    setProp = cc.ArrayContainsObject(getExtraPropsNames,propertyName);
+                }
+            } else if(isExtraProp && node == ccbReader.getAnimationManager().getRootNode()){
+                var extraPropsNames = node.getUserObject();
+                if(!extraPropsNames){
+                    extraPropsNames = [];
+                    node.setUserObject(extraPropsNames);
+                }
+                extraPropsNames.push(propertyName);
+            }
+
+            switch (type) {
+                case CCB_PROPTYPE_POSITION:
+                {
+                    var position = this.parsePropTypePosition(node, parent, ccbReader, propertyName);
+                    if (setProp)
+                        ccNodeLoader.onHandlePropTypePosition(node, parent, propertyName, position, ccbReader);
+                    break;
+                }
+                case CCB_PROPTYPE_POINT:
+                {
+                    var point = ccNodeLoader.parsePropTypePoint(node, parent, ccbReader);
+                    if (setProp)
+                        ccNodeLoader.onHandlePropTypePoint(node, parent, propertyName, point, ccbReader);
+                    break;
+                }
+                case CCB_PROPTYPE_POINTLOCK:
+                {
+                    var pointLock = ccNodeLoader.parsePropTypePointLock(node, parent, ccbReader);
+                    if (setProp)
+                        ccNodeLoader.onHandlePropTypePointLock(node, parent, propertyName, pointLock, ccbReader);
+                    break;
+                }
+                case CCB_PROPTYPE_SIZE:
+                {
+                    var size = this.parsePropTypeSize(node, parent, ccbReader);
+                    if (setProp)
+                        ccNodeLoader.onHandlePropTypeSize(node, parent, propertyName, size, ccbReader);
+                    break;
+                }
+                case CCB_PROPTYPE_SCALELOCK:
+                {
+                    var scaleLock = ccNodeLoader.parsePropTypeScaleLock(node, parent, ccbReader, propertyName);
+                    if (setProp)
+                        ccNodeLoader.onHandlePropTypeScaleLock(node, parent, propertyName, scaleLock, ccbReader);
+                    break;
+                }
+                case CCB_PROPTYPE_FLOATXY:
+                {
+                    var xy = ccNodeLoader.parsePropTypeFloatXY(node, parent, ccbReader);
+                    if (setProp)
+                        ccNodeLoader.onHandlePropTypeFloatXY(node, parent, propertyName, xy, ccbReader);
+                    break;
+                }
+
+                case CCB_PROPTYPE_FLOAT:
+                {
+                    var f = ccNodeLoader.parsePropTypeFloat(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeFloat(node, parent, propertyName, f, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_DEGREES:
+                {
+                    var degrees = ccNodeLoader.parsePropTypeDegrees(node, parent, ccbReader, propertyName);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeDegrees(node, parent, propertyName, degrees, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_FLOATSCALE:
+                {
+                    var floatScale = ccNodeLoader.parsePropTypeFloatScale(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeFloatScale(node, parent, propertyName, floatScale, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_INTEGER:
+                {
+                    var integer = ccNodeLoader.parsePropTypeInteger(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeInteger(node, parent, propertyName, integer, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_INTEGERLABELED:
+                {
+                    var integerLabeled = ccNodeLoader.parsePropTypeIntegerLabeled(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeIntegerLabeled(node, parent, propertyName, integerLabeled, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_FLOATVAR:
+                {
+                    var floatVar = ccNodeLoader.parsePropTypeFloatVar(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeFloatVar(node, parent, propertyName, floatVar, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_CHECK:
+                {
+                    var check = ccNodeLoader.parsePropTypeCheck(node, parent, ccbReader, propertyName);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeCheck(node, parent, propertyName, check, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_SPRITEFRAME:
+                {
+                    var ccSpriteFrame = this.parsePropTypeSpriteFrame(node, parent, ccbReader, propertyName);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, propertyName, ccSpriteFrame, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_ANIMATION:
+                {
+                    var ccAnimation = ccNodeLoader.parsePropTypeAnimation(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeAnimation(node, parent, propertyName, ccAnimation, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_TEXTURE:
+                {
+                    var ccTexture2D = ccNodeLoader.parsePropTypeTexture(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeTexture(node, parent, propertyName, ccTexture2D, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_BYTE:
+                {
+                    var byteValue = ccNodeLoader.parsePropTypeByte(node, parent, ccbReader, propertyName);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeByte(node, parent, propertyName, byteValue, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_COLOR4:
+                case CCB_PROPTYPE_COLOR3:
+                {
+                    var color3B = this.parsePropTypeColor3(node, parent, ccbReader, propertyName);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeColor3(node, parent, propertyName, color3B, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_COLOR4VAR:
+                {
+                    var color4FVar = ccNodeLoader.parsePropTypeColor4FVar(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeColor4FVar(node, parent, propertyName, color4FVar, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_FLIP:
+                {
+                    var flip = ccNodeLoader.parsePropTypeFlip(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeFlip(node, parent, propertyName, flip, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_BLENDMODE:
+                {
+                    var blendFunc = ccNodeLoader.parsePropTypeBlendFunc(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeBlendFunc(node, parent, propertyName, blendFunc, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_FNTFILE:
+                {
+                    var fntFile = ccbReader.getCCBRootPath() + ccNodeLoader.parsePropTypeFntFile(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeFntFile(node, parent, propertyName, fntFile, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_FONTTTF:
+                {
+                    var fontTTF = ccNodeLoader.parsePropTypeFontTTF(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeFontTTF(node, parent, propertyName, fontTTF, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_STRING:
+                {
+                    var stringValue = ccNodeLoader.parsePropTypeString(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeString(node, parent, propertyName, stringValue, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_TEXT:
+                {
+                    var textValue = ccNodeLoader.parsePropTypeText(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeText(node, parent, propertyName, textValue, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_BLOCK:
+                {
+                    var blockData = ccNodeLoader.parsePropTypeBlock(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeBlock(node, parent, propertyName, blockData, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_BLOCKCCCONTROL:
+                {
+                    var blockCCControlData = ccNodeLoader.parsePropTypeBlockCCControl(node, parent, ccbReader);
+                    if (setProp && blockCCControlData != null) {
+                        ccNodeLoader.onHandlePropTypeBlockCCControl(node, parent, propertyName, blockCCControlData, ccbReader);
+                    }
+                    break;
+                }
+                case CCB_PROPTYPE_CCBFILE:
+                {
+                    var ccbFileNode = ccNodeLoader.parsePropTypeCCBFile(node, parent, ccbReader);
+                    if (setProp) {
+                        ccNodeLoader.onHandlePropTypeCCBFile(node, parent, propertyName, ccbFileNode, ccbReader);
+                    }
+                    break;
+                }
+                case PROPERTY_TAG:
+                {
+                    var tag = ccbReader.readString();
+                    ccbReader.setName(node, tag);
+                }
+                // Not supported:
+                // CCB_PROPTYPE_NODE_REFERENCE
+                // CCB_PROPTYPE_FLOAT_CHECK
+                // CCB_PROPTYPE_EFFECTS
+                default:
+                    ASSERT_FAIL_UNEXPECTED_PROPERTYTYPE(type);
+                        break;
+            }
+        }
+    },
+
+    /**
+     * Monkey patch NodeLoader to version 10 format:
+     * Mostly add and adapt units.
+     * Nevermind scale lock: read byte and int is probably the same.
+     * Node loader is referenced in several files.
+     */
+    parsePropTypeColor3: function (
+    node, parent, ccbReader, propertyName) {
+        var color = ccbReader.readColor();
+        if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
+            ccbReader.getAnimationManager().setBaseValue(cc.Color3BWapper.create(color),node, propertyName);
+        }
+        return color;
+    },
+
+    /**
+     * Read version 5 position in version 10 format.
+     */
+    parsePropTypePosition: function (
+    node, parent, ccbReader, propertyName) {
+
+        var pos = ccbReader.readPosition();
+
+        var containerSize = ccbReader.getAnimationManager().getContainerSize(parent);
+        var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
+            containerSize, propertyName);
+        node.setPosition(cc.getAbsolutePosition(pt, pos.type, 
+            containerSize, propertyName));   //different to -x    node.setPosition(pt);
+
+        if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
+            var baseValue = [pos.x, pos.y, pos.type];
+            ccbReader.getAnimationManager().setBaseValue(baseValue,node,propertyName);
+        }
+
+        return pt;
+    },
+
+    parsePropTypeSize: function (
+    node, parent, ccbReader) {
+        var size = ccbReader.readSize();
+        var type = size.type;
+        var width = size.width;
+        var height = size.height;
+        var containerSize = ccbReader.getAnimationManager().getContainerSize(parent);
+        switch (type) {
+            case CCB_SIZETYPE_ABSOLUTE:
+                /* Nothing. */
+                break;
+            case CCB_SIZETYPE_RELATIVE_CONTAINER:
+                width = containerSize.width - width;
+                height = containerSize.height - height;
+                break;
+            case CCB_SIZETYPE_PERCENT:
+                width = (containerSize.width * width / 100.0);
+                height = (containerSize.height * height / 100.0);
+                break;
+            case CCB_SIZETYPE_HORIZONTAL_PERCENT:
+                width = (containerSize.width * width / 100.0);
+                break;
+            case CCB_SIZETYPE_VERTICAL_PERCENT:
+                height = (containerSize.height * height / 100.0);
+                break;
+            case CCB_SIZETYPE_MULTIPLY_RESOLUTION:
+                var resolutionScale = cc.BuilderReader.getResolutionScale();
+                width *= resolutionScale;
+                height *= resolutionScale;
+                break;
+            default:
+                cc.log("Unknown CCB type.");
+                break;
+        }
+
+        return new cc.Size(width, height);
+    },
+
+    /**
+     * Version 10 does not read sheet; instead preloads sprite frames.
+     */
+    parsePropTypeSpriteFrame: function (node, parent, ccbReader, propertyName) {
+        var spriteFrame = ccbReader.readSpriteFrame();
+        if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
+            ccbReader.getAnimationManager().setBaseValue(spriteFrame,node,propertyName);
+        }
+        return spriteFrame;
     }
 });
 
@@ -1012,7 +1497,6 @@ cc.BuilderReader10.loadAsScene = function (ccbFilePath, owner, parentSize, ccbRo
 };
 
 cc.BuilderReader10.load = function (ccbFilePath, owner, parentSize, ccbRootPath) {
-    cc.SpriteFrameCache.loadSpriteFramesFromFile("spriteFrameFileList.plist");
     ccbRootPath = ccbRootPath || cc.BuilderReader10.getResourcePath();
     var reader = new cc.BuilderReader10(cc.NodeLoaderLibrary.newDefaultCCNodeLoaderLibrary());
     reader.setCCBRootPath(ccbRootPath);
@@ -1209,3 +1693,5 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
         cc.SpriteFrameCache.loadedFile[plist] = true;
     }
 };
+
+
