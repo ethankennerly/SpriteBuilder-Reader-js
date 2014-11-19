@@ -42,39 +42,38 @@
  * Sprite sheet framing comes from sprite frame class.
  * If sprite frame image not found, load image file.
  * 
- * Ignores has physics nodes.
+ * Error if physics is defined.
  *
  * TODO: 
  *
  * Read node anchor point property.
  *
- * Removes animation type.
+ * Load sprite sheet.
+ *
+ * Remove animation type.
  *
  * JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.  Animated properties?
  *
- * Load sprite sheet.
- *
  * Not supported:
  * 
+ * Version 10 adds node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
+ *
+ * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
+ *
  * Adapt position and size type and size xUnit and yUnit, which were handled in CCNodeLoader. 
  *
  * Node reference.  UUID.
  *
- * Float check.
- *
  * Float scale.
  *
+ * Float check.
+ *
  * Effects.
- *
- * Version 10 adds node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
- *
- * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
  *
  * Version 10 also reads physics nodes.
  * 
  * To read version number in version 10 reader:
  * Reading integer with sign OLD is more complicated in version 10.
- * Flipped Elias Gamma Coding.
  *
  * fileLookup.plist
  *
@@ -698,6 +697,9 @@ cc.BuilderReader10 = cc.Class.extend({
         var numSeqs = this.readInt(false);
         var hasPhysicsBodies = this.readBool();
         var hasPhysicsNodes  = this.readBool();
+        if (hasPhysicsBodies || hasPhysicsNodes) {
+            throw new Error("Physics bodies or nodes are not supported.");
+        }
 
         for (var i = 0; i < numSeqs; i++) {
             var seq = new cc.BuilderSequence();
@@ -743,7 +745,8 @@ cc.BuilderReader10 = cc.Class.extend({
             value = this.readByte();
         } else if (type == CCB_PROPTYPE_COLOR3
         || type == CCB_PROPTYPE_COLOR4) {
-            value = this.readColor();
+            var c4 = this.readColor();
+            value = cc.Color4BWapper.create(c4);
         } else if (type == CCB_PROPTYPE_FLOATXY) {
             value = [this.readFloat(), this.readFloat()];
         } else if (type == CCB_PROPTYPE_DEGREES) {
@@ -871,9 +874,8 @@ cc.BuilderReader10 = cc.Class.extend({
         var g = Math.round(max * this.readFloat());
         var b = Math.round(max * this.readFloat());
         var a = Math.round(max * this.readFloat());
-        var c = cc.c4(r, g, b, a);
-        value = cc.Color4BWapper.create(c);
-        return value;
+        var c4 = cc.c4(r, g, b, a);
+        return c4;
     },
 
     _readHeader:function () {
@@ -1066,6 +1068,10 @@ cc.BuilderReader10 = cc.Class.extend({
         }
 
         this._animatedProps = null;
+        var hasPhysicsBody = this.readBool();
+        if (hasPhysicsBody) {
+            throw new Error("Physics bodies not supported.");
+        }
 
         /* Read and add children. */
         var numChildren = this.readInt(false);
@@ -1094,7 +1100,9 @@ cc.BuilderReader10 = cc.Class.extend({
      */
     setName: function(node, name)
     {
-        node.setTag(name);
+        if (node.setTag) {
+            node.setTag(name);
+        }
         node.name = name;
     },
 
@@ -1127,6 +1135,10 @@ cc.BuilderReader10 = cc.Class.extend({
      * Does version 10 not record name property type as string?
      *
      * Consolidate string and text.  Read if string or text is localized.
+     *
+     * Read if node is a physics body.  Throw error if physics body.
+     * Adapt sprite frame property name to display frame, which the version 5 sprite loader expects.
+     *
      */
     readPropertiesForNode: function (node, parent, ccbReader, ccNodeLoader) {
         var numRegularProps = ccbReader.readInt(false);
@@ -1261,7 +1273,7 @@ cc.BuilderReader10 = cc.Class.extend({
                 {
                     var ccSpriteFrame = this.parsePropTypeSpriteFrame(node, parent, ccbReader, propertyName);
                     if (setProp) {
-                        ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, propertyName, ccSpriteFrame, ccbReader);
+                        ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, PROPERTY_DISPLAYFRAME, ccSpriteFrame, ccbReader);
                     }
                     break;
                 }
@@ -1292,9 +1304,10 @@ cc.BuilderReader10 = cc.Class.extend({
                 case CCB_PROPTYPE_COLOR4:
                 case CCB_PROPTYPE_COLOR3:
                 {
-                    var color3B = this.parsePropTypeColor3(node, parent, ccbReader, propertyName);
+                    var c4 = this.parsePropTypeColor4(node, parent, ccbReader, propertyName);
                     if (setProp) {
-                        ccNodeLoader.onHandlePropTypeColor3(node, parent, propertyName, color3B, ccbReader);
+                        ccNodeLoader.onHandlePropTypeColor3(node, parent, propertyName, c4, ccbReader);
+                        ccNodeLoader.onHandlePropTypeByte(node, parent, PROPERTY_OPACITY, c4.a, ccbReader);
                     }
                     break;
                 }
@@ -1396,7 +1409,7 @@ cc.BuilderReader10 = cc.Class.extend({
      * Nevermind scale lock: read byte and int is probably the same.
      * Node loader is referenced in several files.
      */
-    parsePropTypeColor3: function (
+    parsePropTypeColor4: function (
     node, parent, ccbReader, propertyName) {
         var color = ccbReader.readColor();
         if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
@@ -1682,7 +1695,10 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
     if(!plist)
         throw "cc.SpriteFrameCache.loadSpriteFramesFromFile(): plist should be non-null";
     var TODO = true;
-    if (!TODO) {
+    if (TODO) {
+        cc.log("    TODO: Load sprite sheet.");
+    }
+    else {
         var fileUtils = cc.FileUtils.getInstance();
         var fullPath = fileUtils.fullPathForFilename(plist);
         var dict = fileUtils.dictionaryWithContentsOfFileThreadSafe(fullPath);

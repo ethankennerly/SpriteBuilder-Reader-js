@@ -1,9 +1,5 @@
 TODO
-	Unexpected property: ''! CCCommon.js:145
-	Unexpected property: 'tag'! CCCommon.js:145
-	Unexpected property: 'anchorPoint'!
 	How does writer store values differently in SpriteBuilder?
-	Sprite loader.  Color.  Position.
 
 SPRITEBUILDER
 

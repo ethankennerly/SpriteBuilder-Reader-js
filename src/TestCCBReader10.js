@@ -52,27 +52,35 @@ function testReadInt() {
     assertEquals(1 | (2 << 7) | (27 << 14), reader.readInt(false));
 }
 
+// testReader5
 var MainScene = cc.Class.extend({});
 var MainScreen = cc.Class.extend({});
 var StoreAScene = cc.Class.extend({});
 var StoreBScene = cc.Class.extend({});
 
+var scene5;
+
+function testReader5(parent) {
+    cc.log("TestCCBReader10: version 5 CocosBuilder");
+    scene5 = cc.BuilderReader.loadAsScene("ccb/MainScene");
+    parent.addChild(scene5);
+}
+
+var scene10;
+
+function testReader10(parent) {
+    cc.log("TestCCBReader10: version 10 SpriteBuilder");
+    cc.log("    TODO: Load sprite sheet.");
+    var name10 = "ccb/Bear";
+    scene10 = cc.BuilderReader10.loadAsScene(name10);
+    scene10.setPosition(160, 240);
+    parent.addChild(scene10);
+}
+
 function TestCCBReader10(parent) {
     testReadIntOLD();
     testReadVariableLengthIntFromArray();
     testReadInt();
-    cc.log("TestCCBReader10: version 5 CocosBuilder");
-    var scene5 = cc.BuilderReader.loadAsScene("ccb/MainScene");
-    parent.addChild(scene5);
-    cc.log("TestCCBReader10: version 10 SpriteBuilder");
-    var version10usable = true;
-    if (version10usable) {
-        var name10 = "ccb/Bear";
-        var scene10 = cc.BuilderReader10.loadAsScene(name10);
-        parent.addChild(scene10);
-    }
-    else {
-        cc.log("    TODO.  Not usable.");
-    }
+    // testReader5(parent);
+    testReader10(parent);
 }
-
