@@ -956,6 +956,10 @@ cc.BuilderReader10 = cc.Class.extend({
 
     /**
      * Read but ignore UUID.
+     * Try to create node as a custom class.  
+     * Fall back on loading a node.
+     * Test case:  Seal is a predefined custom class that inherits cc.Sprite.  Expect sprite loader and sprite node class.
+     * XXX eval class in case Cocos2D is on a mobile device without access to global namespace.
      */
     _readNodeGraph:function (parent) {
         /* Read class name. */
@@ -968,13 +972,20 @@ cc.BuilderReader10 = cc.Class.extend({
             memberVarAssignmentName = this.readCachedString();
         }
 
-        var ccNodeLoader = this._ccNodeLoaderLibrary.getCCNodeLoader(className);
-        if (!ccNodeLoader) {
-            ccNodeLoader = this._ccNodeLoaderLibrary.getCCNodeLoader("CCNode");
-            //cc.log("no corresponding node loader for" + className);
-            //return null;
+        var ccNodeLoader = this._ccNodeLoaderLibrary.guess(className, this._stringCache);
+        var useLoader = null != this._ccNodeLoaderLibrary.getCCNodeLoader(className);
+        var node;
+        if (!useLoader) {
+            try {
+                node = eval("new " + className + "()");
+            }
+            catch (err) {
+                useLoader = true;
+            }
         }
-        var node = ccNodeLoader.loadCCNode(parent, this);
+        if (useLoader) {
+            node = ccNodeLoader.loadCCNode(parent, this);
+        }
 
         //set root node
         if (!locActionManager.getRootNode())
@@ -1512,8 +1523,20 @@ cc.BuilderReader10 = cc.Class.extend({
                     }
                     break;
                 }
+                case CCB_PROPTYPE_NODE_REFERENCE:
+                {
+                    var uuid = this.readInt(false);
+                    cc.log('CCBReader10._readPropertiesForNode: Node reference not supported.' 
+                        + '  CCB file "' + this._currentCCBFile + '"'
+                        + ', property name "' + propertyName + '"' 
+                        + ', UUID: ' + uuid );
+                    var mappedNode = this.nodeMapping[uuid];
+                    if (undefined == mappedNode) {
+                        throw new Error("CCBReader: Failed to find node UUID:" + uuid);
+                    }
+                    node[propertyName] = mappedNode;
+                }
                 // Not supported:
-                // CCB_PROPTYPE_NODE_REFERENCE
                 // CCB_PROPTYPE_FLOAT_CHECK
                 // CCB_PROPTYPE_EFFECTS
                 default:
@@ -1831,4 +1854,36 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
     }
 };
 
+
+cc.NodeLoaderLibrary.prototype.guessClass = function(className, stringCache) {
+    var loaders = this._ccNodeLoaders;
+    var guessed = "CCNode";
+    for (var registered in loaders) {
+        if (0 <= stringCache.indexOf(registered)) {
+            guessed = registered;
+        }
+    }
+    return guessed;
+}
+
+/**
+ * If custom class, guess base class from strings.
+ * Test case:  Seal.ccbi has class name of "Seal".  
+ * Expect a CCSprite.
+ */
+cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
+    var ccNodeLoader = this.getCCNodeLoader(className);
+    if (!ccNodeLoader) {
+        var loaderClassName = this.guessClass(className, stringCache);
+        ccNodeLoader = this.getCCNodeLoader(loaderClassName);
+        if (!ccNodeLoader) {
+            throw new Error('Could not load "' + className + '" or "' + loaderClassName + '"');
+        }
+        else {
+            cc.log("cc.NodeLoaderLibrary.guess: no corresponding node loader for " 
+                + className + ". Defaulting to " + loaderClassName);
+        }
+    }
+    return ccNodeLoader;
+}
 

@@ -1,4 +1,7 @@
 TODO
+	Step through Seal loading.
+	Load Seal as CCSprite.
+	See Seal.
 	How does writer store values differently in SpriteBuilder?
 
 SPRITEBUILDER

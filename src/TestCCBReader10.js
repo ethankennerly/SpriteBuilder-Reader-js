@@ -52,7 +52,7 @@ function testReadInt() {
     assertEquals(1 | (2 << 7) | (27 << 14), reader.readInt(false));
 }
 
-// testReader5
+// testReader5 expects custom classes already defined:
 var MainScene = cc.Class.extend({});
 var MainScreen = cc.Class.extend({});
 var StoreAScene = cc.Class.extend({});
@@ -69,15 +69,23 @@ function testReader5(parent) {
     _parent = parent;
 }
 
+// testReader10 expects custom classes already defined:
+var Penguin = cc.Sprite.extend({});
+var Seal = cc.Sprite.extend({});
+var WaitingPenguin = cc.Sprite.extend({});
+
 var scene10;
 
-function testReader10(parent, basePath) {
+function testReader10(parent, basePath, center) {
     cc.log('TestCCBReader10: version 10 SpriteBuilder '
        + '"' + basePath + '"');
     var scene = cc.BuilderReader10.loadAsScene(basePath);
     var prop = basePath.replace(/^\d/g, '_')
                        .replace(/[- /]/g, '_');
     parent[prop] = scene;
+    if (center) {
+        scene.setPosition(160, 240);
+    }
     parent.addChild(scene);
     _parent = parent;
     return scene;
@@ -88,12 +96,11 @@ function TestCCBReader10(parent) {
     testReadVariableLengthIntFromArray();
     testReadInt();
     testReader5(parent);
-    scene = testReader10(parent, "ccb/Penguin");
-    scene = testReader10(parent, "ccb/Seal");
-    scene = testReader10(parent, "ccb/Bear");
-    scene.setPosition(160, 240);
+    scene = testReader10(parent, "ccb/Bear", true);
     cc.log("Look for bear in center of screen with arm rotating.");
-    scene = testReader10(parent, "ccb/WaitingPenguin");
+    scene = testReader10(parent, "ccb/Seal", true);
+    // scene = testReader10(parent, "ccb/Penguin");
+    // scene = testReader10(parent, "ccb/WaitingPenguin");
     // scene = testReader10(parent, "ccb/Gameplay");
     // cc.log("Look for button in top left of screen.");
 }
