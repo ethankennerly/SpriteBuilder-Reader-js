@@ -1,7 +1,6 @@
 TODO
-	Step through Seal loading.
-	Load Seal as CCSprite.
-	See Seal.
+	Step through Gameplay physics nodes.
+	Load Gameplay.ccbi
 	How does writer store values differently in SpriteBuilder?
 
 SPRITEBUILDER

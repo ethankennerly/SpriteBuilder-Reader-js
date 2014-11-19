@@ -42,7 +42,9 @@
  * Sprite sheet framing comes from sprite frame class.
  * If sprite frame image not found, load image file.
  * 
- * Error if physics is defined.
+ * Ignore physics and joints.  
+ *
+ * Expects joints are the last part of the file and are not read.
  *
  * TODO: 
  *
@@ -53,6 +55,8 @@
  * Remove animation type.
  *
  * JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.  Animated properties?
+ *
+ * Animation of sprite frames.
  *
  * Not supported:
  *
@@ -613,11 +617,170 @@ cc.BuilderReader10 = cc.Class.extend({
             return null;
 
         var node = this._readNodeGraph();
+        this.readJoints();
         this._animationManagers.setObject(this._animationManager, node);
 
         if (cleanUp)
             this._cleanUpNodeGraph(node);
         return node;
+    },
+
+    readJoints: function()
+    {
+        var numJoints = this.readInt(false);
+        for (var i =0; i < numJoints; i++)
+        {
+            this.readJoint();
+        }
+    },
+
+    /**
+     * Could extract readPropertyForNode so it does not double-read property count.
+     */
+    readJoint: function()
+    {
+        var joint;
+        var className = this.readCachedString();
+        cc.log("CCBReader10.readJoint: Not supported " + className);
+
+        var propertyCount = this.readInt(false);
+        var properties = {};
+        for (var i =0; i < propertyCount; i++)
+        {
+            //Hack to extract the properties serialized. the dictionary is Not a node.
+            // this.readPropertiesForNode:(CCNode*)properties parent:nil isExtraProp:NO];
+        }
+        
+        /*
+        CCNode * nodeBodyA = properties[@"bodyA"];
+        CCNode * nodeBodyB = properties[@"bodyB"];
+        
+        float breakingForce = [properties[@"breakingForceEnabled"] boolValue] ? [properties[@"breakingForce"] floatValue] : INFINITY;
+        float maxForce = [properties[@"maxForceEnabled"] boolValue] ? [properties[@"maxForce"] floatValue] : INFINITY;
+        bool  collideBodies = [properties[@"collideBodies"] boolValue];
+        float referenceAngle = [properties[@"referenceAngle"] floatValue];
+        referenceAngle = CC_DEGREES_TO_RADIANS(referenceAngle);
+        
+        if([className isEqualToString:@"CCPhysicsPivotJoint"])
+        {
+            if([properties[@"motorEnabled"] boolValue])
+            {
+                float motorRate = properties[@"motorRate"] ? [properties[@"motorRate"]  floatValue] : 1.0f;
+                CCPhysicsJoint * motorJoint = [CCPhysicsJoint connectedMotorJointWithBodyA:nodeBodyA.physicsBody bodyB:nodeBodyB.physicsBody rate:motorRate];
+                
+                float maxMotorForce = [properties[@"motorMaxForceEnabled"] boolValue] ? [properties[@"motorMaxForce"] floatValue] : INFINITY;
+
+                motorJoint.maxForce = maxMotorForce;
+                motorJoint.breakingForce = breakingForce;
+                motorJoint.collideBodies = collideBodies;
+            }
+            
+            if([properties[@"dampedSpringEnabled"] boolValue])
+            {
+                float   restAngle = properties[@"dampedSpringRestAngle"] ?  [properties[@"dampedSpringRestAngle"]  floatValue] : 0.0f;
+                restAngle = CC_DEGREES_TO_RADIANS(restAngle);
+                float   stiffness = properties[@"dampedSpringStiffness"] ? [properties[@"dampedSpringStiffness"] floatValue] : 1.0f;
+                stiffness *= 1000.0f;
+                float   damping = properties[@"dampedSpringDamping"] ? [properties[@"dampedSpringDamping"] floatValue] : 4.0f;
+                damping *= 100.0f;
+
+                CCPhysicsJoint * rotarySpringJoint = [CCPhysicsJoint connectedRotarySpringJointWithBodyA:nodeBodyA.physicsBody bodyB:nodeBodyB.physicsBody restAngle:restAngle stifness:stiffness damping:damping];
+                
+                rotarySpringJoint.maxForce = maxForce;
+                rotarySpringJoint.breakingForce = breakingForce;
+                rotarySpringJoint.collideBodies = collideBodies;
+            }
+            
+            
+            if([properties[@"limitEnabled"] boolValue])
+            {
+                float   limitMax = properties[@"limitMax"] ? [properties[@"limitMax"]  floatValue] : 90.0f;
+                limitMax = CC_DEGREES_TO_RADIANS(limitMax);
+                
+                float   limitMin = properties[@"limitMin"] ? [properties[@"limitMin"] floatValue] : 0;
+                limitMin = CC_DEGREES_TO_RADIANS(limitMin);
+                
+                CCPhysicsJoint * limitJoint = [CCPhysicsJoint connectedRotaryLimitJointWithBodyA:nodeBodyA.physicsBody bodyB:nodeBodyB.physicsBody min:limitMin max:limitMax];
+                
+                limitJoint.maxForce = maxForce;
+                limitJoint.breakingForce = breakingForce;
+                limitJoint.collideBodies = collideBodies;
+            }
+                
+            if([properties[@"ratchetEnabled"] boolValue])
+            {
+                float ratchetValue = properties[@"ratchetValue"] ? [properties[@"ratchetValue"]  floatValue] : 30.0f;
+                ratchetValue = CC_DEGREES_TO_RADIANS(ratchetValue);
+                float ratchetPhase = properties[@"ratchetPhase"] ? [properties[@"ratchetPhase"]  floatValue] : 0.0f;
+                ratchetPhase = CC_DEGREES_TO_RADIANS(ratchetPhase);
+                
+                CCPhysicsJoint * ratchetJoint = [CCPhysicsJoint connectedRatchetJointWithBodyA:nodeBodyA.physicsBody bodyB:nodeBodyB.physicsBody phase:ratchetPhase ratchet:ratchetValue];
+                
+                ratchetJoint.maxForce = maxForce;
+                ratchetJoint.breakingForce = breakingForce;
+                ratchetJoint.collideBodies = collideBodies;
+        
+            }
+            
+            CGPoint anchorA = [properties[@"anchorA"] CGPointValue];
+            joint = [CCPhysicsJoint connectedPivotJointWithBodyA:nodeBodyA.physicsBody bodyB:nodeBodyB.physicsBody anchorA:anchorA];
+            
+        }
+        else if([className isEqualToString:@"CCPhysicsSpringJoint"])
+        {
+            CGPoint anchorA = [properties[@"anchorA"] CGPointValue];
+            CGPoint anchorB = [properties[@"anchorB"] CGPointValue];
+            
+            CGPoint anchoAWorldPos = [nodeBodyA convertToWorldSpace:anchorA];
+            CGPoint anchoBWorldPos = [nodeBodyB convertToWorldSpace:anchorB];
+            float distance =  ccpDistance(anchoAWorldPos, anchoBWorldPos);
+            
+            BOOL    restLengthEnabled = [properties[@"restLengthEnabled"] boolValue];
+            float   restLength = restLengthEnabled?  [properties[@"restLength"] floatValue] : distance;
+
+            float   stiffness = [properties[@"stiffness"] floatValue];
+            float   damping = [properties[@"damping"] floatValue];
+            
+            joint = [CCPhysicsJoint connectedSpringJointWithBodyA:nodeBodyA.physicsBody bodyB:nodeBodyB.physicsBody anchorA:anchorA anchorB:anchorB restLength:restLength stiffness:stiffness damping:damping];
+
+            
+        }
+        else if([className isEqualToString:@"CCPhysicsPinJoint"])
+        {
+            CGPoint anchorA = [properties[@"anchorA"] CGPointValue];
+            CGPoint anchorB = [properties[@"anchorB"] CGPointValue];
+            
+            BOOL minEnabled = [properties[@"minDistanceEnabled"] boolValue];
+            BOOL maxEnabled = [properties[@"maxDistanceEnabled"] boolValue];
+            
+            CGPoint anchoAWorldPos = [nodeBodyA convertToWorldSpace:anchorA];
+            CGPoint anchoBWorldPos = [nodeBodyB convertToWorldSpace:anchorB];
+            
+            float distance =  ccpDistance(anchoAWorldPos, anchoBWorldPos);
+            
+            float minDistance = minEnabled ? [properties[@"minDistance"] floatValue] : distance;
+            float maxDistance = maxEnabled ? [properties[@"maxDistance"] floatValue] : distance;
+            
+            if(maxEnabled || minEnabled)
+            {
+                joint =  [CCPhysicsJoint connectedDistanceJointWithBodyA:nodeBodyA.physicsBody bodyB:nodeBodyB.physicsBody anchorA:anchorA anchorB:anchorB minDistance:minDistance maxDistance:maxDistance];
+            }
+            else
+            {
+                joint =  [CCPhysicsJoint connectedDistanceJointWithBodyA:nodeBodyA.physicsBody bodyB:nodeBodyB.physicsBody anchorA:anchorA anchorB:anchorB];
+            }
+        }
+        else
+        {
+            return;
+        }
+        joint.maxForce = maxForce;
+        joint.breakingForce = breakingForce;
+        joint.collideBodies = collideBodies;
+        [joint resetScale:NodeToPhysicsScale(nodeBodyA).x];
+        
+    }
+    */
     },
 
     addOwnerOutletName: function(name){
@@ -711,7 +874,7 @@ cc.BuilderReader10 = cc.Class.extend({
         for (var i = 0; i < numSeqs; i++) {
             var seq = new cc.BuilderSequence();
             seq.setDuration(this.readFloat());
-            seq.setName(this.readCachedString());
+            seq.setName(this.adaptProp(this.readCachedString()));
             seq.setSequenceId(this.readInt(false));
             seq.setChainedSequenceId(this.readInt(true));
 
@@ -949,7 +1112,7 @@ cc.BuilderReader10 = cc.Class.extend({
 
         this._currentByte += numBytes;
         if ("name" == str) {
-            str = "tag";
+            str = PROPERTY_TAG;
         }
         this._stringCache.push(str);
     },
@@ -1402,9 +1565,9 @@ cc.BuilderReader10 = cc.Class.extend({
                 }
                 case CCB_PROPTYPE_SPRITEFRAME:
                 {
-                    var ccSpriteFrame = this.parsePropTypeSpriteFrame(node, parent, ccbReader, propertyName);
+                    var ccSpriteFrame = this.parsePropTypeSpriteFrame(node, parent, ccbReader, this.adaptProp(propertyName));
                     if (setProp) {
-                        ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, PROPERTY_DISPLAYFRAME, ccSpriteFrame, ccbReader);
+                        ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, this.adaptProp(propertyName), ccSpriteFrame, ccbReader);
                     }
                     break;
                 }
@@ -1544,6 +1707,13 @@ cc.BuilderReader10 = cc.Class.extend({
                         break;
             }
         }
+    },
+
+    adaptProp: function(name) {
+        if (name == PROPERTY_SPRITEFRAME) {
+            name = PROPERTY_DISPLAYFRAME;
+        }
+        return name;
     },
 
     /**
@@ -1854,13 +2024,18 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
     }
 };
 
-
-cc.NodeLoaderLibrary.prototype.guessClass = function(className, stringCache) {
+/**
+ * Guess "CCNode".  If that is not found in string cache, then try any registered loader in string cache.
+ * Test case:  Gameplay.ccbi is CCNode yet has CCSprite and CCBFile in string cache.
+ */
+cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
     var loaders = this._ccNodeLoaders;
     var guessed = "CCNode";
-    for (var registered in loaders) {
-        if (0 <= stringCache.indexOf(registered)) {
-            guessed = registered;
+    if (stringCache.indexOf(guessed) <= -1) {
+        for (var registered in loaders) {
+            if (0 <= stringCache.indexOf(registered)) {
+                guessed = registered;
+            }
         }
     }
     return guessed;
@@ -1874,7 +2049,7 @@ cc.NodeLoaderLibrary.prototype.guessClass = function(className, stringCache) {
 cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
     var ccNodeLoader = this.getCCNodeLoader(className);
     if (!ccNodeLoader) {
-        var loaderClassName = this.guessClass(className, stringCache);
+        var loaderClassName = this.guessClass(stringCache);
         ccNodeLoader = this.getCCNodeLoader(loaderClassName);
         if (!ccNodeLoader) {
             throw new Error('Could not load "' + className + '" or "' + loaderClassName + '"');

@@ -76,13 +76,14 @@ var WaitingPenguin = cc.Sprite.extend({});
 
 var scene10;
 
-function testReader10(parent, basePath, center) {
+function testReader10(parent, basePath) {
     cc.log('TestCCBReader10: version 10 SpriteBuilder '
        + '"' + basePath + '"');
     var scene = cc.BuilderReader10.loadAsScene(basePath);
     var prop = basePath.replace(/^\d/g, '_')
                        .replace(/[- /]/g, '_');
     parent[prop] = scene;
+    var center = true;
     if (center) {
         scene.setPosition(160, 240);
     }
@@ -96,11 +97,11 @@ function TestCCBReader10(parent) {
     testReadVariableLengthIntFromArray();
     testReadInt();
     testReader5(parent);
-    scene = testReader10(parent, "ccb/Bear", true);
+    scene = testReader10(parent, "ccb/Bear");
     cc.log("Look for bear in center of screen with arm rotating.");
-    scene = testReader10(parent, "ccb/Seal", true);
-    // scene = testReader10(parent, "ccb/Penguin");
-    // scene = testReader10(parent, "ccb/WaitingPenguin");
+    scene = testReader10(parent, "ccb/Seal");
+    scene = testReader10(parent, "ccb/Penguin");
+    scene = testReader10(parent, "ccb/WaitingPenguin");
     // scene = testReader10(parent, "ccb/Gameplay");
     // cc.log("Look for button in top left of screen.");
 }
