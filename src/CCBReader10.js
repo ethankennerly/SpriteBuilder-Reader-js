@@ -55,12 +55,18 @@
  * JavaScript readNodeGraph differs from latest readPropertyForNode in CCBReader, but is like Cocos2d-x CCBReader.  Animated properties?
  *
  * Not supported:
- * 
+ *
  * Version 10 adds node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
  *
  * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
  *
  * Adapt position and size type and size xUnit and yUnit, which were handled in CCNodeLoader. 
+ *
+ * Unexpected property: 'horizontalPadding'! 
+ *
+ * configCocos2d.plist 
+ *
+ * Strings.ccblang
  *
  * Node reference.  UUID.
  *
@@ -288,6 +294,7 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     readNodeGraphFromFile:function (ccbFileName, owner, parentSize, animationManager) {
+        this._currentCCBFile = ccbFileName;
         if (parentSize == null) {
             parentSize = cc.Director.getInstance().getWinSize();
         } else if (parentSize instanceof  cc.BuilderAnimationManager) {
@@ -698,7 +705,7 @@ cc.BuilderReader10 = cc.Class.extend({
         var hasPhysicsBodies = this.readBool();
         var hasPhysicsNodes  = this.readBool();
         if (hasPhysicsBodies || hasPhysicsNodes) {
-            throw new Error("Physics bodies or nodes are not supported.");
+            cc.log('CCBReader10._readSequences: Physics bodies or nodes are not supported.  CCB file "' + this._currentCCBFile + '"');
         }
 
         for (var i = 0; i < numSeqs; i++) {
@@ -784,8 +791,8 @@ cc.BuilderReader10 = cc.Class.extend({
         var type = CCB_POSITIONTYPE_RELATIVE_BOTTOM_LEFT;
         if (CCB_POSITION_UNIT_POINTS == xUnit
         || CCB_POSITION_UNIT_POINTS == yUnit
-        || CCB_POSITION_UNIT_INSET_POINTS == xUnit
-        || CCB_POSITION_UNIT_INSET_POINTS == yUnit) {
+        || CCB_SIZE_UNIT_INSET_POINTS == xUnit
+        || CCB_SIZE_UNIT_INSET_POINTS == yUnit) {
             type = corner;
         }
         else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
@@ -823,8 +830,8 @@ cc.BuilderReader10 = cc.Class.extend({
         || CCB_POSITION_UNIT_POINTS == yUnit) {
             type = CCB_SIZETYPE_ABSOLUTE;
         }
-        else if (CCB_POSITION_UNIT_INSET_POINTS == xUnit
-        || CCB_POSITION_UNIT_INSET_POINTS == yUnit) {
+        else if (CCB_SIZE_UNIT_INSET_POINTS == xUnit
+        || CCB_SIZE_UNIT_INSET_POINTS == yUnit) {
             type = CCB_SIZETYPE_RELATIVE_CONTAINER;
         }
         else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
@@ -1008,6 +1015,13 @@ cc.BuilderReader10 = cc.Class.extend({
         var uuid = this.readInt(false);
         if(uuid)
         {
+            cc.log('CCBReader10._readNodeGraph: Node reference not supported.' 
+                + '  CCB file "' + this._currentCCBFile + '"'
+                + ', class name "' + className + '"'
+                + ', UUID <' + uuid + '>');
+            if (undefined == this.nodeMapping) {
+                this.nodeMapping = {};
+            }
             this.nodeMapping[uuid] = node;
         }
         this.readPropertiesForNode(node, parent, this, ccNodeLoader);
@@ -1020,7 +1034,7 @@ cc.BuilderReader10 = cc.Class.extend({
             embeddedNode.setRotation(node.getRotation());
             embeddedNode.setScaleX(node.getScaleX());
             embeddedNode.setScaleY(node.getScaleY());
-            this.setName(node.getTag());
+            embeddedNode.setName(node.getTag());
             var visible = !(node._visible !== false);
             embeddedNode.setVisible(visible);
             //embeddedNode.ignoreAnchorPointForPosition(node.isIgnoreAnchorPointForPosition());
@@ -1070,7 +1084,7 @@ cc.BuilderReader10 = cc.Class.extend({
         this._animatedProps = null;
         var hasPhysicsBody = this.readBool();
         if (hasPhysicsBody) {
-            throw new Error("Physics bodies not supported.");
+            this._readPhysicsBody(node, className);
         }
 
         /* Read and add children. */
@@ -1092,6 +1106,112 @@ cc.BuilderReader10 = cc.Class.extend({
         }
 
         return node;
+    },
+   
+    /**
+     * Not supported.
+     * Stub to avoid corrupting data when a physics body is read.
+     */
+    _readPhysicsBody: function(node, className)
+    {
+        cc.log("Physics body is not supported.  Stubbing.");
+        var bodyShape = this.readInt(false);
+        var cornerRadius = this.readFloat();
+
+        var body;
+        var i, j;
+        if (bodyShape == 0)
+        {
+            var numPolygons = this.readInt(false);
+            var polygons = [];
+            for(j = 0; j < numPolygons; j++)
+            {
+                var numPoints = this.readInt(false);
+                var points = [];
+                for (i = 0; i < numPoints; i++)
+                {
+                    var x = this.readFloat();
+                    var y = this.readFloat();
+                    
+                    points[i] = cc.p(x, y);
+                }
+                polygons[j] = {};
+                polygons[j].polygon = points;
+                polygons[j].numPoints = numPoints;
+            }
+            
+            var shapes = [];
+            for (i = 0; i < numPolygons; i++)
+            {
+                // [CCPhysicsShape polygonShapeWithPoints:polygons[i].polygon count:polygons[i].numPoints cornerRadius:cornerRadius];
+                var shape = {polygon: polygons[i].polygon, 
+                             count: polygons[i].numPoints, 
+                             cornerRadius: cornerRadius};
+                shapes.push(shape);
+            }
+            //Construct body.
+            // [CCPhysicsBody bodyWithShapes:shapes];
+            body = {shapes: shapes};
+        }
+        else if (bodyShape == 1)
+        {
+            var x = this.readFloat();
+            var y = this.readFloat();
+            
+            var point = cc.p(x, y);
+            // [CCPhysicsBody bodyWithCircleOfRadius:cornerRadius andCenter:point];
+            body = {radius: cornerRadius, center: point};
+
+        }
+        if (!body) {
+            throw new Error('[PHYSICS] Unknown body shape ' + bodyShape 
+                + ', class name "' + className 
+                + '", in CCB file: "' + this._currentCCBFile + '"');
+        }
+
+        var dynamic = this.readBool();
+        var affectedByGravity = this.readBool();
+        var allowsRotation = this.readBool();
+       
+        if (dynamic) body.type = "CCPhysicsBodyTypeDynamic";
+        else body.type = "CCPhysicsBodyTypeStatic";
+        
+        var density = this.readFloat();
+        var friction = this.readFloat();
+        var elasticity = this.readFloat();
+        
+        var collisionType = this.readCachedString();
+        var collisionCategories = this.readCachedString();
+        var collisionMask = this.readCachedString();
+        
+        if (dynamic)
+        {
+            body.affectedByGravity = affectedByGravity;
+            body.allowsRotation = allowsRotation;
+        }
+        
+        body.density = density;
+        body.friction = friction;
+        body.elasticity = elasticity;
+        
+        body.collisionType = collisionType;
+        
+        var masks;
+        if("" != collisionMask)
+        {
+            masks = collisionMask.split(";");
+        }
+        
+        var categories;
+        if("" != collisionCategories)
+        {
+            categories = collisionCategories.split(";");
+        }
+
+        body.collisionMask = masks;
+        body.collisionCategories = categories;
+        
+        node.physicsBody = body;
     },
 
     /**

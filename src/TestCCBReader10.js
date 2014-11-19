@@ -58,29 +58,42 @@ var MainScreen = cc.Class.extend({});
 var StoreAScene = cc.Class.extend({});
 var StoreBScene = cc.Class.extend({});
 
+var _parent;
+var scene;
 var scene5;
 
 function testReader5(parent) {
     cc.log("TestCCBReader10: version 5 CocosBuilder");
     scene5 = cc.BuilderReader.loadAsScene("ccb/MainScene");
     parent.addChild(scene5);
+    _parent = parent;
 }
 
 var scene10;
 
-function testReader10(parent) {
-    cc.log("TestCCBReader10: version 10 SpriteBuilder");
-    cc.log("    TODO: Load sprite sheet.");
-    var name10 = "ccb/Bear";
-    scene10 = cc.BuilderReader10.loadAsScene(name10);
-    scene10.setPosition(160, 240);
-    parent.addChild(scene10);
+function testReader10(parent, basePath) {
+    cc.log('TestCCBReader10: version 10 SpriteBuilder '
+       + '"' + basePath + '"');
+    var scene = cc.BuilderReader10.loadAsScene(basePath);
+    var prop = basePath.replace(/^\d/g, '_')
+                       .replace(/[- /]/g, '_');
+    parent[prop] = scene;
+    parent.addChild(scene);
+    _parent = parent;
+    return scene;
 }
 
 function TestCCBReader10(parent) {
     testReadIntOLD();
     testReadVariableLengthIntFromArray();
     testReadInt();
-    // testReader5(parent);
-    testReader10(parent);
+    testReader5(parent);
+    scene = testReader10(parent, "ccb/Penguin");
+    scene = testReader10(parent, "ccb/Seal");
+    scene = testReader10(parent, "ccb/Bear");
+    scene.setPosition(160, 240);
+    cc.log("Look for bear in center of screen with arm rotating.");
+    scene = testReader10(parent, "ccb/WaitingPenguin");
+    // scene = testReader10(parent, "ccb/Gameplay");
+    // cc.log("Look for button in top left of screen.");
 }

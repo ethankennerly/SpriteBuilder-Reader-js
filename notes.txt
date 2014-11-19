@@ -152,3 +152,27 @@ is there something before read sequences auto sequence ID?
 how does writer store values differently in SpriteBuilder?
 
 
+Wed 11/19/2014 
+06:57
+
+Reading Gameplay.ccb:
+
+TestCCBReader10: version 10 SpriteBuilder Button.
+Look for button in top left of screen. CCCommon.js:145
+CCBReader10._readSequences: Physics bodies or nodes are not supported.  CCB file "ccb/Gameplay.ccbi" CCCommon.js:145
+CCBReader10._readNodeGraph: Node reference not supported.  CCB file "ccb/Gameplay.ccbi", class name "Gameplay", UUID <1> CCCommon.js:145
+CCBReader10._readNodeGraph: Node reference not supported.  CCB file "ccb/Gameplay.ccbi", class name "CCNode", UUID <2> CCCommon.js:145
+CCBReader10._readNodeGraph: Node reference not supported.  CCB file "ccb/Gameplay.ccbi", class name "CCSprite", UUID <1> CCCommon.js:145
+Unexpected property: 'horizontalPadding'! CCCommon.js:145
+2Unexpected property: ''! CCCommon.js:145
+    TODO: Load sprite sheet. CCCommon.js:145
+Unexpected property type: '45'! CCCommon.js:145
+Unexpected property: ''! CCCommon.js:145
+Unexpected position unit CCCommon.js:145
+2Unexpected property: ''! CCCommon.js:145
+Unexpected property: 'anchorPoint'! CCCommon.js:145
+Physics body is not supported.  Stubbing. CCCommon.js:145
+
+
+
+
