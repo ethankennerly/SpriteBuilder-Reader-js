@@ -53,18 +53,19 @@ function testReadInt() {
 }
 
 // testReader5 expects custom classes already defined:
-var MainScene = cc.Class.extend({});
-var MainScreen = cc.Class.extend({});
-var StoreAScene = cc.Class.extend({});
-var StoreBScene = cc.Class.extend({});
+var MainScene = cc.Scene.extend({});
+var MainScreen = cc.Scene.extend({});
+var StoreAScene = cc.Scene.extend({});
+var StoreBScene = cc.Scene.extend({});
 
 var _parent;
 var scene;
 var scene5;
 
-function testReader5(parent) {
-    cc.log("TestCCBReader10: version 5 CocosBuilder");
-    scene5 = cc.BuilderReader.loadAsScene("ccb/MainScene");
+function testReader5(parent, basePath) {
+    cc.log('TestCCBReader10: version 5 CocosBuilder'
+       + '"' + basePath + '"');
+    scene5 = cc.BuilderReader.loadAsScene(basePath);
     parent.addChild(scene5);
     _parent = parent;
 }
@@ -96,12 +97,13 @@ function TestCCBReader10(parent) {
     testReadIntOLD();
     testReadVariableLengthIntFromArray();
     testReadInt();
-    testReader5(parent);
+    testReader5(parent, "ccb/MainScene_5");
     scene = testReader10(parent, "ccb/Bear");
     cc.log("Look for bear in center of screen with arm rotating.");
     scene = testReader10(parent, "ccb/Seal");
     scene = testReader10(parent, "ccb/Penguin");
     scene = testReader10(parent, "ccb/WaitingPenguin");
+    // scene = testReader10(parent, "ccb/MainScene_10");
     // scene = testReader10(parent, "ccb/Gameplay");
     // cc.log("Look for button in top left of screen.");
 }

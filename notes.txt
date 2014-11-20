@@ -1,4 +1,7 @@
 TODO
+	CCBFile version 10
+	MainScene version 5 button.
+	MainScene version 10 button.
 	Step through Gameplay physics nodes.
 	Load Gameplay.ccbi
 	How does writer store values differently in SpriteBuilder?

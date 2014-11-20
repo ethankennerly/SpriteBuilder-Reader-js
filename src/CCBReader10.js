@@ -1141,6 +1141,7 @@ cc.BuilderReader10 = cc.Class.extend({
         if (!useLoader) {
             try {
                 node = eval("new " + className + "()");
+                cc.log('CCBReader10._readNodeGraph: new class name "' + className + '"');
             }
             catch (err) {
                 useLoader = true;
@@ -1680,7 +1681,7 @@ cc.BuilderReader10 = cc.Class.extend({
                 }
                 case CCB_PROPTYPE_CCBFILE:
                 {
-                    var ccbFileNode = ccNodeLoader.parsePropTypeCCBFile(node, parent, ccbReader);
+                    var ccbFileNode = this.parsePropTypeCCBFile(node, parent, ccbReader, cc.BuilderReader10);
                     if (setProp) {
                         ccNodeLoader.onHandlePropTypeCCBFile(node, parent, propertyName, ccbFileNode, ccbReader);
                     }
@@ -1714,6 +1715,43 @@ cc.BuilderReader10 = cc.Class.extend({
             name = PROPERTY_DISPLAYFRAME;
         }
         return name;
+    },
+
+    /**
+     * Use version 10.
+     * Redundant procedures could be extracted.
+     * Test case: Load version 10 CCBI which refers to sub files.  Expect subfiles are parsed with version 10 reader.
+     * @param   readerClass Unlike other parsers, the readerClass is added.
+     * @return  node of CCB file.
+     */
+    parsePropTypeCCBFile:function (node, parent, ccbReader, readerClass) {
+        var ccbFileName = ccbReader.getCCBRootPath() + ccbReader.readCachedString();
+
+        /* Change path extension to .ccbi. */
+        var ccbFileWithoutPathExtension = readerClass.deletePathExtension(ccbFileName);
+        ccbFileName = ccbFileWithoutPathExtension + ".ccbi";
+
+        //load sub file
+        var fileUtils = cc.FileUtils.getInstance();
+        var path = fileUtils.fullPathFromRelativePath(ccbFileName);
+        var myCCBReader = new readerClass(ccbReader);
+
+        var size ;
+        var bytes = fileUtils.getByteArrayFromFile(path,"rb", size);
+
+        myCCBReader.initWithData(bytes,ccbReader.getOwner());
+        myCCBReader.getAnimationManager().setRootContainerSize(parent.getContentSize());
+        myCCBReader.setAnimationManagers(ccbReader.getAnimationManagers());
+
+        myCCBReader.getAnimationManager().setOwner(ccbReader.getOwner());
+        var ccbFileNode = myCCBReader.readFileWithCleanUp(false);
+
+        ccbReader.setAnimationManagers(myCCBReader.getAnimationManagers());
+
+        if(ccbFileNode && myCCBReader.getAnimationManager().getAutoPlaySequenceId() != -1)
+            myCCBReader.getAnimationManager().runAnimations(myCCBReader.getAnimationManager().getAutoPlaySequenceId(),0);
+
+        return ccbFileNode;
     },
 
     /**
@@ -2027,8 +2065,10 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
 /**
  * Guess "CCNode".  If that is not found in string cache, then try any registered loader in string cache.
  * Test case:  Gameplay.ccbi is CCNode yet has CCSprite and CCBFile in string cache.
+ * Test case:  MainScene.ccbi has CCButton in string cache.  Expect to load cc.ControlButtonLoader
  */
 cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
+    this.registerCCNodeLoader("CCButton", cc.ControlButtonLoader.loader());
     var loaders = this._ccNodeLoaders;
     var guessed = "CCNode";
     if (stringCache.indexOf(guessed) <= -1) {
