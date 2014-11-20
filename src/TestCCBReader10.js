@@ -103,7 +103,8 @@ function TestCCBReader10(parent) {
     scene = testReader10(parent, "ccb/Seal");
     scene = testReader10(parent, "ccb/Penguin");
     scene = testReader10(parent, "ccb/WaitingPenguin");
-    // scene = testReader10(parent, "ccb/MainScene_10");
+    scene = testReader10(parent, "ccb/MainScene_10");
+    // scene.setScale(0.15);
     // scene = testReader10(parent, "ccb/Gameplay");
     // cc.log("Look for button in top left of screen.");
 }

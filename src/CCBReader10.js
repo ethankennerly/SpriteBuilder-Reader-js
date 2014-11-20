@@ -46,6 +46,10 @@
  *
  * Expects joints are the last part of the file and are not read.
  *
+ * Version 10 fixes "preferedSize" to be "preferredSize".
+ *  'backgroundSpriteFrame|Normal'
+ *  'backgroundSpriteFrame|Highlighted' 
+ *
  * TODO: 
  *
  * Read node anchor point property.
@@ -58,6 +62,8 @@
  *
  * Animation of sprite frames.
  *
+ * Button 'userInteractionEnabled' interpreted as 'enabled'
+ *
  * Not supported:
  *
  * Version 10 adds node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
@@ -66,7 +72,34 @@
  *
  * Adapt position and size type and size xUnit and yUnit, which were handled in CCNodeLoader. 
  *
- * Unexpected property: 'horizontalPadding'! 
+ * Button properties:
+ *  Background 
+ *     Skipping selector 'play' since no CCBSelectorResolver is present. CCCommon.js:145
+ *     Unexpected property: 'block'! CCCommon.js:145
+ *     Unexpected property: 'maxSize'! CCCommon.js:145
+ *     Unexpected property: 'labelColor|Highlighted'! CCCommon.js:145
+ *     Unexpected property: 'opacity'! CCCommon.js:145
+ *     Unexpected property: 'fontName'! CCCommon.js:145
+ *     Unexpected property: 'fontSize'! CCCommon.js:145
+ *     Unexpected property: 'horizontalPadding'! CCCommon.js:145
+ *     Unexpected property: 'verticalPadding'! CCCommon.js:145
+ *     Unexpected property: 'fontColor'! CCCommon.js:145
+ *     Unexpected property: 'opacity'! CCCommon.js:145
+ *     Unexpected property: 'outlineColor'! CCCommon.js:145
+ *     Unexpected property: 'opacity'! CCCommon.js:145
+ *     Unexpected property: 'outlineWidth'! CCCommon.js:145
+ *     Unexpected property: 'shadowColor'! CCCommon.js:145
+ *     Unexpected property: 'opacity'! CCCommon.js:145
+ *     Unexpected property: 'shadowBlurRadius'! CCCommon.js:145
+ *     Unexpected property: 'shadowOffset'! 
+ *     backgroundOpacity|Normal
+ *     backgroundOpacity|Highlighted
+ *     backgroundOpacity|Disabled
+ *     backgroundOpacity|Selected
+ *     labelOpacity|Normal
+ *     labelOpacity|Highlighted
+ *     labelOpacity|Disabled
+ *     labelOpacity|Selected
  *
  * configCocos2d.plist 
  *
@@ -79,6 +112,8 @@
  * Float check.
  *
  * Effects.
+ *
+ * Button maxSize, userInteractionEnabled
  *
  * Version 10 also reads physics nodes.
  * 
@@ -608,7 +643,25 @@ cc.BuilderReader10 = cc.Class.extend({
         this._animationManager.addDocumentCallbackControlEvents(controlEvents);
     },
 
+    /**
+     * Version 10 fixes typo of control loader "preferedSize" as "preferredSize".
+     * Should be = "preferredSize". This is a typo in cocos2d-iphone, cocos2d-x and CocosBuilder!
+     */
+    overrideConstants: function() {
+        PROPERTY_PREFEREDSIZE = "preferredSize";
+        PROPERTY_MAXSIZE = "maxSize";
+        PROPERTY_USER_INTERACTION_ENABLED = "userInteractionEnabled";
+        PROPERTY_BACKGROUNDSPRITEFRAME_NORMAL = "backgroundSpriteFrame|Normal";
+        PROPERTY_BACKGROUNDSPRITEFRAME_HIGHLIGHTED = "backgroundSpriteFrame|Highlighted";
+        PROPERTY_BACKGROUNDSPRITEFRAME_DISABLED = "backgroundSpriteFrame|Disabled";
+        PROPERTY_BACKGROUNDSPRITEFRAME_SELECTED = "backgroundSpriteFrame|Selected";
+        PROPERTY_TITLECOLOR_NORMAL = "labelColor|Normal";
+        PROPERTY_TITLECOLOR_HIGHLIGHTED = "labelColor|Highlighted";
+        PROPERTY_TITLECOLOR_DISABLED = "labelColor|Disabled";
+    },
+
     readFileWithCleanUp:function (cleanUp) {
+        this.overrideConstants();
         if (!this._readHeader())
             return null;
         if (!this._readStringCache())
@@ -1123,10 +1176,12 @@ cc.BuilderReader10 = cc.Class.extend({
      * Fall back on loading a node.
      * Test case:  Seal is a predefined custom class that inherits cc.Sprite.  Expect sprite loader and sprite node class.
      * XXX eval class in case Cocos2D is on a mobile device without access to global namespace.
+     * To debug, record current class name.
      */
     _readNodeGraph:function (parent) {
         /* Read class name. */
         var className = this.readCachedString();
+        this._currentClassName = className;
 
         var locActionManager = this._animationManager;
         var memberVarAssignmentType = this.readInt(false);
@@ -1489,8 +1544,13 @@ cc.BuilderReader10 = cc.Class.extend({
                 case CCB_PROPTYPE_SIZE:
                 {
                     var size = this.parsePropTypeSize(node, parent, ccbReader);
-                    if (setProp)
+                    if (setProp) {
+                        if (PROPERTY_MAXSIZE == propertyName) {
+                            cc.log('Property "' + propertyName + '" not supported.  Defaulting to "' + PROPERTY_PREFEREDSIZE + '"');
+                            propertyName = PROPERTY_PREFEREDSIZE;
+                        }
                         ccNodeLoader.onHandlePropTypeSize(node, parent, propertyName, size, ccbReader);
+                    }
                     break;
                 }
                 case CCB_PROPTYPE_SCALELOCK:
@@ -1560,15 +1620,21 @@ cc.BuilderReader10 = cc.Class.extend({
                 {
                     var check = ccNodeLoader.parsePropTypeCheck(node, parent, ccbReader, propertyName);
                     if (setProp) {
+                        if (PROPERTY_USER_INTERACTION_ENABLED == propertyName) {
+                            cc.log('Property "' + propertyName + '" not supported.  Defaulting to "' + PROPERTY_ENABLED + '"');
+                            propertyName = PROPERTY_ENABLED;
+                        }
                         ccNodeLoader.onHandlePropTypeCheck(node, parent, propertyName, check, ccbReader);
                     }
                     break;
                 }
                 case CCB_PROPTYPE_SPRITEFRAME:
                 {
-                    var ccSpriteFrame = this.parsePropTypeSpriteFrame(node, parent, ccbReader, this.adaptProp(propertyName));
+                    var spriteFrame = this.parsePropTypeSpriteFrame(node, parent, ccbReader, this.adaptProp(propertyName));
                     if (setProp) {
-                        ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, this.adaptProp(propertyName), ccSpriteFrame, ccbReader);
+                        if (!this.onHandlePropTypeSpriteFrame(node, propertyName, spriteFrame)) {
+                            ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, this.adaptProp(propertyName), spriteFrame, ccbReader);
+                        }
                     }
                     break;
                 }
@@ -1656,9 +1722,11 @@ cc.BuilderReader10 = cc.Class.extend({
                         ccbReader.setName(node, text);
                     }
                     else {
-                        node[propertyName] = text;
+                        if (node.hasOwnProperty(propertyName)) {
+                            node[propertyName] = text;
+                        }
                         if (setProp) {
-                            ccNodeLoader.onHandlePropTypeString(node, parent, propertyName, stringValue, ccbReader);
+                            ccNodeLoader.onHandlePropTypeString(node, parent, propertyName, text, ccbReader);
                         }
                     }
                     break;
@@ -1839,6 +1907,21 @@ cc.BuilderReader10 = cc.Class.extend({
             ccbReader.getAnimationManager().setBaseValue(spriteFrame,node,propertyName);
         }
         return spriteFrame;
+    },
+
+    /**
+     * Selected frame for button.
+     * @return  wasHandled {boolean}
+     */
+    onHandlePropTypeSpriteFrame: function(node, propertyName, spriteFrame) {
+        var wasHandled = false;
+        if (propertyName == PROPERTY_BACKGROUNDSPRITEFRAME_SELECTED) {
+            if (spriteFrame != null) {
+                node.setBackgroundSpriteFrameForState(spriteFrame, cc.CONTROL_STATE_SELECTED);
+                wasHandled = true;
+            }
+        }
+        return wasHandled;
     }
 });
 
@@ -2078,6 +2161,7 @@ cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
             }
         }
     }
+    cc.log('cc.NodeLoaderLibrary.guessClass: ' + guessed + '"');
     return guessed;
 }
 
