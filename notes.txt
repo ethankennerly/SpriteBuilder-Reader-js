@@ -1,9 +1,5 @@
 TODO
-	Step through position.
-	MainScene version 5 button.
-	MainScene version 10 button.
-	Position CircleButton in Machine.ccbi
-	Scale CircleButton in Machine.ccbi
+	Align and scale sprite on CircleButton in Machine.ccbi.
 	Load Machine.ccbi
 	Step through Gameplay physics nodes.
 	Load Gameplay.ccbi

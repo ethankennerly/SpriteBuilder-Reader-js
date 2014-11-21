@@ -50,6 +50,8 @@
  *  'backgroundSpriteFrame|Normal'
  *  'backgroundSpriteFrame|Highlighted' 
  *
+ * Only sets position property, not shadowOffset position.  Does not support shadowOffset.
+ *
  * TODO: 
  *
  * Read node anchor point property.
@@ -1551,8 +1553,8 @@ cc.BuilderReader10 = cc.Class.extend({
                 case CCB_PROPTYPE_POSITION:
                 {
                     var position = this.parsePropTypePosition(node, parent, ccbReader, propertyName);
-                    if (setProp)
-                        ccNodeLoader.onHandlePropTypePosition(node, parent, propertyName, position, ccbReader);
+                    //- if (setProp)
+                    //-    ccNodeLoader.onHandlePropTypePosition(node, parent, propertyName, position, ccbReader);
                     break;
                 }
                 case CCB_PROPTYPE_POINT:
@@ -1867,18 +1869,23 @@ cc.BuilderReader10 = cc.Class.extend({
 
     /**
      * Read version 5 position in version 10 format.
-     * @param   propertyName    Expects "position".
+     * @param   propertyName    If "position", set absolute position.
      */
     parsePropTypePosition: function (
     node, parent, ccbReader, propertyName) {
 
         var pos = ccbReader.readPosition();
 
-        var containerSize = ccbReader.getAnimationManager().getContainerSize(parent);
-        var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
-            containerSize, propertyName);
-        node.setPosition(cc.getAbsolutePosition(pt, pos.type, 
-            containerSize, propertyName));   //different to -x    node.setPosition(pt);
+        if (PROPERTY_POSITION == propertyName) {
+            var containerSize = ccbReader.getAnimationManager().getContainerSize(parent);
+            var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
+                containerSize, propertyName);
+            node.setPosition(cc.getAbsolutePosition(pt, pos.type, 
+                containerSize, propertyName));   //different to -x    node.setPosition(pt);
+        }
+        else {
+            ASSERT_FAIL_UNEXPECTED_PROPERTY(propertyName);
+        }
 
         if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
             var baseValue = [pos.x, pos.y, pos.type];
