@@ -55,7 +55,7 @@ cc.FileUtils.getInstance().setSearchPaths(searchPaths);
 var platform = cc.Application.getInstance().getTargetPlatform();
 if (platform == cc.TARGET_PLATFORM.MOBILE_BROWSER) {
     if (screenSize.height > 450) {
-        resDirOrders.push("HD");
+        resDirOrders.push("Normal");
     }
     else {
         resourceSize = cc.size(400, 225);
@@ -64,13 +64,13 @@ if (platform == cc.TARGET_PLATFORM.MOBILE_BROWSER) {
     }
 }
 else if (platform == cc.TARGET_PLATFORM.PC_BROWSER) {
-    resDirOrders.push("HD");
+    resDirOrders.push("Normal");
 }
 else if (platform == cc.TARGET_PLATFORM.IPHONE) {
     resDirOrders.push("Normal");
 }
 else if (platform == cc.TARGET_PLATFORM.IPAD) {
-    resDirOrders.push("HD");
+    resDirOrders.push("Normal");
 }
 
 cc.FileUtils.getInstance().setSearchResolutionsOrder(resDirOrders);

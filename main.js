@@ -51,11 +51,11 @@ var cocos2dApp = cc.Application.extend({
 
         var platform = cc.Application.getInstance().getTargetPlatform();
         if (platform == cc.TARGET_PLATFORM.MOBILE_BROWSER) {
-            resDirOrders.push("HD");
+            resDirOrders.push("Normal");
         }
         else if (platform == cc.TARGET_PLATFORM.PC_BROWSER) {
             if (screenSize.height >= 800) {
-                resDirOrders.push("HD");
+                resDirOrders.push("Normal");
             }
             else {
                 resourceSize = cc.size(320, 480);

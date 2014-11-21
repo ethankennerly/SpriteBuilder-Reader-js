@@ -1264,7 +1264,9 @@ cc.BuilderReader10 = cc.Class.extend({
             embeddedNode.setRotation(node.getRotation());
             embeddedNode.setScaleX(node.getScaleX());
             embeddedNode.setScaleY(node.getScaleY());
-            embeddedNode.setName(node.getTag());
+            if (node.hasOwnProperty("getTag")) {
+                embeddedNode.setName(node.getTag());
+            }
             var visible = !(node._visible !== false);
             embeddedNode.setVisible(visible);
             //embeddedNode.ignoreAnchorPointForPosition(node.isIgnoreAnchorPointForPosition());
@@ -2151,7 +2153,6 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
  * Test case:  MainScene.ccbi has CCButton in string cache.  Expect to load cc.ControlButtonLoader
  */
 cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
-    this.registerCCNodeLoader("CCButton", cc.ControlButtonLoader.loader());
     var loaders = this._ccNodeLoaders;
     var guessed = "CCNode";
     if (stringCache.indexOf(guessed) <= -1) {
@@ -2171,8 +2172,12 @@ cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
  * Expect a CCSprite.
  */
 cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
+    this.registerCCNodeLoader("CCButton", cc.ControlButtonLoader.loader());
     var ccNodeLoader = this.getCCNodeLoader(className);
-    if (!ccNodeLoader) {
+    if (ccNodeLoader) {
+        cc.log("cc.NodeLoaderLibrary.guess: loaded " + className );
+    }
+    else {
         var loaderClassName = this.guessClass(stringCache);
         ccNodeLoader = this.getCCNodeLoader(loaderClassName);
         if (!ccNodeLoader) {
