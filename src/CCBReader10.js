@@ -1267,7 +1267,7 @@ cc.BuilderReader10 = cc.Class.extend({
             if (node.hasOwnProperty("getTag")) {
                 embeddedNode.setName(node.getTag());
             }
-            var visible = !(node._visible !== false);
+            var visible = node._visible !== false;
             embeddedNode.setVisible(visible);
             //embeddedNode.ignoreAnchorPointForPosition(node.isIgnoreAnchorPointForPosition());
 

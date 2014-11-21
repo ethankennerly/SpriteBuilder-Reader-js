@@ -21,3 +21,5 @@ https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/blob/master/Peev
 
 CocosBuilder example MainScene.ccbi from store example by Soomla:
 https://github.com/soomla/cocos2dx-js-store-example/blob/master/Resources/ccb
+
+To use this example, checkout your Cocos2D-HTML version at 2.2.2, commit ID 5fd806ab9f72865618205195b59e7281eedffbad
