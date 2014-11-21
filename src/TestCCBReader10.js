@@ -15,6 +15,16 @@ function assertEquals(expected, got, message) {
     }
 }
 
+function assertArrayEquals(expected, got, message) {
+    if (expected == null || got == null) {
+        assertEquals(expected, got, "null");
+    }
+    assertEquals(expected.length, got.length, "length");
+    for (var e = 0; e < expected.length; e++) {
+        assertEquals(expected[e], got[e]);
+    }
+}
+
 function testData() {
     var byteArray = new Uint8Array(6);
 	byteArray[0] = 3;
@@ -50,6 +60,62 @@ function testReadInt() {
     assertEquals(7, reader.readInt(true));
     assertEquals(-14, reader.readInt(true));
     assertEquals(1 | (2 << 7) | (27 << 14), reader.readInt(false));
+}
+
+/**
+ * http://www.html5rocks.com/en/tutorials/webgl/typed_arrays/
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
+ */
+function testFloat32Array() {
+    var f = new Float32Array(1);
+    f[0] = 2;
+    var uf = new Uint8Array(f.buffer, 0, 4);
+    assertArrayEquals([0, 0, 0, 64], uf);
+    f[0] = 3;
+    uf = new Uint8Array(f.buffer, 0, 4);
+    assertArrayEquals([0, 0, 64, 64], uf);
+    f[0] = 1;
+    var uf = new Uint8Array(f.buffer, 0, 4);
+    [0, 0, 128, 63]
+    assertArrayEquals([0, 0, 128, 63], uf);
+}
+
+function testDataFloat() {
+    var byteArray = new Uint8Array([3, 
+        5, 0, 0, 128, 63,
+        5, 0, 0, 0, 64,
+        0, 
+        1, 
+        2, 
+        3, 
+        4, 27]);
+    return byteArray;
+}
+
+function testReadFloatVersion5() {
+    var reader = new cc.BuilderReader();
+    reader.initWithData(testDataFloat());
+    assertEquals(3, reader.readByte());
+    assertEquals(1, reader.readFloat());
+    assertEquals(2, reader.readFloat());
+    assertEquals(0, reader.readFloat());
+    assertEquals(1, reader.readFloat());
+    assertEquals(-1, reader.readFloat());
+    assertEquals(0.5, reader.readFloat());
+    assertEquals(0, reader.readFloat());
+}
+
+function testReadFloat() {
+    var reader = new cc.BuilderReader10();
+    reader.initWithData(testDataFloat());
+    assertEquals(3, reader.readByte());
+    assertEquals(1, reader.readFloat());
+    assertEquals(2, reader.readFloat());
+    assertEquals(0, reader.readFloat());
+    assertEquals(1, reader.readFloat());
+    assertEquals(-1, reader.readFloat());
+    assertEquals(0.5, reader.readFloat());
+    assertEquals(-14, reader.readFloat());
 }
 
 // testReader5 expects custom classes already defined:
@@ -96,14 +162,17 @@ function TestCCBReader10(parent) {
     testReadIntOLD();
     testReadVariableLengthIntFromArray();
     testReadInt();
-    testReader5(parent, "ccb/MainScene_5");
-    scene = testReader10(parent, "ccb/Bear");
-    cc.log("Look for bear in center of screen with arm rotating.");
-    scene = testReader10(parent, "ccb/Seal");
-    scene = testReader10(parent, "ccb/Penguin");
+    testFloat32Array();
+    testReadFloat();
+    testReadFloatVersion5();
+    // testReader5(parent, "ccb/MainScene_5");
+    // scene = testReader10(parent, "ccb/Bear");
+    // cc.log("Look for bear in center of screen with arm rotating.");
+    // scene = testReader10(parent, "ccb/Seal");
+    // scene = testReader10(parent, "ccb/Penguin");
     // scene = testReader10(parent, "ccb/WaitingPenguin");
-    scene = testReader10(parent, "ccb/MainScene_10", true);
-    scene.setScale(0.15);
+    // scene = testReader10(parent, "ccb/MainScene_10", true);
+    // scene.setScale(0.15);
     scene = testReader10(parent, "Machines", true);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");

@@ -123,6 +123,9 @@
  * fileLookup.plist
  *
  * SpriteKit sprite frame reader override.
+ *
+ * Note:  For version 5 and version 10, FileUtils calls TypedArray (bytearray), which is not supported in IE9.
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
  */
 var CCB_VERSION_10 = 10;
 
@@ -509,16 +512,39 @@ cc.BuilderReader10 = cc.Class.extend({
             case CCB_FLOAT_INTEGER:
                 return this.readInt(true);
             default:
-                /* using a memcpy since the compiler isn't
-                 * doing the float ptr math correctly on device.
-                 */
-                var pF = this._decodeFloat(23, 8); //this._bytes + this._currentByte;
-                //this._currentByte += 4;
+                var pF = this._decodeFloat();
                 return pF;
         }
     },
 
-    _decodeFloat:function (precisionBits, exponentBits) {
+    /**
+     * @return  32-bit (4-byte) float.
+     *
+     * New byte
+     * Depends on TypedArray support.
+     * http://www.html5rocks.com/en/tutorials/webgl/typed_arrays/
+     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
+     */ 
+    _decodeFloat: function() {
+        var byteLength = 4;
+        var doubleWord = new Uint8Array(byteLength);
+        for (var byte = 0; byte < byteLength; byte++) {
+            doubleWord[byte] = this._data[this._currentByte + byte];
+        }
+        var floats = new Float32Array(doubleWord.buffer, 0, 1);
+        this._currentByte += byteLength;
+        return floats[0];
+    },
+
+    /* using a memcpy since the compiler isn't
+     * doing the float ptr math correctly on device.
+     * this._bytes + this._currentByte;
+     * Usage was:
+     *      var pF = this._decodeFloat(23, 8);
+     */
+    _decodeFloatVersion5:function (precisionBits, exponentBits) {
+        precisionBits = precisionBits === undefined ? 23 : precisionBits;
+        exponentBits = exponentBits === undefined ? 8 : exponentBits;
         var length = precisionBits + exponentBits + 1;
         var size = length >> 3;
         this._checkSize(length);
