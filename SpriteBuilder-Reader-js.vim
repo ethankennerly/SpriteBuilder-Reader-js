@@ -145,6 +145,7 @@ badd +373 \archive\cocos2d-html5\cocos2d\layers_scenes_transitions_nodes\CCTrans
 badd +1 \archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\SpriteBuilder\ Resources\MainScene.ccb
 badd +614 \archive\cocos2d-html5\extensions\GUI\CCControlExtension\CCControlButton.js
 badd +47 \archive\cocos2d-html5\extensions\GUI\CCControlExtension\CCControl.js
+badd +0 res\Normal\Machine.ccbi
 args README.md
 edit README.md
 set splitbelow splitright
@@ -370,13 +371,14 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 2 - ((0 * winheight(0) + 15) / 31)
+let s:l = 5 - ((4 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-2
-normal! 018l
+5
+normal! 01l
 wincmd w
+2wincmd w
 exe 'vert 1resize ' . ((&columns * 67 + 66) / 133)
 exe 'vert 2resize ' . ((&columns * 65 + 66) / 133)
 tabedit src\TestCCBReader10.js
@@ -500,11 +502,11 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 94 - ((13 * winheight(0) + 15) / 31)
+let s:l = 180 - ((29 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-94
+180
 normal! 0
 wincmd w
 argglobal
@@ -728,12 +730,1543 @@ normal! zt
 87
 normal! 0
 wincmd w
+2wincmd w
 exe 'vert 1resize ' . ((&columns * 67 + 66) / 133)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe 'vert 2resize ' . ((&columns * 65 + 66) / 133)
 exe '3resize ' . ((&lines * 29 + 16) / 33)
 exe 'vert 3resize ' . ((&columns * 65 + 66) / 133)
-tabedit C:\archive\SpriteBuilder-Reader-js\res\ccb\Normal\MainScene.ccbi
+tabedit C:\archive\cocos2d-html5\extensions\CCBReader\CCSpriteLoader.js
+set splitbelow splitright
+wincmd _ | wincmd |
+vsplit
+1wincmd h
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+3wincmd k
+wincmd w
+wincmd w
+wincmd w
+wincmd w
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+set nosplitbelow
+set nosplitright
+wincmd t
+set winheight=1 winwidth=1
+exe '1resize ' . ((&lines * 6 + 16) / 33)
+exe 'vert 1resize ' . ((&columns * 63 + 66) / 133)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe 'vert 2resize ' . ((&columns * 63 + 66) / 133)
+exe '3resize ' . ((&lines * 20 + 16) / 33)
+exe 'vert 3resize ' . ((&columns * 63 + 66) / 133)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe 'vert 4resize ' . ((&columns * 63 + 66) / 133)
+exe '5resize ' . ((&lines * 6 + 16) / 33)
+exe 'vert 5resize ' . ((&columns * 69 + 66) / 133)
+exe '6resize ' . ((&lines * 24 + 16) / 33)
+exe 'vert 6resize ' . ((&columns * 69 + 66) / 133)
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'javascript'
+setlocal filetype=javascript
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'javascript'
+setlocal syntax=javascript
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+silent! normal! zE
+let s:l = 372 - ((4 * winheight(0) + 3) / 6)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+372
+normal! 08l
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+argglobal
+enew
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=wipe
+setlocal buflisted
+setlocal buftype=quickfix
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'qf'
+setlocal filetype=qf
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal nomodifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'qf'
+setlocal syntax=qf
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal winfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+argglobal
+edit C:\archive\cocos2d-html5\extensions\CCBReader\CCControlLoader.js
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'javascript'
+setlocal filetype=javascript
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'javascript'
+setlocal syntax=javascript
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+silent! normal! zE
+let s:l = 264 - ((4 * winheight(0) + 10) / 20)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+264
+normal! 0118l
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+argglobal
+enew
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=wipe
+setlocal buflisted
+setlocal buftype=quickfix
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'qf'
+setlocal filetype=qf
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal nomodifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'qf'
+setlocal syntax=qf
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal winfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+argglobal
+edit C:\archive\SpriteBuilder-Reader-js\src\CCBReader10.js
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'javascript'
+setlocal filetype=javascript
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=indent
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'javascript'
+setlocal syntax=javascript
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+250
+normal zo
+404
+normal zo
+412
+normal zo
+412
+normal zo
+447
+normal zo
+447
+normal zo
+468
+normal zo
+468
+normal zo
+503
+normal zo
+506
+normal zo
+507
+normal zo
+509
+normal zo
+511
+normal zo
+513
+normal zo
+515
+normal zo
+517
+normal zo
+506
+normal zo
+503
+normal zo
+531
+normal zo
+534
+normal zo
+531
+normal zo
+548
+normal zo
+548
+normal zo
+604
+normal zo
+679
+normal zo
+692
+normal zo
+692
+normal zo
+723
+normal zo
+747
+normal zo
+778
+normal zo
+793
+normal zo
+747
+normal zo
+831
+normal zo
+831
+normal zo
+723
+normal zo
+887
+normal zo
+887
+normal zo
+915
+normal zo
+923
+normal zo
+915
+normal zo
+947
+normal zo
+956
+normal zo
+963
+normal zo
+956
+normal zo
+947
+normal zo
+975
+normal zo
+975
+normal zo
+1023
+normal zo
+1035
+normal zo
+1035
+normal zo
+1058
+normal zo
+250
+normal zo
+1096
+normal zo
+1123
+normal zo
+1133
+normal zo
+1135
+normal zo
+1143
+normal zo
+1149
+normal zo
+1133
+normal zo
+1171
+normal zo
+1173
+normal zo
+1171
+normal zo
+1181
+normal zo
+1181
+normal zo
+1210
+normal zo
+1225
+normal zo
+1226
+normal zo
+1225
+normal zo
+1248
+normal zo
+1254
+normal zo
+1254
+normal zo
+1248
+normal zo
+1276
+normal zo
+1277
+normal zo
+1276
+normal zo
+1290
+normal zo
+1290
+normal zo
+1308
+normal zo
+1315
+normal zo
+1315
+normal zo
+1308
+normal zo
+1329
+normal zo
+1332
+normal zo
+1332
+normal zo
+1329
+normal zo
+1210
+normal zo
+1377
+normal zo
+1385
+normal zo
+1389
+normal zo
+1389
+normal zo
+1385
+normal zo
+1377
+normal zo
+1524
+normal zo
+1529
+normal zo
+1553
+normal zo
+1555
+normal zo
+1576
+normal zo
+1576
+normal zo
+1603
+normal zo
+1603
+normal zo
+1651
+normal zo
+1651
+normal zo
+1748
+normal zo
+1755
+normal zo
+1755
+normal zo
+1748
+normal zo
+1766
+normal zo
+1766
+normal zo
+1790
+normal zo
+1790
+normal zo
+1553
+normal zo
+1529
+normal zo
+1524
+normal zo
+1826
+normal zo
+1826
+normal zo
+1877
+normal zo
+1887
+normal zo
+1891
+normal zo
+1877
+normal zo
+1952
+normal zo
+1952
+normal zo
+1096
+normal zo
+2189
+normal zo
+2192
+normal zo
+2193
+normal zo
+2193
+normal zo
+2192
+normal zo
+2189
+normal zo
+2208
+normal zo
+2214
+normal zo
+2214
+normal zo
+2208
+normal zo
+let s:l = 519 - ((3 * winheight(0) + 3) / 6)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+519
+normal! 04l
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+argglobal
+edit C:\archive\SpriteBuilder-Reader-js\src\CCBReader10.js
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'javascript'
+setlocal filetype=javascript
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=indent
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'javascript'
+setlocal syntax=javascript
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+250
+normal zo
+281
+normal zo
+287
+normal zo
+288
+normal zo
+287
+normal zo
+281
+normal zo
+322
+normal zo
+341
+normal zo
+341
+normal zo
+356
+normal zo
+356
+normal zo
+404
+normal zo
+412
+normal zo
+412
+normal zo
+447
+normal zo
+447
+normal zo
+468
+normal zo
+479
+normal zo
+479
+normal zo
+468
+normal zo
+503
+normal zo
+506
+normal zo
+507
+normal zo
+509
+normal zo
+511
+normal zo
+513
+normal zo
+515
+normal zo
+517
+normal zo
+506
+normal zo
+503
+normal zo
+531
+normal zo
+534
+normal zo
+531
+normal zo
+548
+normal zo
+561
+normal zo
+565
+normal zo
+566
+normal zo
+565
+normal zo
+561
+normal zo
+575
+normal zo
+548
+normal zo
+604
+normal zo
+609
+normal zo
+610
+normal zo
+609
+normal zo
+679
+normal zo
+692
+normal zo
+692
+normal zo
+723
+normal zo
+747
+normal zo
+778
+normal zo
+793
+normal zo
+747
+normal zo
+831
+normal zo
+831
+normal zo
+723
+normal zo
+887
+normal zo
+887
+normal zo
+915
+normal zo
+923
+normal zo
+915
+normal zo
+947
+normal zo
+956
+normal zo
+963
+normal zo
+956
+normal zo
+947
+normal zo
+975
+normal zo
+975
+normal zo
+1023
+normal zo
+1035
+normal zo
+1035
+normal zo
+1058
+normal zo
+250
+normal zo
+1096
+normal zo
+1123
+normal zo
+1133
+normal zo
+1135
+normal zo
+1143
+normal zo
+1149
+normal zo
+1133
+normal zo
+1171
+normal zo
+1173
+normal zo
+1171
+normal zo
+1181
+normal zo
+1181
+normal zo
+1210
+normal zo
+1225
+normal zo
+1226
+normal zo
+1225
+normal zo
+1248
+normal zo
+1254
+normal zo
+1254
+normal zo
+1248
+normal zo
+1276
+normal zo
+1277
+normal zo
+1276
+normal zo
+1290
+normal zo
+1290
+normal zo
+1308
+normal zo
+1315
+normal zo
+1315
+normal zo
+1308
+normal zo
+1329
+normal zo
+1332
+normal zo
+1332
+normal zo
+1329
+normal zo
+1210
+normal zo
+1377
+normal zo
+1385
+normal zo
+1389
+normal zo
+1389
+normal zo
+1385
+normal zo
+1377
+normal zo
+1524
+normal zo
+1529
+normal zo
+1553
+normal zo
+1555
+normal zo
+1576
+normal zo
+1576
+normal zo
+1603
+normal zo
+1603
+normal zo
+1611
+normal zo
+1613
+normal zo
+1611
+normal zo
+1651
+normal zo
+1651
+normal zo
+1748
+normal zo
+1755
+normal zo
+1755
+normal zo
+1748
+normal zo
+1766
+normal zo
+1766
+normal zo
+1790
+normal zo
+1790
+normal zo
+1553
+normal zo
+1529
+normal zo
+1524
+normal zo
+1826
+normal zo
+1826
+normal zo
+1877
+normal zo
+1880
+normal zo
+1882
+normal zo
+1884
+normal zo
+1880
+normal zo
+1887
+normal zo
+1891
+normal zo
+1877
+normal zo
+1952
+normal zo
+1952
+normal zo
+1096
+normal zo
+2189
+normal zo
+2192
+normal zo
+2193
+normal zo
+2193
+normal zo
+2192
+normal zo
+2189
+normal zo
+2208
+normal zo
+2214
+normal zo
+2214
+normal zo
+2208
+normal zo
+let s:l = 92 - ((8 * winheight(0) + 12) / 24)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+92
+normal! 058l
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 6 + 16) / 33)
+exe 'vert 1resize ' . ((&columns * 63 + 66) / 133)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe 'vert 2resize ' . ((&columns * 63 + 66) / 133)
+exe '3resize ' . ((&lines * 20 + 16) / 33)
+exe 'vert 3resize ' . ((&columns * 63 + 66) / 133)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe 'vert 4resize ' . ((&columns * 63 + 66) / 133)
+exe '5resize ' . ((&lines * 6 + 16) / 33)
+exe 'vert 5resize ' . ((&columns * 69 + 66) / 133)
+exe '6resize ' . ((&lines * 24 + 16) / 33)
+exe 'vert 6resize ' . ((&columns * 69 + 66) / 133)
+tabedit C:\archive\SpriteBuilder-Reader-js\src\CCBReader.m
+set splitbelow splitright
+wincmd _ | wincmd |
+vsplit
+1wincmd h
+wincmd w
+set nosplitbelow
+set nosplitright
+wincmd t
+set winheight=1 winwidth=1
+exe 'vert 1resize ' . ((&columns * 75 + 66) / 133)
+exe 'vert 2resize ' . ((&columns * 57 + 66) / 133)
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal noautoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal cursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal diff
+setlocal equalprg=
+setlocal errorformat=
+setlocal noexpandtab
+if &filetype != 'objc'
+setlocal filetype=objc
+endif
+setlocal foldcolumn=2
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=diff
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal scrollbind
+setlocal shiftwidth=8
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'objc'
+setlocal syntax=objc
+endif
+setlocal tabstop=8
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal nowrap
+setlocal wrapmargin=0
+920
+normal zo
+let s:l = 200 - ((18 * winheight(0) + 15) / 31)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+200
+normal! 028l
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+argglobal
+edit C:\archive\SpriteBuilder-Reader-js\src\CCBReader10.m
+setlocal keymap=
+setlocal noarabic
+setlocal noautoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal diff
+setlocal equalprg=
+setlocal errorformat=
+setlocal noexpandtab
+if &filetype != 'objc'
+setlocal filetype=objc
+endif
+setlocal foldcolumn=2
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=diff
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal scrollbind
+setlocal shiftwidth=8
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'objc'
+setlocal syntax=objc
+endif
+setlocal tabstop=8
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal nowrap
+setlocal wrapmargin=0
+1334
+normal zo
+1334
+normal zo
+let s:l = 331 - ((21 * winheight(0) + 15) / 31)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+331
+normal! 015l
+lcd C:\archive\SpriteBuilder-Reader-js
+wincmd w
+2wincmd w
+exe 'vert 1resize ' . ((&columns * 75 + 66) / 133)
+exe 'vert 2resize ' . ((&columns * 57 + 66) / 133)
+tabedit C:\archive\SpriteBuilder-Reader-js\res\Normal\Machine.ccbi
 set splitbelow splitright
 wincmd _ | wincmd |
 vsplit
@@ -847,11 +2380,11 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-let s:l = 1 - ((0 * winheight(0) + 15) / 31)
+let s:l = 9 - ((7 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+9
 normal! 0
 lcd C:\archive\SpriteBuilder-Reader-js
 wincmd w
@@ -1218,1053 +2751,9 @@ normal! zt
 normal! 06l
 lcd C:\archive\SpriteBuilder-Reader-js
 wincmd w
+2wincmd w
 exe 'vert 1resize ' . ((&columns * 68 + 66) / 133)
 exe 'vert 2resize ' . ((&columns * 64 + 66) / 133)
-tabedit C:\archive\cocos2d-html5\extensions\CCBReader\CCSpriteLoader.js
-set splitbelow splitright
-wincmd _ | wincmd |
-vsplit
-1wincmd h
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
-wincmd w
-wincmd w
-wincmd w
-set nosplitbelow
-set nosplitright
-wincmd t
-set winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 6 + 16) / 33)
-exe 'vert 1resize ' . ((&columns * 66 + 66) / 133)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe 'vert 2resize ' . ((&columns * 66 + 66) / 133)
-exe '3resize ' . ((&lines * 20 + 16) / 33)
-exe 'vert 3resize ' . ((&columns * 66 + 66) / 133)
-exe '4resize ' . ((&lines * 1 + 16) / 33)
-exe 'vert 4resize ' . ((&columns * 66 + 66) / 133)
-exe 'vert 5resize ' . ((&columns * 66 + 66) / 133)
-argglobal
-setlocal keymap=
-setlocal noarabic
-setlocal autoindent
-setlocal balloonexpr=
-setlocal nobinary
-setlocal bufhidden=
-setlocal buflisted
-setlocal buftype=
-setlocal nocindent
-setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
-setlocal cinoptions=
-setlocal cinwords=if,else,while,do,for,switch
-setlocal colorcolumn=
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
-setlocal commentstring=/*%s*/
-setlocal complete=.,w,b,u,t,i
-setlocal concealcursor=
-setlocal conceallevel=0
-setlocal completefunc=
-setlocal nocopyindent
-setlocal cryptmethod=
-setlocal nocursorbind
-setlocal nocursorcolumn
-setlocal nocursorline
-setlocal define=
-setlocal dictionary=
-setlocal nodiff
-setlocal equalprg=
-setlocal errorformat=
-setlocal expandtab
-if &filetype != 'javascript'
-setlocal filetype=javascript
-endif
-setlocal foldcolumn=0
-setlocal foldenable
-setlocal foldexpr=0
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldmarker={{{,}}}
-set foldmethod=indent
-setlocal foldmethod=manual
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldtext=foldtext()
-setlocal formatexpr=
-setlocal formatoptions=tcq
-setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
-setlocal grepprg=
-setlocal iminsert=2
-setlocal imsearch=2
-setlocal include=
-setlocal includeexpr=
-setlocal indentexpr=
-setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
-setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255
-setlocal keywordprg=
-setlocal nolinebreak
-setlocal nolisp
-setlocal nolist
-setlocal makeprg=
-setlocal matchpairs=(:),{:},[:]
-setlocal modeline
-setlocal modifiable
-setlocal nrformats=octal,hex
-setlocal nonumber
-setlocal numberwidth=4
-setlocal omnifunc=
-setlocal path=
-setlocal nopreserveindent
-setlocal nopreviewwindow
-setlocal quoteescape=\\
-setlocal noreadonly
-setlocal norelativenumber
-setlocal norightleft
-setlocal rightleftcmd=search
-setlocal noscrollbind
-setlocal shiftwidth=4
-setlocal noshortname
-setlocal smartindent
-setlocal softtabstop=4
-setlocal nospell
-setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
-setlocal spellfile=
-setlocal spelllang=en
-setlocal statusline=
-setlocal suffixesadd=
-setlocal noswapfile
-setlocal synmaxcol=3000
-if &syntax != 'javascript'
-setlocal syntax=javascript
-endif
-setlocal tabstop=4
-setlocal tags=
-setlocal textwidth=0
-setlocal thesaurus=
-setlocal noundofile
-setlocal nowinfixheight
-setlocal nowinfixwidth
-setlocal wrap
-setlocal wrapmargin=0
-silent! normal! zE
-let s:l = 372 - ((4 * winheight(0) + 3) / 6)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-372
-normal! 08l
-lcd C:\archive\SpriteBuilder-Reader-js
-wincmd w
-argglobal
-enew
-setlocal keymap=
-setlocal noarabic
-setlocal autoindent
-setlocal balloonexpr=
-setlocal nobinary
-setlocal bufhidden=wipe
-setlocal buflisted
-setlocal buftype=quickfix
-setlocal nocindent
-setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
-setlocal cinoptions=
-setlocal cinwords=if,else,while,do,for,switch
-setlocal colorcolumn=
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
-setlocal commentstring=/*%s*/
-setlocal complete=.,w,b,u,t,i
-setlocal concealcursor=
-setlocal conceallevel=0
-setlocal completefunc=
-setlocal nocopyindent
-setlocal cryptmethod=
-setlocal nocursorbind
-setlocal nocursorcolumn
-setlocal nocursorline
-setlocal define=
-setlocal dictionary=
-setlocal nodiff
-setlocal equalprg=
-setlocal errorformat=
-setlocal expandtab
-if &filetype != 'qf'
-setlocal filetype=qf
-endif
-setlocal foldcolumn=0
-setlocal foldenable
-setlocal foldexpr=0
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldmarker={{{,}}}
-set foldmethod=indent
-setlocal foldmethod=manual
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldtext=foldtext()
-setlocal formatexpr=
-setlocal formatoptions=tcq
-setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
-setlocal grepprg=
-setlocal iminsert=2
-setlocal imsearch=2
-setlocal include=
-setlocal includeexpr=
-setlocal indentexpr=
-setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
-setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255
-setlocal keywordprg=
-setlocal nolinebreak
-setlocal nolisp
-setlocal nolist
-setlocal makeprg=
-setlocal matchpairs=(:),{:},[:]
-setlocal modeline
-setlocal nomodifiable
-setlocal nrformats=octal,hex
-setlocal nonumber
-setlocal numberwidth=4
-setlocal omnifunc=
-setlocal path=
-setlocal nopreserveindent
-setlocal nopreviewwindow
-setlocal quoteescape=\\
-setlocal noreadonly
-setlocal norelativenumber
-setlocal norightleft
-setlocal rightleftcmd=search
-setlocal noscrollbind
-setlocal shiftwidth=4
-setlocal noshortname
-setlocal smartindent
-setlocal softtabstop=4
-setlocal nospell
-setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
-setlocal spellfile=
-setlocal spelllang=en
-setlocal statusline=
-setlocal suffixesadd=
-setlocal noswapfile
-setlocal synmaxcol=3000
-if &syntax != 'qf'
-setlocal syntax=qf
-endif
-setlocal tabstop=4
-setlocal tags=
-setlocal textwidth=0
-setlocal thesaurus=
-setlocal noundofile
-setlocal winfixheight
-setlocal nowinfixwidth
-setlocal wrap
-setlocal wrapmargin=0
-lcd C:\archive\SpriteBuilder-Reader-js
-wincmd w
-argglobal
-edit C:\archive\cocos2d-html5\extensions\CCBReader\CCControlLoader.js
-setlocal keymap=
-setlocal noarabic
-setlocal autoindent
-setlocal balloonexpr=
-setlocal nobinary
-setlocal bufhidden=
-setlocal buflisted
-setlocal buftype=
-setlocal nocindent
-setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
-setlocal cinoptions=
-setlocal cinwords=if,else,while,do,for,switch
-setlocal colorcolumn=
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
-setlocal commentstring=/*%s*/
-setlocal complete=.,w,b,u,t,i
-setlocal concealcursor=
-setlocal conceallevel=0
-setlocal completefunc=
-setlocal nocopyindent
-setlocal cryptmethod=
-setlocal nocursorbind
-setlocal nocursorcolumn
-setlocal nocursorline
-setlocal define=
-setlocal dictionary=
-setlocal nodiff
-setlocal equalprg=
-setlocal errorformat=
-setlocal expandtab
-if &filetype != 'javascript'
-setlocal filetype=javascript
-endif
-setlocal foldcolumn=0
-setlocal foldenable
-setlocal foldexpr=0
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldmarker={{{,}}}
-set foldmethod=indent
-setlocal foldmethod=manual
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldtext=foldtext()
-setlocal formatexpr=
-setlocal formatoptions=tcq
-setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
-setlocal grepprg=
-setlocal iminsert=2
-setlocal imsearch=2
-setlocal include=
-setlocal includeexpr=
-setlocal indentexpr=
-setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
-setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255
-setlocal keywordprg=
-setlocal nolinebreak
-setlocal nolisp
-setlocal nolist
-setlocal makeprg=
-setlocal matchpairs=(:),{:},[:]
-setlocal modeline
-setlocal modifiable
-setlocal nrformats=octal,hex
-setlocal nonumber
-setlocal numberwidth=4
-setlocal omnifunc=
-setlocal path=
-setlocal nopreserveindent
-setlocal nopreviewwindow
-setlocal quoteescape=\\
-setlocal noreadonly
-setlocal norelativenumber
-setlocal norightleft
-setlocal rightleftcmd=search
-setlocal noscrollbind
-setlocal shiftwidth=4
-setlocal noshortname
-setlocal smartindent
-setlocal softtabstop=4
-setlocal nospell
-setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
-setlocal spellfile=
-setlocal spelllang=en
-setlocal statusline=
-setlocal suffixesadd=
-setlocal noswapfile
-setlocal synmaxcol=3000
-if &syntax != 'javascript'
-setlocal syntax=javascript
-endif
-setlocal tabstop=4
-setlocal tags=
-setlocal textwidth=0
-setlocal thesaurus=
-setlocal noundofile
-setlocal nowinfixheight
-setlocal nowinfixwidth
-setlocal wrap
-setlocal wrapmargin=0
-silent! normal! zE
-let s:l = 273 - ((13 * winheight(0) + 10) / 20)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-273
-normal! 04l
-lcd C:\archive\SpriteBuilder-Reader-js
-wincmd w
-argglobal
-enew
-setlocal keymap=
-setlocal noarabic
-setlocal autoindent
-setlocal balloonexpr=
-setlocal nobinary
-setlocal bufhidden=wipe
-setlocal buflisted
-setlocal buftype=quickfix
-setlocal nocindent
-setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
-setlocal cinoptions=
-setlocal cinwords=if,else,while,do,for,switch
-setlocal colorcolumn=
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
-setlocal commentstring=/*%s*/
-setlocal complete=.,w,b,u,t,i
-setlocal concealcursor=
-setlocal conceallevel=0
-setlocal completefunc=
-setlocal nocopyindent
-setlocal cryptmethod=
-setlocal nocursorbind
-setlocal nocursorcolumn
-setlocal nocursorline
-setlocal define=
-setlocal dictionary=
-setlocal nodiff
-setlocal equalprg=
-setlocal errorformat=
-setlocal expandtab
-if &filetype != 'qf'
-setlocal filetype=qf
-endif
-setlocal foldcolumn=0
-setlocal foldenable
-setlocal foldexpr=0
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldmarker={{{,}}}
-set foldmethod=indent
-setlocal foldmethod=manual
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldtext=foldtext()
-setlocal formatexpr=
-setlocal formatoptions=tcq
-setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
-setlocal grepprg=
-setlocal iminsert=2
-setlocal imsearch=2
-setlocal include=
-setlocal includeexpr=
-setlocal indentexpr=
-setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
-setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255
-setlocal keywordprg=
-setlocal nolinebreak
-setlocal nolisp
-setlocal nolist
-setlocal makeprg=
-setlocal matchpairs=(:),{:},[:]
-setlocal modeline
-setlocal nomodifiable
-setlocal nrformats=octal,hex
-setlocal nonumber
-setlocal numberwidth=4
-setlocal omnifunc=
-setlocal path=
-setlocal nopreserveindent
-setlocal nopreviewwindow
-setlocal quoteescape=\\
-setlocal noreadonly
-setlocal norelativenumber
-setlocal norightleft
-setlocal rightleftcmd=search
-setlocal noscrollbind
-setlocal shiftwidth=4
-setlocal noshortname
-setlocal smartindent
-setlocal softtabstop=4
-setlocal nospell
-setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
-setlocal spellfile=
-setlocal spelllang=en
-setlocal statusline=
-setlocal suffixesadd=
-setlocal noswapfile
-setlocal synmaxcol=3000
-if &syntax != 'qf'
-setlocal syntax=qf
-endif
-setlocal tabstop=4
-setlocal tags=
-setlocal textwidth=0
-setlocal thesaurus=
-setlocal noundofile
-setlocal winfixheight
-setlocal nowinfixwidth
-setlocal wrap
-setlocal wrapmargin=0
-lcd C:\archive\SpriteBuilder-Reader-js
-wincmd w
-argglobal
-edit C:\archive\SpriteBuilder-Reader-js\src\CCBReader10.js
-setlocal keymap=
-setlocal noarabic
-setlocal autoindent
-setlocal balloonexpr=
-setlocal nobinary
-setlocal bufhidden=
-setlocal buflisted
-setlocal buftype=
-setlocal nocindent
-setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
-setlocal cinoptions=
-setlocal cinwords=if,else,while,do,for,switch
-setlocal colorcolumn=
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
-setlocal commentstring=/*%s*/
-setlocal complete=.,w,b,u,t,i
-setlocal concealcursor=
-setlocal conceallevel=0
-setlocal completefunc=
-setlocal nocopyindent
-setlocal cryptmethod=
-setlocal nocursorbind
-setlocal nocursorcolumn
-setlocal nocursorline
-setlocal define=
-setlocal dictionary=
-setlocal nodiff
-setlocal equalprg=
-setlocal errorformat=
-setlocal expandtab
-if &filetype != 'javascript'
-setlocal filetype=javascript
-endif
-setlocal foldcolumn=0
-setlocal foldenable
-setlocal foldexpr=0
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldmarker={{{,}}}
-set foldmethod=indent
-setlocal foldmethod=indent
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldtext=foldtext()
-setlocal formatexpr=
-setlocal formatoptions=tcq
-setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
-setlocal grepprg=
-setlocal iminsert=2
-setlocal imsearch=2
-setlocal include=
-setlocal includeexpr=
-setlocal indentexpr=
-setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
-setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255
-setlocal keywordprg=
-setlocal nolinebreak
-setlocal nolisp
-setlocal nolist
-setlocal makeprg=
-setlocal matchpairs=(:),{:},[:]
-setlocal modeline
-setlocal modifiable
-setlocal nrformats=octal,hex
-setlocal nonumber
-setlocal numberwidth=4
-setlocal omnifunc=
-setlocal path=
-setlocal nopreserveindent
-setlocal nopreviewwindow
-setlocal quoteescape=\\
-setlocal noreadonly
-setlocal norelativenumber
-setlocal norightleft
-setlocal rightleftcmd=search
-setlocal noscrollbind
-setlocal shiftwidth=4
-setlocal noshortname
-setlocal smartindent
-setlocal softtabstop=4
-setlocal nospell
-setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
-setlocal spellfile=
-setlocal spelllang=en
-setlocal statusline=
-setlocal suffixesadd=
-setlocal noswapfile
-setlocal synmaxcol=3000
-if &syntax != 'javascript'
-setlocal syntax=javascript
-endif
-setlocal tabstop=4
-setlocal tags=
-setlocal textwidth=0
-setlocal thesaurus=
-setlocal noundofile
-setlocal nowinfixheight
-setlocal nowinfixwidth
-setlocal wrap
-setlocal wrapmargin=0
-245
-normal zo
-399
-normal zo
-407
-normal zo
-407
-normal zo
-442
-normal zo
-442
-normal zo
-463
-normal zo
-463
-normal zo
-576
-normal zo
-651
-normal zo
-664
-normal zo
-664
-normal zo
-695
-normal zo
-719
-normal zo
-750
-normal zo
-765
-normal zo
-719
-normal zo
-803
-normal zo
-803
-normal zo
-695
-normal zo
-859
-normal zo
-859
-normal zo
-887
-normal zo
-895
-normal zo
-887
-normal zo
-919
-normal zo
-928
-normal zo
-935
-normal zo
-928
-normal zo
-919
-normal zo
-947
-normal zo
-947
-normal zo
-1007
-normal zo
-1007
-normal zo
-1030
-normal zo
-245
-normal zo
-1068
-normal zo
-1105
-normal zo
-1107
-normal zo
-1115
-normal zo
-1121
-normal zo
-1105
-normal zo
-1143
-normal zo
-1145
-normal zo
-1143
-normal zo
-1153
-normal zo
-1153
-normal zo
-1182
-normal zo
-1197
-normal zo
-1198
-normal zo
-1197
-normal zo
-1220
-normal zo
-1226
-normal zo
-1226
-normal zo
-1220
-normal zo
-1248
-normal zo
-1249
-normal zo
-1248
-normal zo
-1262
-normal zo
-1262
-normal zo
-1280
-normal zo
-1287
-normal zo
-1287
-normal zo
-1280
-normal zo
-1301
-normal zo
-1304
-normal zo
-1304
-normal zo
-1301
-normal zo
-1182
-normal zo
-1349
-normal zo
-1357
-normal zo
-1361
-normal zo
-1361
-normal zo
-1357
-normal zo
-1349
-normal zo
-1496
-normal zo
-1501
-normal zo
-1525
-normal zo
-1548
-normal zo
-1548
-normal zo
-1575
-normal zo
-1575
-normal zo
-1623
-normal zo
-1623
-normal zo
-1720
-normal zo
-1727
-normal zo
-1727
-normal zo
-1720
-normal zo
-1738
-normal zo
-1738
-normal zo
-1762
-normal zo
-1762
-normal zo
-1525
-normal zo
-1501
-normal zo
-1496
-normal zo
-1798
-normal zo
-1798
-normal zo
-1919
-normal zo
-1919
-normal zo
-1068
-normal zo
-2156
-normal zo
-2159
-normal zo
-2160
-normal zo
-2160
-normal zo
-2159
-normal zo
-2156
-normal zo
-2175
-normal zo
-2181
-normal zo
-2181
-normal zo
-2175
-normal zo
-let s:l = 1272 - ((15 * winheight(0) + 15) / 31)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1272
-normal! 013l
-lcd C:\archive\SpriteBuilder-Reader-js
-wincmd w
-5wincmd w
-exe '1resize ' . ((&lines * 6 + 16) / 33)
-exe 'vert 1resize ' . ((&columns * 66 + 66) / 133)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe 'vert 2resize ' . ((&columns * 66 + 66) / 133)
-exe '3resize ' . ((&lines * 20 + 16) / 33)
-exe 'vert 3resize ' . ((&columns * 66 + 66) / 133)
-exe '4resize ' . ((&lines * 1 + 16) / 33)
-exe 'vert 4resize ' . ((&columns * 66 + 66) / 133)
-exe 'vert 5resize ' . ((&columns * 66 + 66) / 133)
-tabedit C:\archive\SpriteBuilder-Reader-js\src\CCBReader.m
-set splitbelow splitright
-wincmd _ | wincmd |
-vsplit
-1wincmd h
-wincmd w
-set nosplitbelow
-set nosplitright
-wincmd t
-set winheight=1 winwidth=1
-exe 'vert 1resize ' . ((&columns * 75 + 66) / 133)
-exe 'vert 2resize ' . ((&columns * 57 + 66) / 133)
-argglobal
-setlocal keymap=
-setlocal noarabic
-setlocal noautoindent
-setlocal balloonexpr=
-setlocal nobinary
-setlocal bufhidden=
-setlocal buflisted
-setlocal buftype=
-setlocal nocindent
-setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
-setlocal cinoptions=
-setlocal cinwords=if,else,while,do,for,switch
-setlocal colorcolumn=
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
-setlocal commentstring=/*%s*/
-setlocal complete=.,w,b,u,t,i
-setlocal concealcursor=
-setlocal conceallevel=0
-setlocal completefunc=
-setlocal nocopyindent
-setlocal cryptmethod=
-setlocal cursorbind
-setlocal nocursorcolumn
-setlocal nocursorline
-setlocal define=
-setlocal dictionary=
-setlocal diff
-setlocal equalprg=
-setlocal errorformat=
-setlocal noexpandtab
-if &filetype != 'objc'
-setlocal filetype=objc
-endif
-setlocal foldcolumn=2
-setlocal foldenable
-setlocal foldexpr=0
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldmarker={{{,}}}
-set foldmethod=indent
-setlocal foldmethod=diff
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldtext=foldtext()
-setlocal formatexpr=
-setlocal formatoptions=tcq
-setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
-setlocal grepprg=
-setlocal iminsert=2
-setlocal imsearch=2
-setlocal include=
-setlocal includeexpr=
-setlocal indentexpr=
-setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
-setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255
-setlocal keywordprg=
-setlocal nolinebreak
-setlocal nolisp
-setlocal nolist
-setlocal makeprg=
-setlocal matchpairs=(:),{:},[:]
-setlocal modeline
-setlocal modifiable
-setlocal nrformats=octal,hex
-setlocal nonumber
-setlocal numberwidth=4
-setlocal omnifunc=
-setlocal path=
-setlocal nopreserveindent
-setlocal nopreviewwindow
-setlocal quoteescape=\\
-setlocal noreadonly
-setlocal norelativenumber
-setlocal norightleft
-setlocal rightleftcmd=search
-setlocal scrollbind
-setlocal shiftwidth=8
-setlocal noshortname
-setlocal nosmartindent
-setlocal softtabstop=0
-setlocal nospell
-setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
-setlocal spellfile=
-setlocal spelllang=en
-setlocal statusline=
-setlocal suffixesadd=
-setlocal noswapfile
-setlocal synmaxcol=3000
-if &syntax != 'objc'
-setlocal syntax=objc
-endif
-setlocal tabstop=8
-setlocal tags=
-setlocal textwidth=0
-setlocal thesaurus=
-setlocal noundofile
-setlocal nowinfixheight
-setlocal nowinfixwidth
-setlocal nowrap
-setlocal wrapmargin=0
-920
-normal zo
-let s:l = 973 - ((0 * winheight(0) + 15) / 31)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-973
-normal! 012l
-lcd C:\archive\SpriteBuilder-Reader-js
-wincmd w
-argglobal
-edit C:\archive\SpriteBuilder-Reader-js\src\CCBReader10.m
-setlocal keymap=
-setlocal noarabic
-setlocal noautoindent
-setlocal balloonexpr=
-setlocal nobinary
-setlocal bufhidden=
-setlocal buflisted
-setlocal buftype=
-setlocal nocindent
-setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
-setlocal cinoptions=
-setlocal cinwords=if,else,while,do,for,switch
-setlocal colorcolumn=
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
-setlocal commentstring=/*%s*/
-setlocal complete=.,w,b,u,t,i
-setlocal concealcursor=
-setlocal conceallevel=0
-setlocal completefunc=
-setlocal nocopyindent
-setlocal cryptmethod=
-setlocal nocursorbind
-setlocal nocursorcolumn
-setlocal nocursorline
-setlocal define=
-setlocal dictionary=
-setlocal diff
-setlocal equalprg=
-setlocal errorformat=
-setlocal noexpandtab
-if &filetype != 'objc'
-setlocal filetype=objc
-endif
-setlocal foldcolumn=2
-setlocal foldenable
-setlocal foldexpr=0
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldmarker={{{,}}}
-set foldmethod=indent
-setlocal foldmethod=diff
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldtext=foldtext()
-setlocal formatexpr=
-setlocal formatoptions=tcq
-setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
-setlocal grepprg=
-setlocal iminsert=2
-setlocal imsearch=2
-setlocal include=
-setlocal includeexpr=
-setlocal indentexpr=
-setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
-setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255
-setlocal keywordprg=
-setlocal nolinebreak
-setlocal nolisp
-setlocal nolist
-setlocal makeprg=
-setlocal matchpairs=(:),{:},[:]
-setlocal modeline
-setlocal modifiable
-setlocal nrformats=octal,hex
-setlocal nonumber
-setlocal numberwidth=4
-setlocal omnifunc=
-setlocal path=
-setlocal nopreserveindent
-setlocal nopreviewwindow
-setlocal quoteescape=\\
-setlocal noreadonly
-setlocal norelativenumber
-setlocal norightleft
-setlocal rightleftcmd=search
-setlocal scrollbind
-setlocal shiftwidth=8
-setlocal noshortname
-setlocal nosmartindent
-setlocal softtabstop=0
-setlocal nospell
-setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
-setlocal spellfile=
-setlocal spelllang=en
-setlocal statusline=
-setlocal suffixesadd=
-setlocal noswapfile
-setlocal synmaxcol=3000
-if &syntax != 'objc'
-setlocal syntax=objc
-endif
-setlocal tabstop=8
-setlocal tags=
-setlocal textwidth=0
-setlocal thesaurus=
-setlocal noundofile
-setlocal nowinfixheight
-setlocal nowinfixwidth
-setlocal nowrap
-setlocal wrapmargin=0
-1334
-normal zo
-1334
-normal zo
-let s:l = 1436 - ((30 * winheight(0) + 15) / 31)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1436
-normal! 08l
-lcd C:\archive\SpriteBuilder-Reader-js
-wincmd w
-5wincmd w
-exe 'vert 1resize ' . ((&columns * 75 + 66) / 133)
-exe 'vert 2resize ' . ((&columns * 57 + 66) / 133)
 tabedit C:\archive\PeevedPenguins-Spritebuilder\PeevedPenguins.spritebuilder\Source\libs\cocos2d-iphone\cocos2d-ui\CCButton.h
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -2494,7 +2983,7 @@ setlocal wrap
 setlocal wrapmargin=0
 lcd C:\archive\SpriteBuilder-Reader-js
 wincmd w
-5wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 20 + 16) / 33)
 exe '2resize ' . ((&lines * 10 + 16) / 33)
 tabedit C:\archive\SpriteBuilder-Reader-js\src\CCBReader_private.h
@@ -2844,13 +3333,13 @@ setlocal wrap
 setlocal wrapmargin=0
 lcd C:\archive\SpriteBuilder-Reader-js
 wincmd w
-5wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 29 + 16) / 33)
 exe 'vert 1resize ' . ((&columns * 67 + 66) / 133)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
 exe 'vert 2resize ' . ((&columns * 65 + 66) / 133)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-tabnext 4
+tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif

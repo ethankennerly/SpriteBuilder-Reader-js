@@ -52,6 +52,11 @@
  *
  * Only sets position property, not shadowOffset position.  Does not support shadowOffset.
  *
+ * Override Control button:
+ *      Constructed:  Does not zoom on touch down by default.
+ *      Load Sprite instead of Scale9Sprite.
+ *      Scale9Sprite not supported.
+ *
  * TODO: 
  *
  * Read node anchor point property.
@@ -75,7 +80,9 @@
  * Adapt position and size type and size xUnit and yUnit, which were handled in CCNodeLoader. 
  *
  * Button properties:
- *  Background 
+ *     'title' --> 'title|Normal'
+ *     'title|1' --> 'title|Normal'
+ *     Background 
  *     Skipping selector 'play' since no CCBSelectorResolver is present. CCCommon.js:145
  *     Unexpected property: 'block'! CCCommon.js:145
  *     Unexpected property: 'maxSize'! CCCommon.js:145
@@ -104,6 +111,8 @@
  *     labelOpacity|Selected
  *
  * configCocos2d.plist 
+ *
+ * Control button Scale9Sprite not supported.
  *
  * Strings.ccblang
  *
@@ -1205,6 +1214,7 @@ cc.BuilderReader10 = cc.Class.extend({
      * Test case:  Seal is a predefined custom class that inherits cc.Sprite.  Expect sprite loader and sprite node class.
      * XXX eval class in case Cocos2D is on a mobile device without access to global namespace.
      * To debug, record current class name.
+     * Disable zoomOnTouchDown by default.
      */
     _readNodeGraph:function (parent) {
         /* Read class name. */
@@ -1576,8 +1586,8 @@ cc.BuilderReader10 = cc.Class.extend({
                     var size = this.parsePropTypeSize(node, parent, ccbReader);
                     if (setProp) {
                         if (PROPERTY_MAXSIZE == propertyName) {
-                            cc.log('Property "' + propertyName + '" not supported.  Defaulting to "' + PROPERTY_PREFEREDSIZE + '"');
-                            propertyName = PROPERTY_PREFEREDSIZE;
+                            cc.log('Property "' + propertyName + '" not supported.');
+                            //- propertyName = PROPERTY_PREFEREDSIZE;
                         }
                         ccNodeLoader.onHandlePropTypeSize(node, parent, propertyName, size, ccbReader);
                     }
@@ -2180,6 +2190,54 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
     }
 };
 
+
+/**
+ * Do not zoom.
+ * Sprite instead of Scale9Sprite.
+ * Center margins on sprite.
+ */
+cc.ControlSpriteButton = cc.ControlButton.extend({
+
+    /**
+     * Do not zoom.  Margin at image center.
+     */
+    initWithLabelAndBackgroundSprite: function(label, backgroundSprite) {
+        var success = cc.ControlButton.prototype.initWithLabelAndBackgroundSprite.call(this, label, backgroundSprite);
+        if (success) {
+            this.setZoomOnTouchDown(false);
+            this.centerMargins(backgroundSprite);
+        }
+        return success;
+    },
+
+    /**
+     * Sprite instead of Scale9Sprite.
+     */
+    setBackgroundSpriteFrameForState: function(spriteFrame, state) {
+        var sprite = cc.Sprite.createWithSpriteFrame(spriteFrame);
+        this.setBackgroundSpriteForState(sprite, state);
+        this.centerMargins(sprite);
+    },
+
+    centerMargins: function(sprite)
+    {
+        var size = sprite.getContentSize();
+        cc.log("ControlSpriteButton.centerMargins: width " + size.width + " height " + size.height);
+        this.setMargins(size.width * 0.5, size.height * 0.5);
+        //? this.setMargins(9.5, 9);
+    }
+});
+
+cc.ControlSpriteButtonLoader = cc.ControlButtonLoader.extend({
+    _createCCNode: function(parent, ccbReader) {
+        var controlButton = new cc.ControlSpriteButton();
+        if (controlButton && controlButton.init()) {
+            return controlButton;
+        }
+        return null;
+    }
+});
+
 /**
  * Guess "CCNode".  If that is not found in string cache, then try any registered loader in string cache.
  * Test case:  Gameplay.ccbi is CCNode yet has CCSprite and CCBFile in string cache.
@@ -2205,7 +2263,11 @@ cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
  * Expect a CCSprite.
  */
 cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
-    this.registerCCNodeLoader("CCButton", cc.ControlButtonLoader.loader());
+    if (null == this.getCCNodeLoader("CCButton")) {
+        var loaderClass = cc.ControlSpriteButtonLoader;
+        var loader = new loaderClass();
+        this.registerCCNodeLoader("CCButton", loader);
+    }
     var ccNodeLoader = this.getCCNodeLoader(className);
     if (ccNodeLoader) {
         cc.log("cc.NodeLoaderLibrary.guess: loaded " + className );
@@ -2223,4 +2285,3 @@ cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
     }
     return ccNodeLoader;
 }
-
