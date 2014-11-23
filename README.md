@@ -8,9 +8,18 @@ Usage
 -----
 
 Clone cocos2d-html commit 5fd806ab9f72865618205195b59e7281eedffbad
+
+In terminal:
 cd directory that contains cocos2d-html and SpriteBuilder-Reader-js
 python -m SimpleHTTPServer
+
+Open Chrome or another web browser.  
+Open console.
+Load URL:
 localhost:8000/SpriteBuilder-Reader-js
+
+In TestCCBReader10.js, uncomment the tests you want to see.  
+Reload.
 
 SpriteBuilder CCBI and images from MakeGamesWithUs tutorial assets:
 https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS
@@ -62,31 +71,35 @@ Features
 Todo
 ----
 
- * Position Peeved Penguins example of button.
+ * Position Peeved Penguins example of button with normalized and absolute position.
 
  * Read node anchor point properly.
  
+ * Wire Peeved Penguins play button to log message.
+
+ * Load Peeved Penguins Gameplay, ignoring physics.
+
  * Load sprite sheet.
  
- * Animated properties?
- 
- * Animation of sprite frames.
+ * Animated properties.
  
  * Remove animation type.
+
+ * Animation of sprite frames.
  
 Not supported
 -------------
-
- * Nodes with physics.  Opening a scene with physics causes a crash.
-
- * Internet Explorer 9: For version 5 and version 10, FileUtils calls TypedArray (bytearray), which is not supported in IE9.
- <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays>
 
  * Node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
  
  * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
  
  * Adapt position and size type and size xUnit and yUnit, which were handled in CCNodeLoader. 
+
+ * Nodes with physics.  Opening a scene with physics causes a crash.
+
+ * Internet Explorer 9: For version 5 and version 10, FileUtils calls TypedArray (bytearray), which is not supported in IE9.
+ <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays>
 
  * Only sets position property, not shadowOffset position.  Does not support shadowOffset.
  

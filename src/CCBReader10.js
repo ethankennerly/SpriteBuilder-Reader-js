@@ -951,11 +951,16 @@ cc.BuilderReader10 = cc.Class.extend({
         return type;
     },
 
+    /**
+     * @return  size that has "width" and "height" properties.
+     */
     readSize: function()
     {
         var size = {};
-        size.w = this.readFloat();
-        size.h = this.readFloat();
+        size.width = this.readFloat();
+        size.height = this.readFloat();
+        size.w = size.width;
+        size.h = size.height;
         size.xUnit = this.readByte();  // TODO
         size.yUnit = this.readByte();  // TODO
         size.type = this._adaptSizeType(size.xUnit, size.yUnit);
@@ -2104,8 +2109,31 @@ cc.ControlSpriteButton = cc.ControlButton.extend({
      */
     setBackgroundSpriteFrameForState: function(spriteFrame, state) {
         var sprite = cc.Sprite.createWithSpriteFrame(spriteFrame);
+        sprite.getPreferredSize = function() {
+            return new cc.Size(-1, -1);
+        };
         this.setBackgroundSpriteForState(sprite, state);
         this.centerMargins(sprite);
+    },
+
+    /**
+     * Sets the background sprite to use for the specified button state.  
+     *
+     * @param {Sprite} sprite The background sprite to use for the specified state.  Does not use Scale9Sprite.
+     * @param {Number} state The state that uses the specified image. The values are described in "CCControlState".
+     */
+    setBackgroundSpriteForState: function(sprite, state) {
+        var locTable = this._backgroundSpriteDispatchTable;
+        if (locTable[state]) {
+            var previousSprite = locTable[state];
+            if (previousSprite)
+                this.removeChild(previousSprite, true);
+        }
+
+        locTable[state] = sprite;
+        sprite.setVisible(this._state === state);
+        sprite.setAnchorPoint(0.5, 0.5);
+        this.addChild(sprite);
     },
 
     centerMargins: function(sprite)
@@ -2113,7 +2141,8 @@ cc.ControlSpriteButton = cc.ControlButton.extend({
         var size = sprite.getContentSize();
         cc.log("ControlSpriteButton.centerMargins: width " + size.width + " height " + size.height);
         this.setMargins(size.width * 0.5, size.height * 0.5);
-        //? this.setMargins(9.5, 9);
+        //? this._marginH = size.width * 0.5;
+        //? this._marginV = size.height * 0.5;
     }
 });
 
