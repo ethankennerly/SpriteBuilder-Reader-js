@@ -1891,6 +1891,7 @@ cc.BuilderReader10.loadAsScene = function (ccbFilePath, owner, parentSize, ccbRo
 cc.BuilderReader10.load = function (ccbFilePath, owner, parentSize, ccbRootPath) {
     ccbRootPath = ccbRootPath || cc.BuilderReader10.getResourcePath();
     var reader = new cc.BuilderReader10(cc.NodeLoaderLibrary.newDefaultCCNodeLoaderLibrary());
+    cc.BuilderReader10._currentReader = reader;
     reader.setCCBRootPath(ccbRootPath);
     if((ccbFilePath.length < 5)||(ccbFilePath.toLowerCase().lastIndexOf(".ccbi") != ccbFilePath.length - 5))
         ccbFilePath = ccbFilePath + ".ccbi";

@@ -186,7 +186,10 @@ function TestCCBReader10(parent) {
     // scene = testReader10(parent, "ccb/Seal");
     // scene = testReader10(parent, "ccb/Penguin");
     // scene = testReader10(parent, "ccb/WaitingPenguin");
-    // scene = testReader10(parent, "Machine");
+    scene = testReader10(parent, "Machine");
+    cc.BuilderReader10._currentReader.getAnimationManager().runAnimations("down");
+    cc.log("Look circle moving down and highlight rotating clockwise.");
+    // scene = testReader10(parent, "Machines", true);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");
     // scene.setScale(0.25);
