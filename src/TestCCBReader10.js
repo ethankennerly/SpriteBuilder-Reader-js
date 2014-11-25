@@ -120,6 +120,17 @@ function testReadFloat() {
 
 // testReader5 expects custom classes already defined:
 var MainScene = cc.Node.extend({});
+
+var Controller = cc.Class.extend({
+    onResolveCCBCCCallFuncSelector: function(target, selectorName) {
+        cc.log("MainScene.onResolveCCBCCCallFuncSelector: " + target + " name " + selectorName);
+        return this[selectorName];
+    },
+
+    play: function(target) {
+        cc.log("MainScene.play: " + target + " x " + target.getPositionX() + " y " + target.getPositionY());
+    }
+});
 var MainScreen = cc.Node.extend({});
 var StoreAScene = cc.Node.extend({});
 var StoreBScene = cc.Node.extend({});
@@ -166,6 +177,7 @@ function TestCCBReader10(parent) {
     testReadFloat();
     testReadFloatVersion5();
     // testReader5(parent, "ccb/MainScene_5");
+    // scene = testReader10(parent, "Machines", true);
     scene = testReader10(parent, "ccb/MainScene_10", true);
     scene.setScale(0.25);
     scene.setPositionY(320);
@@ -175,8 +187,6 @@ function TestCCBReader10(parent) {
     // scene = testReader10(parent, "ccb/Penguin");
     // scene = testReader10(parent, "ccb/WaitingPenguin");
     // scene = testReader10(parent, "Machine");
-    scene = testReader10(parent, "Machines", true);
-    // scene.setPositionY(480);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");
     // scene.setScale(0.25);

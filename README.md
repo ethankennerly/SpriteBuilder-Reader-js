@@ -71,10 +71,6 @@ Features
 Todo
 ----
 
- * Position Peeved Penguins example of button with normalized and absolute position.
-
- * Read node anchor point properly.
- 
  * Wire Peeved Penguins play button to log message.
 
  * Load Peeved Penguins Gameplay, ignoring physics.
@@ -85,10 +81,16 @@ Todo
  
  * Remove animation type.
 
- * Animation of sprite frames.
- 
 Not supported
 -------------
+
+ * Position Peeved Penguins example of button with normalized and absolute position.
+
+ * Read node anchor point properly.
+ 
+ * Animation of sprite frames.
+ 
+ * Scale content to percent of parent size.
 
  * Node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
  
