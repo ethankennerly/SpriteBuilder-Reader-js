@@ -176,13 +176,13 @@ function TestCCBReader10(parent) {
     testFloat32Array();
     testReadFloat();
     testReadFloatVersion5();
-    // testReader5(parent, "ccb/MainScene_5");
-    // scene = testReader10(parent, "Machines", true);
+    testReader5(parent, "ccb/MainScene_5");
+    scene = testReader10(parent, "Machines", true);
     scene = testReader10(parent, "ccb/MainScene_10", true);
     scene.setScale(0.25);
     scene.setPositionY(320);
-    // scene = testReader10(parent, "ccb/Bear");
-    // cc.log("Look for bear in center of screen with arm rotating.");
+    scene = testReader10(parent, "ccb/Bear");
+    cc.log("Look for bear in center of screen with arm rotating.");
     // scene = testReader10(parent, "ccb/Seal");
     // scene = testReader10(parent, "ccb/Penguin");
     // scene = testReader10(parent, "ccb/WaitingPenguin");

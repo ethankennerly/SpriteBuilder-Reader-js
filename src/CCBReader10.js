@@ -176,9 +176,8 @@ cc.BuilderReader10 = cc.Class.extend({
     _readNodeGraphFromData:false,
 
     ctor:function (ccNodeLoaderLibrary, ccbMemberVariableAssigner, ccbSelectorResolver, ccNodeLoaderListener) {
-        if (cc.BuilderReader10.requiring()) {
-            cc.BuilderReader10.extend();
-        }
+        cc.BuilderReader10.requiring();
+        cc.BuilderReader10.extend();
         this._stringCache = [];
         this._loadedSpriteSheets = [];
         this._currentBit = -1;
@@ -993,9 +992,6 @@ cc.BuilderReader10 = cc.Class.extend({
         return type;
     },
 
-    /**
-     * @return  size that has "width" and "height" properties.
-     */
     readSize: function()
     {
         var size = {};
@@ -1005,7 +1001,7 @@ cc.BuilderReader10 = cc.Class.extend({
         size.h = size.height;
         size.xUnit = this.readByte();  // TODO
         size.yUnit = this.readByte();  // TODO
-        this._adaptSizeType(size);
+        size.type = this._adaptSizeType(size);
         return size;
     },
 
@@ -1038,7 +1034,7 @@ cc.BuilderReader10 = cc.Class.extend({
         else {
             cc.log("Unexpected size unit");
         }
-        size.type = type;
+        size.type = size;
         return type;
     },
 
@@ -2319,9 +2315,11 @@ cc.BuilderReader10.extend = function()
 
         /**
          * Sprite instead of Scale9Sprite.
+         * XXX To avoid sprite complaint, overwrites preferred size as 0.
          */
         setBackgroundSpriteFrameForState: function(spriteFrame, state) {
             var sprite = cc.Sprite.createWithSpriteFrame(spriteFrame);
+            this.setPreferredSize(new cc.Size(0, 0));
             this.setBackgroundSpriteForState(sprite, state);
             this.centerMargins(sprite);
         },
@@ -2478,3 +2476,4 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
         cc.SpriteFrameCache.loadedFile[plist] = true;
     }
 };
+
