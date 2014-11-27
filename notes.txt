@@ -1,9 +1,5 @@
 TODO
-	Scale sprite on CircleButton in Machine.ccbi.
-	Disable zoom on CircleButton in Machine.ccbi.
-	Disable 9-slice on CircleButton in Machine.ccbi.
-	Load Machine.ccbi
-	"title" --> "title|Normal"
+	Wire play button.
 	Step through Gameplay physics nodes.
 	Load Gameplay.ccbi
 	How does writer store values differently in SpriteBuilder?

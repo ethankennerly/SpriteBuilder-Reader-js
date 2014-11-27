@@ -993,22 +993,29 @@ cc.BuilderReader10 = cc.Class.extend({
         return type;
     },
 
+    /**
+     * @return  size that has "width" and "height" properties.
+     */
     readSize: function()
     {
         var size = {};
-        size.w = this.readFloat();
-        size.h = this.readFloat();
+        size.width = this.readFloat();
+        size.height = this.readFloat();
+        size.w = size.width;
+        size.h = size.height;
         size.xUnit = this.readByte();  // TODO
         size.yUnit = this.readByte();  // TODO
-        size.type = this._adaptSizeType(size.xUnit, size.yUnit);
+        this._adaptSizeType(size);
         return size;
     },
 
     /**
      * Absolute position not supported.
      */
-    _adaptSizeType: function(xUnit, yUnit)
+    _adaptSizeType: function(size)
     {
+        var xUnit = size.xUnit;
+        var yUnit = size.yUnit;
         var type = CCB_SIZETYPE_RELATIVE_CONTAINER;
         if (CCB_POSITION_UNIT_POINTS == xUnit
         || CCB_POSITION_UNIT_POINTS == yUnit) {
@@ -1021,6 +1028,8 @@ cc.BuilderReader10 = cc.Class.extend({
         else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
         || CCB_POSITION_UNIT_NORMALIZED == yUnit) {
             type = CCB_SIZETYPE_PERCENT;
+            size.width *= 100.0;
+            size.height *= 100.0;
         }
         else if (CCB_SIZE_UNIT_INSET_UI_POINTS == xUnit
         || CCB_SIZE_UNIT_INSET_UI_POINTS == yUnit) {
@@ -1029,6 +1038,7 @@ cc.BuilderReader10 = cc.Class.extend({
         else {
             cc.log("Unexpected size unit");
         }
+        size.type = type;
         return type;
     },
 
@@ -2468,4 +2478,3 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
         cc.SpriteFrameCache.loadedFile[plist] = true;
     }
 };
-

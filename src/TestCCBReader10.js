@@ -119,10 +119,21 @@ function testReadFloat() {
 }
 
 // testReader5 expects custom classes already defined:
-var MainScene = cc.Scene.extend({});
-var MainScreen = cc.Scene.extend({});
-var StoreAScene = cc.Scene.extend({});
-var StoreBScene = cc.Scene.extend({});
+var MainScene = cc.Node.extend({});
+
+var Controller = cc.Class.extend({
+    onResolveCCBCCCallFuncSelector: function(target, selectorName) {
+        cc.log("MainScene.onResolveCCBCCCallFuncSelector: " + target + " name " + selectorName);
+        return this[selectorName];
+    },
+
+    play: function(target) {
+        cc.log("MainScene.play: " + target + " x " + target.getPositionX() + " y " + target.getPositionY());
+    }
+});
+var MainScreen = cc.Node.extend({});
+var StoreAScene = cc.Node.extend({});
+var StoreBScene = cc.Node.extend({});
 
 var _parent;
 var scene;
@@ -165,11 +176,13 @@ function TestCCBReader10(parent) {
     testFloat32Array();
     testReadFloat();
     testReadFloatVersion5();
-    testReader5(parent, "ccb/MainScene_5");
+    // testReader5(parent, "ccb/MainScene_5");
+    // scene = testReader10(parent, "Machines", true);
     scene = testReader10(parent, "ccb/MainScene_10", true);
-    scene.setScale(0.15);
-    scene = testReader10(parent, "ccb/Bear");
-    cc.log("Look for bear in center of screen with arm rotating.");
+    scene.setScale(0.25);
+    scene.setPositionY(320);
+    // scene = testReader10(parent, "ccb/Bear");
+    // cc.log("Look for bear in center of screen with arm rotating.");
     // scene = testReader10(parent, "ccb/Seal");
     // scene = testReader10(parent, "ccb/Penguin");
     // scene = testReader10(parent, "ccb/WaitingPenguin");
@@ -179,5 +192,6 @@ function TestCCBReader10(parent) {
     // scene = testReader10(parent, "Machines", true);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");
+    // scene.setScale(0.25);
     // cc.log("Look for button in top left of screen.");
 }
