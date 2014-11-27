@@ -176,6 +176,9 @@ cc.BuilderReader10 = cc.Class.extend({
     _readNodeGraphFromData:false,
 
     ctor:function (ccNodeLoaderLibrary, ccbMemberVariableAssigner, ccbSelectorResolver, ccNodeLoaderListener) {
+        if (cc.BuilderReader10.requiring()) {
+            cc.BuilderReader10.extend();
+        }
         this._stringCache = [];
         this._loadedSpriteSheets = [];
         this._currentBit = -1;
@@ -264,11 +267,35 @@ cc.BuilderReader10 = cc.Class.extend({
 
         var nodeGraph = this.readFileWithCleanUp(true);
 
-        if (nodeGraph && locAnimationManager.getAutoPlaySequenceId() != -1) {
-            //auto play animations
-            locAnimationManager.runAnimations(locAnimationManager.getAutoPlaySequenceId(), 0);
-        }
+        this.autoPlayAnimation(nodeGraph);
         return nodeGraph;
+    },
+
+    /**
+     * If no sequence, ignore.
+     *
+     * Cocos2d-x 2.2.2 only supports runAnimations by name, not by id.  
+     * Otherwise Cocos2d-x interprets the name as id -1.
+     * However, this version does bind "runAnimationsForSequenceIdTweenDuration".
+     * which is what jsb_cocosbuilder.js calls.
+     */
+    autoPlayAnimation: function(nodeGraph)
+    {
+        if (nodeGraph) {
+            var man = this._animationManager;
+            var id = man.getAutoPlaySequenceId();
+            if (-1 != id) {
+                var seqs = man.getSequences();
+                var seq = seqs[id];
+                if (seq) {
+                    cc.log("cc.BuilderReader10.autoPlayAnimation: " + id + " seq " + seq);
+                    man.runAnimationsForSequenceIdTweenDuration(id, 0);
+                }
+                else {
+                    cc.log("cc.BuilderReader10.autoPlayAnimation: No such " + id + " seq " + seq);
+                }
+            }
+        }
     },
 
     createSceneWithNodeGraphFromFile:function (ccbFileName, owner, parentSize, animationManager) {
@@ -620,7 +647,7 @@ cc.BuilderReader10 = cc.Class.extend({
     {
         var joint;
         var className = this.readCachedString();
-        cc.log("CCBReader10.readJoint: Not supported " + className);
+        cc.log("cc.BuilderReader10.readJoint: Not supported " + className);
 
         var propertyCount = this.readInt(false);
         var properties = {};
@@ -773,8 +800,22 @@ cc.BuilderReader10 = cc.Class.extend({
         this._ownerOutletNodes.push(node);
     },
 
+    /**
+     * If null, ignore.
+     * Cocos2d-x does not tolerate null object.
+     * Test case: Set null object.  JavaScript error: CCBReader10.js line ... Error: Error processing arguments
+     */
+    setUserObject: function(node, obj) {
+        if (obj) {
+            node.setUserObject(obj);
+        }
+        else {
+            cc.log("cc.BuilderReader10.setUserObject: Expected value.  Got " + obj);
+        }
+    },
+
     _cleanUpNodeGraph:function (node) {
-        node.setUserObject(null);
+        //- this.setUserObject(node, null);
         var getChildren = node.getChildren();
         for (var i = 0, len = getChildren.length; i < len; i++) {
             this._cleanUpNodeGraph(getChildren[i]);
@@ -847,12 +888,13 @@ cc.BuilderReader10 = cc.Class.extend({
         var hasPhysicsBodies = this.readBool();
         var hasPhysicsNodes  = this.readBool();
         if (hasPhysicsBodies || hasPhysicsNodes) {
-            cc.log('CCBReader10._readSequences: Physics bodies or nodes are not supported.  CCB file "' + this._currentCCBFile + '"');
+            cc.log('cc.BuilderReader10._readSequences: Physics bodies or nodes are not supported.  CCB file "' + this._currentCCBFile + '"');
         }
 
         for (var i = 0; i < numSeqs; i++) {
             var seq = new cc.BuilderSequence();
-            seq.setDuration(this.readFloat());
+            var duration = this.readFloat();
+            seq.setDuration(duration);
             seq.setName(this.adaptProp(this.readCachedString()));
             seq.setSequenceId(this.readInt(false));
             seq.setChainedSequenceId(this.readInt(true));
@@ -990,27 +1032,14 @@ cc.BuilderReader10 = cc.Class.extend({
         return type;
     },
 
-/**
+    /**
      * Expects sprite sheets were already loaded.
      * If sprite frame image not found, load image file.
      */
     readSpriteFrame: function() 
     {
-        cc.SpriteFrameCache.loadSpriteFramesFromFile("spriteFrameFileList.plist");
-        var value;
         var spriteFile = this.readCachedString();
-        var frameCache = cc.SpriteFrameCache.getInstance();
-        value = frameCache.getSpriteFrame(spriteFile);
-        if (!value) {
-            spriteFile = this._ccbRootPath + spriteFile;
-            var texture = cc.TextureCache.getInstance().addImage(spriteFile);
-            var locContentSize = texture.getContentSize();
-            var bounds = cc.rect(0, 0, locContentSize.width, locContentSize.height);
-            value = cc.SpriteFrame.createWithTexture(texture, bounds);
-            frameCache.addSpriteFrame(value, spriteFile);
-        }
-        this.setName(value, spriteFile);
-        return value;
+        return cc.BuilderReader10.loadSpriteFrame(spriteFile, this._ccbRootPath);
     },
 
     /**
@@ -1123,7 +1152,7 @@ cc.BuilderReader10 = cc.Class.extend({
         if (!useLoader) {
             try {
                 node = eval("new " + className + "()");
-                cc.log('CCBReader10._readNodeGraph: new class name "' + className + '"');
+                cc.log('cc.BuilderReader10._readNodeGraph: new class name "' + className + '"');
             }
             catch (err) {
                 useLoader = true;
@@ -1172,7 +1201,7 @@ cc.BuilderReader10 = cc.Class.extend({
         var uuid = this.readInt(false);
         if(uuid)
         {
-            cc.log('CCBReader10._readNodeGraph: Node reference not supported.' 
+            cc.log('cc.BuilderReader10._readNodeGraph: Node reference not supported.' 
                 + '  CCB file "' + this._currentCCBFile + '"'
                 + ', class name "' + className + '"'
                 + ', UUID <' + uuid + '>');
@@ -1194,7 +1223,10 @@ cc.BuilderReader10 = cc.Class.extend({
             if (node.hasOwnProperty("getTag")) {
                 embeddedNode.setName(node.getTag());
             }
-            var visible = node._visible !== false;
+            var visible = node.isVisible() !== false;
+            if (!visible) {
+                cc.log("cc.BuilderReader10._readNodeGraph: hiding node " + embeddedNod);
+            }
             embeddedNode.setVisible(visible);
             //embeddedNode.ignoreAnchorPointForPosition(node.isIgnoreAnchorPointForPosition());
 
@@ -1249,6 +1281,9 @@ cc.BuilderReader10 = cc.Class.extend({
         /* Read and add children. */
         var numChildren = this.readInt(false);
         for (i = 0; i < numChildren; i++) {
+            if (!node) {
+                cc.log('cc.BuilderReader10._readNodeGraph: Expected node. Got ' + node); 
+            }
             var child = this._readNodeGraph(node);
             node.addChild(child);
         }
@@ -1373,18 +1408,6 @@ cc.BuilderReader10 = cc.Class.extend({
         node.physicsBody = body;
     },
 
-    /**
-     * Set tag and name.  Version 2.2.2 supports integer tag.
-     * Version 3 supports string name.
-     */
-    setName: function(node, name)
-    {
-        if (node.setTag) {
-            node.setTag(name);
-        }
-        node.name = name;
-    },
-
     _getBit:function () {
         var bit = (this._data[this._currentByte] & (1 << this._currentBit)) != 0;
 
@@ -1443,7 +1466,7 @@ cc.BuilderReader10 = cc.Class.extend({
                 var extraPropsNames = node.getUserObject();
                 if(!extraPropsNames){
                     extraPropsNames = [];
-                    node.setUserObject(extraPropsNames);
+                    this.setUserObject(node, extraPropsNames);
                 }
                 extraPropsNames.push(propertyName);
             }
@@ -1559,10 +1582,11 @@ cc.BuilderReader10 = cc.Class.extend({
                 }
                 case CCB_PROPTYPE_SPRITEFRAME:
                 {
-                    var spriteFrame = this.parsePropTypeSpriteFrame(node, parent, ccbReader, this.adaptProp(propertyName));
+                    var adaptedName = this.adaptProp(propertyName);
+                    var spriteFrame = this.parsePropTypeSpriteFrame(node, parent, ccbReader, adaptedName);
                     if (setProp) {
-                        if (!this.onHandlePropTypeSpriteFrame(node, propertyName, spriteFrame)) {
-                            ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, this.adaptProp(propertyName), spriteFrame, ccbReader);
+                        if (!this.onHandlePropTypeSpriteFrame(node, adaptedName, spriteFrame)) {
+                            ccNodeLoader.onHandlePropTypeSpriteFrame(node, parent, adaptedName, spriteFrame, ccbReader);
                         }
                     }
                     break;
@@ -1648,7 +1672,7 @@ cc.BuilderReader10 = cc.Class.extend({
                     var localized = ccbReader.readBool();  // TODO
                     if (propertyName == PROPERTY_TAG)
                     {
-                        ccbReader.setName(node, text);
+                        cc.BuilderReader10.setName(node, text);
                     }
                     else {
                         if (node.hasOwnProperty(propertyName)) {
@@ -1687,7 +1711,7 @@ cc.BuilderReader10 = cc.Class.extend({
                 case CCB_PROPTYPE_NODE_REFERENCE:
                 {
                     var uuid = this.readInt(false);
-                    cc.log('CCBReader10._readPropertiesForNode: Node reference not supported.' 
+                    cc.log('cc.BuilderReader10._readPropertiesForNode: Node reference not supported.' 
                         + '  CCB file "' + this._currentCCBFile + '"'
                         + ', property name "' + propertyName + '"' 
                         + ', UUID: ' + uuid );
@@ -1745,8 +1769,7 @@ cc.BuilderReader10 = cc.Class.extend({
 
         ccbReader.setAnimationManagers(myCCBReader.getAnimationManagers());
 
-        if(ccbFileNode && myCCBReader.getAnimationManager().getAutoPlaySequenceId() != -1)
-            myCCBReader.getAnimationManager().runAnimations(myCCBReader.getAnimationManager().getAutoPlaySequenceId(),0);
+        this.autoPlayAnimation(ccbFileNode);
 
         return ccbFileNode;
     },
@@ -1767,6 +1790,23 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     /**
+     * If no parent, return size 0.
+     * Cocos2d-x says parent is null and crashes.
+     */
+    getContainerSize: function(parent) {
+        var size;
+        if (parent) {
+            size = this.getAnimationManager().getContainerSize(parent);
+        }
+        else {
+            cc.log("cc.BuilderReader10.getContainerSize: Expected parent. Got " + parent 
+                 + ". Defaulting to size 0." );
+            size = new cc.Size(0, 0);
+        }
+        return size;
+    },
+
+    /**
      * Read version 5 position in version 10 format.
      * @param   propertyName    If "position", set absolute position.
      */
@@ -1776,7 +1816,7 @@ cc.BuilderReader10 = cc.Class.extend({
         var pos = ccbReader.readPosition();
 
         if (PROPERTY_POSITION == propertyName) {
-            var containerSize = ccbReader.getAnimationManager().getContainerSize(parent);
+            var containerSize = this.getContainerSize(parent);
             var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
                 containerSize, propertyName);
             node.setPosition(cc.getAbsolutePosition(pt, pos.type, 
@@ -1800,7 +1840,7 @@ cc.BuilderReader10 = cc.Class.extend({
         var type = size.type;
         var width = size.width;
         var height = size.height;
-        var containerSize = ccbReader.getAnimationManager().getContainerSize(parent);
+        var containerSize = ccbReader.getContainerSize(parent);
         switch (type) {
             case CCB_SIZETYPE_ABSOLUTE:
                 /* Nothing. */
@@ -1853,6 +1893,16 @@ cc.BuilderReader10 = cc.Class.extend({
             if (spriteFrame != null) {
                 node.setBackgroundSpriteFrameForState(spriteFrame, cc.CONTROL_STATE_SELECTED);
                 wasHandled = true;
+            }
+        }
+        else if (propertyName === PROPERTY_DISPLAYFRAME) {
+            if(spriteFrame) {
+                cc.log("cc.BuilderReader10.onHandlePropTypeSpriteFrame: " + spriteFrame.name 
+                     + " node x " + node.getPositionX());
+                node.setDisplayFrame(spriteFrame);
+            }
+            else {
+                cc.log("cc.BuilderReader10.onHandlePropTypeSpriteFrame: ERROR: SpriteFrame is null");
             }
         }
         return wasHandled;
@@ -1988,6 +2038,41 @@ cc.BuilderReader10.load = function (ccbFilePath, owner, parentSize, ccbRootPath)
     return node;
 };
 
+/**
+ * Set tag and name.  Version 2.2.2 supports integer tag.
+ * Version 3 supports string name.
+ */
+cc.BuilderReader10.setName = function(node, name)
+{
+    if (node.setTag) {
+        node.setTag(name);
+    }
+    node.name = name;
+};
+
+cc.BuilderReader10.loadSpriteFrame = function(spriteFile, rootPath)
+{
+    if (undefined == rootPath) {
+        rootPath = "";
+    }
+    var frame;
+    cc.SpriteFrameCache.loadSpriteFramesFromFile("spriteFrameFileList.plist");
+    var frameCache = cc.SpriteFrameCache.getInstance();
+    frame = frameCache.getSpriteFrame(spriteFile);
+    if (!frame) {
+        spriteFile = rootPath + spriteFile;
+        var texture = cc.TextureCache.getInstance().addImage(spriteFile);
+        var locContentSize = texture.getContentSize();
+        var bounds = cc.rect(0, 0, locContentSize.width, locContentSize.height);
+        frame = cc.SpriteFrame.createWithTexture(texture, bounds);
+        frameCache.addSpriteFrame(frame, spriteFile);
+        cc.log('cc.BuilderReader10.readSpriteFrame: Loaded separate file "' + spriteFile 
+            + '" to create frame "' + frame + '"');
+    }
+    cc.BuilderReader10.setName(frame, spriteFile);
+    return frame;
+};
+
 cc.BuilderReader10._resourcePath = "";
 cc.BuilderReader10.setResourcePath = function (rootPath) {
     cc.BuilderReader10._resourcePath = rootPath;
@@ -2028,6 +2113,311 @@ cc.BuilderReader10.concat = function (stringA, stringB) {
     return stringA + stringB;
 };
 
+/**
+ * @return  {Array} Subpaths to extensions.
+ * @param   all {Boolean}   On cocos2d-html5 without loadExtensions, include dependencies.
+ */
+cc.BuilderReader10.requiresSubPaths = function(all) {
+    var subPaths = [];
+    subPaths.push('CCBReader/CCNodeLoader.js');
+    subPaths.push('CCBReader/CCSpriteLoader.js');
+    subPaths.push('CCBReader/CCControlLoader.js');
+    subPaths.push('CCBReader/CCNodeLoaderLibrary.js');
+    subPaths.push('CCBReader/CCBAnimationManager.js');
+    subPaths.push('CCBReader/CCBSequence.js');
+    subPaths.push('CCBReader/CCBRelativePositioning.js');
+    if (all) {
+        subPaths.push('GUI/CCControlExtension/CCControl.js');
+        subPaths.push('GUI/CCControlExtension/CCControlButton.js');
+        subPaths.push('GUI/CCControlExtension/CCControlUtils.js');
+        subPaths.push('GUI/CCControlExtension/CCInvocation.js');
+        subPaths.push('GUI/CCControlExtension/CCScale9Sprite.js');
+        subPaths.push('CCBReader/CCBReaderUtil.js');
+        subPaths.push('CCBReader/CCBReader.js');
+        subPaths.push('CCBReader/CCBValue.js');
+        subPaths.push('CCBReader/CCBKeyframe.js');
+    }
+    return subPaths;
+};
+
+cc.BuilderReader10.requiresFunc = function(all) {
+    return function() {    
+        var subPaths = cc.BuilderReader10.requiresSubPaths(all);
+        var requireFunc = require;
+        for (var i = 0; i < subPaths.length; i++) {
+            var path = pathPrefix + subPaths[i];
+            requireFunc(path);
+        }
+    }
+};
+
+cc.BuilderReader10.extendClassNames = [
+    "ActionInstant",
+    "ActionInterval",
+    "Node",
+    "LayerRGBA",
+    "Control",
+    "ControlButton",
+    "NodeRGBA"
+];
+
+/**
+ * If "extend" method not defined for each dependency, extend from cc.Class.
+ * cocos2d-x JavaScript bindings might not have extended all of these.
+ */
+cc.BuilderReader10.extendClasses = function() {
+    var names = cc.BuilderReader10.extendClassNames;
+    for (var n = 0; n < names.length; n++) {
+        var name = names[n];
+        if (cc[name] && !cc[name].extend) {
+            cc[name].extend = cc.Class.extend;
+        }
+    }
+};
+
+/**
+ * Load SpriteBuilder reader dependencies.
+ * Load required extensions that this depends on and extend.
+ * Unless loadExtensions == true, the ControlButton and CCBReader were not included.
+ */
+cc.BuilderReader10.requiring = function() {
+    if (cc.BuilderReader10.required) {
+        return false;
+    }
+    cc.BuilderReader10.required = true;
+    cc.BuilderReader10.requireDictionary();
+    cc.BuilderReader10.extendClasses();
+    return true;
+};
+
+/**
+ * AnimationManager expects cc._Dictionary.
+ * Cocos2d-x does not define cc._Dictionary.
+ * Copied from cocos2d/core/platform/CCTypes.js
+ * Whole CCTypes not copied in case other values were already defined in Cocos2d-x.
+ */
+cc.BuilderReader10.requireDictionary = function() {
+    if (cc._Dictionary) {
+        return;
+    }
+    cc._Dictionary = cc.Class.extend({
+        _keyMapTb: null,
+        _valueMapTb: null,
+        __currId: 0,
+
+        ctor: function () {
+            this._keyMapTb = {};
+            this._valueMapTb = {};
+            this.__currId = 2 << (0 | (Math.random() * 10));
+        },
+
+        __getKey: function () {
+            this.__currId++;
+            return "key_" + this.__currId;
+        },
+
+        setObject: function (value, key) {
+            if (key == null)
+                return;
+
+            var keyId = this.__getKey();
+            this._keyMapTb[keyId] = key;
+            this._valueMapTb[keyId] = value;
+        },
+
+        objectForKey: function (key) {
+            if (key == null)
+                return null;
+
+            var locKeyMapTb = this._keyMapTb;
+            for (var keyId in locKeyMapTb) {
+                if (locKeyMapTb[keyId] === key)
+                    return this._valueMapTb[keyId];
+            }
+            return null;
+        },
+
+        valueForKey: function (key) {
+            return this.objectForKey(key);
+        },
+
+        removeObjectForKey: function (key) {
+            if (key == null)
+                return;
+
+            var locKeyMapTb = this._keyMapTb;
+            for (var keyId in locKeyMapTb) {
+                if (locKeyMapTb[keyId] === key) {
+                    delete this._valueMapTb[keyId];
+                    delete locKeyMapTb[keyId];
+                    return;
+                }
+            }
+        },
+
+        removeObjectsForKeys: function (keys) {
+            if (keys == null)
+                return;
+
+            for (var i = 0; i < keys.length; i++)
+                this.removeObjectForKey(keys[i]);
+        },
+
+        allKeys: function () {
+            var keyArr = [], locKeyMapTb = this._keyMapTb;
+            for (var key in locKeyMapTb)
+                keyArr.push(locKeyMapTb[key]);
+            return keyArr;
+        },
+
+        removeAllObjects: function () {
+            this._keyMapTb = {};
+            this._valueMapTb = {};
+        },
+
+        count: function() {
+            return this.allKeys().length;
+        }
+    });
+}
+
+cc.BuilderReader10.extend = function()
+{
+    if (cc.BuilderReader10.extended) {
+        return;
+    }
+    cc.BuilderReader10.extended = true;
+
+    cc.BuilderReader10.extendClasses();
+    /**
+     * Do not zoom.
+     * Sprite instead of Scale9Sprite.
+     * Center margins on sprite.
+     */
+    cc.ControlSpriteButton = cc.ControlButton.extend({
+        /**
+         * Do not zoom.  Margin at image center.
+         */
+        initWithLabelAndBackgroundSprite: function(label, backgroundSprite) {
+            var success = cc.ControlButton.prototype.initWithLabelAndBackgroundSprite.call(this, label, backgroundSprite);
+            if (success) {
+                this.setZoomOnTouchDown(false);
+                this.centerMargins(backgroundSprite);
+            }
+            return success;
+        },
+
+        /**
+         * Sprite instead of Scale9Sprite.
+         */
+        setBackgroundSpriteFrameForState: function(spriteFrame, state) {
+            var sprite = cc.Sprite.createWithSpriteFrame(spriteFrame);
+            this.setBackgroundSpriteForState(sprite, state);
+            this.centerMargins(sprite);
+        },
+
+        centerMargins: function(sprite)
+        {
+            var size = sprite.getContentSize();
+            cc.log("ControlSpriteButton.centerMargins: width " + size.width + " height " + size.height);
+            this.setMargins(size.width * 0.5, size.height * 0.5);
+            //? this.setMargins(9.5, 9);
+        }
+    });
+
+    cc.ControlSpriteButtonLoader = cc.ControlButtonLoader.extend({
+        _createCCNode: function(parent, ccbReader) {
+            var controlButton = new cc.ControlSpriteButton();
+            if (controlButton && controlButton.init()) {
+                return controlButton;
+            }
+            return null;
+        }
+    });
+
+    /**
+     * Guess "CCNode".  If that is not found in string cache, then try any registered loader in string cache.
+     * Test case:  Gameplay.ccbi is CCNode yet has CCSprite and CCBFile in string cache.
+     * Test case:  MainScene.ccbi has CCButton in string cache.  Expect to load cc.ControlButtonLoader
+     */
+    cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
+        var loaders = this._ccNodeLoaders;
+        var guessed = "CCNode";
+        if (stringCache.indexOf(guessed) <= -1) {
+            for (var registered in loaders) {
+                if (0 <= stringCache.indexOf(registered)) {
+                    guessed = registered;
+                }
+            }
+        }
+        cc.log('cc.NodeLoaderLibrary.guessClass: ' + guessed + '"');
+        return guessed;
+    };
+
+    /**
+     * If custom class, guess base class from strings.
+     * Test case:  Seal.ccbi has class name of "Seal".  
+     * Expect a CCSprite.
+     */
+    cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
+        if (null == this.getCCNodeLoader("CCButton")) {
+            var loaderClass = cc.ControlSpriteButtonLoader;
+            var loader = new loaderClass();
+            this.registerCCNodeLoader("CCButton", loader);
+        }
+        var ccNodeLoader = this.getCCNodeLoader(className);
+        if (ccNodeLoader) {
+            cc.log("cc.NodeLoaderLibrary.guess: loaded " + className );
+        }
+        else {
+            var loaderClassName = this.guessClass(stringCache);
+            ccNodeLoader = this.getCCNodeLoader(loaderClassName);
+            if (!ccNodeLoader) {
+                throw new Error('Could not load "' + className + '" or "' + loaderClassName + '"');
+            }
+            else {
+                cc.log("cc.NodeLoaderLibrary.guess: no corresponding node loader for " 
+                    + className + ". Defaulting to " + loaderClassName);
+            }
+        }
+        return ccNodeLoader;
+    };
+
+
+    /**
+     * Cocos2d-x does not define this helper method.
+     * Cocos2d-html5 defines this as a dummy echo.
+     */
+    if (!cc.FileUtils.prototype.fullPathFromRelativePath) {
+        cc.FileUtils.prototype.fullPathFromRelativePath = function(pszRelativePath) {
+            return pszRelativePath;
+        };
+    }
+
+    /**
+     * Cocos2d-x does not define this helper method.
+     * Dummy assignment that is ignored.
+     */
+    if (!cc.BuilderAnimationManager.prototype.setOwner) {
+        cc.BuilderAnimationManager.prototype.setOwner = function(owner) {
+            this._owner = owner;
+        };
+    }
+
+    /**
+     * Cocos2d-x defines "size" but not "Size".  HTML5 defines "Size".
+     */
+    if (!cc.Size) {
+        cc.Size = cc.size;
+    }
+    if (!cc.Point) {
+        cc.Point = cc.p;
+    }
+}
+
+/**
+ * Consistent: "Wapper" was misspelled in "Color3BWapper".
+ */
 cc.Color4BWapper = cc.Class.extend({
     _color:null,
     ctor:function () {
@@ -2048,7 +2438,6 @@ cc.Color4BWapper.create = function (color) {
     }
     return ret;
 };
-
 
 /**
  * Load sprite sheets.
@@ -2080,98 +2469,3 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
     }
 };
 
-
-/**
- * Do not zoom.
- * Sprite instead of Scale9Sprite.
- * Center margins on sprite.
- */
-cc.ControlSpriteButton = cc.ControlButton.extend({
-
-    /**
-     * Do not zoom.  Margin at image center.
-     */
-    initWithLabelAndBackgroundSprite: function(label, backgroundSprite) {
-        var success = cc.ControlButton.prototype.initWithLabelAndBackgroundSprite.call(this, label, backgroundSprite);
-        if (success) {
-            this.setZoomOnTouchDown(false);
-            this.centerMargins(backgroundSprite);
-        }
-        return success;
-    },
-
-    /**
-     * Sprite instead of Scale9Sprite.
-     */
-    setBackgroundSpriteFrameForState: function(spriteFrame, state) {
-        var sprite = cc.Sprite.createWithSpriteFrame(spriteFrame);
-        this.setBackgroundSpriteForState(sprite, state);
-        this.centerMargins(sprite);
-    },
-
-    centerMargins: function(sprite)
-    {
-        var size = sprite.getContentSize();
-        cc.log("ControlSpriteButton.centerMargins: width " + size.width + " height " + size.height);
-        this.setMargins(size.width * 0.5, size.height * 0.5);
-        //? this.setMargins(9.5, 9);
-    }
-});
-
-cc.ControlSpriteButtonLoader = cc.ControlButtonLoader.extend({
-    _createCCNode: function(parent, ccbReader) {
-        var controlButton = new cc.ControlSpriteButton();
-        if (controlButton && controlButton.init()) {
-            return controlButton;
-        }
-        return null;
-    }
-});
-
-/**
- * Guess "CCNode".  If that is not found in string cache, then try any registered loader in string cache.
- * Test case:  Gameplay.ccbi is CCNode yet has CCSprite and CCBFile in string cache.
- * Test case:  MainScene.ccbi has CCButton in string cache.  Expect to load cc.ControlButtonLoader
- */
-cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
-    var loaders = this._ccNodeLoaders;
-    var guessed = "CCNode";
-    if (stringCache.indexOf(guessed) <= -1) {
-        for (var registered in loaders) {
-            if (0 <= stringCache.indexOf(registered)) {
-                guessed = registered;
-            }
-        }
-    }
-    cc.log('cc.NodeLoaderLibrary.guessClass: ' + guessed + '"');
-    return guessed;
-}
-
-/**
- * If custom class, guess base class from strings.
- * Test case:  Seal.ccbi has class name of "Seal".  
- * Expect a CCSprite.
- */
-cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
-    if (null == this.getCCNodeLoader("CCButton")) {
-        var loaderClass = cc.ControlSpriteButtonLoader;
-        var loader = new loaderClass();
-        this.registerCCNodeLoader("CCButton", loader);
-    }
-    var ccNodeLoader = this.getCCNodeLoader(className);
-    if (ccNodeLoader) {
-        cc.log("cc.NodeLoaderLibrary.guess: loaded " + className );
-    }
-    else {
-        var loaderClassName = this.guessClass(stringCache);
-        ccNodeLoader = this.getCCNodeLoader(loaderClassName);
-        if (!ccNodeLoader) {
-            throw new Error('Could not load "' + className + '" or "' + loaderClassName + '"');
-        }
-        else {
-            cc.log("cc.NodeLoaderLibrary.guess: no corresponding node loader for " 
-                + className + ". Defaulting to " + loaderClassName);
-        }
-    }
-    return ccNodeLoader;
-}
