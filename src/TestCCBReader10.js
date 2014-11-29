@@ -186,8 +186,10 @@ function testButtonCallback(parent) {
             return this[selectorName];
         },
 
-        play: function(target) {
-            cc.log("TestController.play: " + target + " x " + target.getPositionX() + " y " + target.getPositionY());
+        play: function(target, controlEvent) {
+            target.setPositionX(20.0 + target.getPositionX());
+            cc.log("TestController.play: Moving button right:  " + target 
+                + " event " + controlEvent);
         }
     });
     var controller = new TestController();

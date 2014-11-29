@@ -1551,7 +1551,9 @@ cc.BuilderReader10 = cc.Class.extend({
                             cc.log('Property "' + propertyName + '" not supported.');
                             //- propertyName = PROPERTY_PREFEREDSIZE;
                         }
-                        ccNodeLoader.onHandlePropTypeSize(node, parent, propertyName, size, ccbReader);
+                        else {
+                            ccNodeLoader.onHandlePropTypeSize(node, parent, propertyName, size, ccbReader);
+                        }
                     }
                     break;
                 }
@@ -2445,11 +2447,17 @@ cc.BuilderReader10.extend = function()
 
         /**
          * Sprite instead of Scale9Sprite.
-         * XXX To avoid sprite complaint, overwrites preferred size as 0.
+         * XXX To avoid sprite complaint and preserve content size:
+         * alias setPreferredSize to setContentSize,
+         *   and getPreferredSize to getContentSize.
          */
         setBackgroundSpriteFrameForState: function(spriteFrame, state) {
             var sprite = cc.Sprite.createWithSpriteFrame(spriteFrame);
-            this.setPreferredSize(new cc.Size(0, 0));
+            //? this.setPreferredSize(new cc.Size(0, 0));
+            if (!sprite.setPreferredSize) {
+                sprite.setPreferredSize = sprite.setContentSize;
+                sprite.getPreferredSize = sprite.getContentSize;
+            }
             this.setBackgroundSpriteForState(sprite, state);
             this.centerMargins(sprite);
         },
@@ -2473,11 +2481,13 @@ cc.BuilderReader10.extend = function()
         },
 
         /**
-         * @param   blockData   Expects properties "selMenuHandler" {Function} and "target" {ControlSpriteButton}.
+         * Listen for button touch beginning.
+         * @param   blockData   Expects properties "selMenuHander" {Function} and "target" {ControlSpriteButton}.
+         *                      Note "selMenuHander" (sic) was misspelled in CCNodeLoader, so misspell it here too.
          */
         onHandlePropTypeBlock:function (node, parent, propertyName, blockData, ccbReader) {
-            cc.log("TODO: listen for press with property " + propertyName);
-            ASSERT_FAIL_UNEXPECTED_PROPERTY(propertyName);
+            node._addTargetWithActionForControlEvent(blockData.target, blockData.selMenuHander, 
+                cc.CONTROL_EVENT_TOUCH_DOWN);
         },
     });
 

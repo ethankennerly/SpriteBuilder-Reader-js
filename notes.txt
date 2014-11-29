@@ -2,9 +2,10 @@ TODO
 	Wire play button to log message.
 	Step through Gameplay physics nodes.
 	Load sprite sheet.
-	Position button.
+	Position MainScene 10 play button.
 	Load Gameplay.ccbi
 	How does writer store values differently in SpriteBuilder?
+	Research ControlSwitch.
 
 SPRITEBUILDER
 
