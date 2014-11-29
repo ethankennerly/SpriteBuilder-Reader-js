@@ -169,6 +169,8 @@ function testReader10(parent, basePath, preservePosition) {
     return scene;
 }
 
+var testAnimation;
+
 function TestCCBReader10(parent) {
     testReadIntOLD();
     testReadVariableLengthIntFromArray();
@@ -187,10 +189,12 @@ function TestCCBReader10(parent) {
     // scene = testReader10(parent, "ccb/WaitingPenguin");
     scene = testReader10(parent, "Machine");
     cc.BuilderReader10._currentReader.getAnimationManager().runAnimations("down");
-    var button = scene.getChildren()[0].CircleButton;
-    button.animationManager.runAnimations("down");
+    testAnimation = scene.getChildren()[0].CircleButton;
+    testAnimation.animationManager.runAnimations("down");
     cc.log("Look circle moving down and highlight rotating clockwise.");
-    scene = testReader10(parent, "Machines");
+    // TODO:
+    // testAnimation.animationManager.runAnimations("up");
+    // scene = testReader10(parent, "Machines");
     // scene = testReader10(parent, "Machines", true);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");

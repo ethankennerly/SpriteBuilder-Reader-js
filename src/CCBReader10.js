@@ -2179,6 +2179,7 @@ cc.BuilderReader10.requiresSubPaths = function(all) {
     subPaths.push('CCBReader/CCBAnimationManager.js');
     subPaths.push('CCBReader/CCBSequence.js');
     subPaths.push('CCBReader/CCBRelativePositioning.js');
+    subPaths.push('CCBReader/CCBKeyframe.js');
     if (all) {
         subPaths.push('GUI/CCControlExtension/CCControl.js');
         subPaths.push('GUI/CCControlExtension/CCControlButton.js');
@@ -2188,7 +2189,6 @@ cc.BuilderReader10.requiresSubPaths = function(all) {
         subPaths.push('CCBReader/CCBReaderUtil.js');
         subPaths.push('CCBReader/CCBReader.js');
         subPaths.push('CCBReader/CCBValue.js');
-        subPaths.push('CCBReader/CCBKeyframe.js');
     }
     return subPaths;
 };
