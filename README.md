@@ -77,28 +77,22 @@ Todo
 
  * Load sprite sheet.
  
- * Animated properties.
- 
- * Remove animation type.
-
 Not supported
 -------------
-
- * Position Peeved Penguins example of button with normalized and absolute position.
-
- * Read node anchor point properly.
- 
- * Animation of sprite frames.
- 
- * Scale content to percent of parent size.
-
- * Node property:  Flip, BlockCCControl, Block.
 
  * Node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
  
  * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
  
  * Adapt position and size type and size xUnit and yUnit, which were handled in CCNodeLoader. 
+
+ * Position Peeved Penguins example of button with normalized and absolute position.
+
+ * Scale content to percent of parent size.
+
+ * Animation of sprite frames.
+ 
+ * Node property:  BlockCCControl, Block.
 
  * Nodes with physics.  Opening a scene with physics causes a crash.
 
@@ -144,18 +138,14 @@ Not supported
  
  * Strings.ccblang
  
- * Node reference.  UUID.
+ * Node reference.  UUID.  Wired.  But no use case.
  
  * Float scale.
- 
- * Float check.
  
  * Effects.
  
  * Button maxSize
  
- * Version 10 also reads physics nodes.
-  
  * fileLookup.plist
  
  * SpriteKit sprite frame reader override.

@@ -627,6 +627,7 @@ cc.BuilderReader10 = cc.Class.extend({
             return null;
 
         var node = this._readNodeGraph();
+        cc.BuilderReader10.trySetDescendents(node);
         // this.readJoints();
         this._animationManagers.setObject(this._animationManager, node);
 
@@ -1270,7 +1271,6 @@ cc.BuilderReader10 = cc.Class.extend({
             if (node.getName) {
                 var name = node.getName();
                 cc.BuilderReader10.setName(embeddedNode, name);
-                cc.BuilderReader10.trySetParentVariable(parent, name, embeddedNode, node);
             }
             var visible = node.isVisible() !== false;
             if (!visible) {
@@ -1336,7 +1336,6 @@ cc.BuilderReader10 = cc.Class.extend({
             }
             var child = this._readNodeGraph(node);
             node.addChild(child);
-            cc.BuilderReader10.trySetParentVariable(node, child.getName(), child);
         }
 
         // FIX ISSUE #1860: "onNodeLoaded will be called twice if ccb was added as a CCBFile".
@@ -1724,7 +1723,6 @@ cc.BuilderReader10 = cc.Class.extend({
                     if (propertyName == PROPERTY_NAME)
                     {
                         cc.BuilderReader10.setName(node, text);
-                        cc.BuilderReader10.trySetParentVariable(parent, text, node);
                     }
                     else {
                         if (node.hasOwnProperty(propertyName)) {
@@ -2138,13 +2136,12 @@ cc.BuilderReader10.setName = function(node, name)
 /**
  * Set parent variable name of node, if valid and not already taken.
  * Flash Professional sets parent member variable to instance name.
- * @param   overwriteValue  If parent property equals this, overwrite.  Otherwise, if it exists do not overwrite.
  */
-cc.BuilderReader10.trySetParentVariable = function(parent, name, node, overwriteValue)
+cc.BuilderReader10.trySetParentVariable = function(parent, name, node)
 {
     if (!parent || !name) {
     }
-    else if (undefined === parent[name] || overwriteValue === parent[name]) {
+    else if (undefined === parent[name]) {
         try {
             parent[name] = node;
         }
@@ -2153,9 +2150,25 @@ cc.BuilderReader10.trySetParentVariable = function(parent, name, node, overwrite
                 + parent + '" variable with a name of "' + name + '" to node "' + node + '".');
         }
     }
-    else {
+    else if (node !== parent[name]) {
         cc.log('cc.BuilderReader10.trySetParentVariable: "' 
             + parent + '" already has variable "' + name + '" of value "' + parent[name] + '".');
+    }
+};
+
+/**
+ * Recursively set parent member variables to child.
+ */
+cc.BuilderReader10.trySetDescendents = function(root)
+{
+    var children = root.getChildren();
+    for (var c = 0; c < children.length; c++) {
+        var child = children[c];
+        if (child.getName) {
+            var name = child.getName();
+            cc.BuilderReader10.trySetParentVariable(root, name, child);
+        }
+        cc.BuilderReader10.trySetDescendents(child);
     }
 };
 

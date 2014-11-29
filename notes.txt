@@ -1,8 +1,7 @@
 TODO
-	Step through "Machines" loading a machine's animations.
-	Play animation of sub CCBI file "Machine" in "Machines".
 	Wire play button.
 	Step through Gameplay physics nodes.
+	Load sprite sheet.
 	Load Gameplay.ccbi
 	How does writer store values differently in SpriteBuilder?
 
