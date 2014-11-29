@@ -37,36 +37,44 @@ commit f8b8f4c
 Features
 --------
 
- * Version 10 deprecated JS controlled animation callbacks.
- 
- * Version 10 reads integer from variable length byte array.
-  
- * Reading node graph parent:
-  
- * Reads visibility.
- 
- * Replaces tag with name in string cache.
-  
- * Version 10 reads keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
-  
- * Sprite sheet framing comes from sprite frame class.
-   If sprite frame image not found, load image file.
-  
- * Ignore physics and joints.  
- 
- * Expects joints are the last part of the file and are not read.
- 
- * Version 10 fixes "preferedSize" to be "preferredSize".
+ * Layout by absolute position.
 
- * Background sprite frame names updated from number to a name:
-   'backgroundSpriteFrame|Normal'
-   'backgroundSpriteFrame|Highlighted' 
- 
+ * Wire node animations.
+
+ * Read keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
+  
+ * Read integer from variable length byte array.
+  
  * ControlSprite Button:
        Constructed:  Does not zoom on touch down by default.
        Load Sprite instead of Scale9Sprite.
  
+ * Sprite sheet framing comes from sprite frame class.
+   If sprite frame image not found, load image file.
+  
+ * Reads visibility.
+ 
+ * Try to set name.
+  
+ * Background sprite frame names updated from number to a name:
+   'backgroundSpriteFrame|Normal'
+   'backgroundSpriteFrame|Highlighted' 
+ 
+ * Removed reading JS controlled animation callbacks.
+
  * Button 'userInteractionEnabled' interpreted as 'enabled'.
+
+ * Fixes "preferedSize" to be "preferredSize".
+
+ * Ignore physics and joints.  
+ 
+ * Expects joints are the last part of the file and are not read.
+ 
+
+Extra Features
+--------------
+
+ * Set member variable to child names.
 
 Todo
 ----
@@ -150,3 +158,4 @@ Not supported
  
  * SpriteKit sprite frame reader override.
 
+ * SpriteBuilder appears to save font color and shadow color as byte instead of float.

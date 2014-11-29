@@ -121,16 +121,6 @@ function testReadFloat() {
 // testReader5 expects custom classes already defined:
 var MainScene = cc.Node.extend({});
 
-var Controller = cc.Class.extend({
-    onResolveCCBCCCallFuncSelector: function(target, selectorName) {
-        cc.log("MainScene.onResolveCCBCCCallFuncSelector: " + target + " name " + selectorName);
-        return this[selectorName];
-    },
-
-    play: function(target) {
-        cc.log("MainScene.play: " + target + " x " + target.getPositionX() + " y " + target.getPositionY());
-    }
-});
 var MainScreen = cc.Node.extend({});
 var StoreAScene = cc.Node.extend({});
 var StoreBScene = cc.Node.extend({});
@@ -186,6 +176,29 @@ function testMultipleAnimations(parent) {
     cc.log("Testing animation in sub CCBI:  Look for circle moving down on two left machines and up on two right machines.");
 }
 
+/**
+ * The animation manager expects a function "onResolveCCBCCMenuItemSelector" to bind a function.
+ */
+function testButtonCallback(parent) {
+    var TestController = cc.Class.extend({
+        onResolveCCBCCMenuItemSelector: function(target, selectorName) {
+            cc.log("TestController.onResolveCCBCCMenuItemSelector: " + target + " name " + selectorName);
+            return this[selectorName];
+        },
+
+        play: function(target) {
+            cc.log("TestController.play: " + target + " x " + target.getPositionX() + " y " + target.getPositionY());
+        }
+    });
+    var controller = new TestController();
+    var reader = new cc.BuilderReader10.defaultReader(null, controller);
+    scene = cc.BuilderReader10.loadReader(reader, "ccb/MainScene_10", true);
+    scene.setScale(0.25);
+    scene.setPosition(320, 720);
+    parent.addChild(scene);
+    cc.log("Testing button:  Click button.  Look at log.  Expect to read 'play'.");
+}
+
 function TestCCBReader10(parent) {
     testReadIntOLD();
     testReadVariableLengthIntFromArray();
@@ -195,16 +208,14 @@ function TestCCBReader10(parent) {
     testReadFloatVersion5();
     /*
     testReader5(parent, "ccb/MainScene_5");
-    scene = testReader10(parent, "ccb/MainScene_10", true);
-    scene.setScale(0.25);
-    scene.setPositionY(320);
     scene = testReader10(parent, "ccb/Bear");
     cc.log("Look for bear in center of screen with arm rotating.");
     // scene = testReader10(parent, "ccb/Seal");
     // scene = testReader10(parent, "ccb/Penguin");
     // scene = testReader10(parent, "ccb/WaitingPenguin");
      */
-    testMultipleAnimations(parent);
+    testButtonCallback(parent);
+    // testMultipleAnimations(parent);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");
     // scene.setScale(0.25);

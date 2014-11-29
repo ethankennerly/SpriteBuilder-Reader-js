@@ -1999,10 +1999,7 @@ cc.BuilderReader10.getResolutionScale = function () {
 };
 
 cc.BuilderReader10.loadAsScene = function (ccbFilePath, owner, parentSize, ccbRootPath) {
-    ccbRootPath = ccbRootPath || cc.BuilderReader10.getResourcePath();
-
     var getNode = cc.BuilderReader10.load(ccbFilePath, owner, parentSize, ccbRootPath);
-
     var scene = cc.Scene.create();
     scene.addChild(getNode);
     return scene;
@@ -2011,6 +2008,23 @@ cc.BuilderReader10.loadAsScene = function (ccbFilePath, owner, parentSize, ccbRo
 cc.BuilderReader10.load = function (ccbFilePath, owner, parentSize, ccbRootPath) {
     ccbRootPath = ccbRootPath || cc.BuilderReader10.getResourcePath();
     var reader = new cc.BuilderReader10(cc.NodeLoaderLibrary.newDefaultCCNodeLoaderLibrary());
+    return cc.BuilderReader10.loadReader(reader, ccbFilePath, owner, parentSize, ccbRootPath);
+};
+
+/**
+ * Default loader library.
+ */
+cc.BuilderReader10.defaultReader = function(ccbMemberVariableAssigner, ccbSelectorResolver, ccNodeLoaderListener) {
+    var reader = new cc.BuilderReader10(cc.NodeLoaderLibrary.newDefaultCCNodeLoaderLibrary(),
+        ccbMemberVariableAssigner, ccbSelectorResolver, ccNodeLoaderListener);
+    return reader;
+}
+
+/**
+ * @param   reader  Preconstruct and customize parameters.
+ */
+cc.BuilderReader10.loadReader = function (reader, ccbFilePath, owner, parentSize, ccbRootPath) {
+    ccbRootPath = ccbRootPath || cc.BuilderReader10.getResourcePath();
     cc.BuilderReader10._currentReader = reader;
     reader.setCCBRootPath(ccbRootPath);
     if((ccbFilePath.length < 5)||(ccbFilePath.toLowerCase().lastIndexOf(".ccbi") != ccbFilePath.length - 5))
@@ -2456,7 +2470,15 @@ cc.BuilderReader10.extend = function()
                 return controlButton;
             }
             return null;
-        }
+        },
+
+        /**
+         * @param   blockData   Expects properties "selMenuHandler" {Function} and "target" {ControlSpriteButton}.
+         */
+        onHandlePropTypeBlock:function (node, parent, propertyName, blockData, ccbReader) {
+            cc.log("TODO: listen for press with property " + propertyName);
+            ASSERT_FAIL_UNEXPECTED_PROPERTY(propertyName);
+        },
     });
 
     /**

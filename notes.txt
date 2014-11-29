@@ -1,7 +1,8 @@
 TODO
-	Wire play button.
+	Wire play button to log message.
 	Step through Gameplay physics nodes.
 	Load sprite sheet.
+	Position button.
 	Load Gameplay.ccbi
 	How does writer store values differently in SpriteBuilder?
 
@@ -177,6 +178,20 @@ Unexpected position unit CCCommon.js:145
 Unexpected property: 'anchorPoint'! CCCommon.js:145
 Physics body is not supported.  Stubbing. CCCommon.js:145
 
+
+
+
+Sat 11/29/2014 
+12:21
+
+alternatives:
+	conventional:
+		read property block
+		resolve selector
+		button handles selector and target of block, listening to pressed.
+	streamlined:
+		read property block
+		handle selector and target of block, on pressed.
 
 
 
