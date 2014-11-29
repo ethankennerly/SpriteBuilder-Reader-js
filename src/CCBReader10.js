@@ -1336,6 +1336,7 @@ cc.BuilderReader10 = cc.Class.extend({
             }
             var child = this._readNodeGraph(node);
             node.addChild(child);
+            cc.BuilderReader10.trySetParentVariable(node, child.getName(), child);
         }
 
         // FIX ISSUE #1860: "onNodeLoaded will be called twice if ccb was added as a CCBFile".
@@ -1815,6 +1816,8 @@ cc.BuilderReader10 = cc.Class.extend({
      * Call "getByteArrayFromFile" with exactly one argument:  the file path.
      * In Cocos2D-HTML5 the other arguments are ignored.
      * Test case: 2014-11-28 Load with Cocos2d-x 2.2.2.  Error: wrong number of arguments: 3, was expecting 3.  (sic)
+     * Extend nodes with animations by sub files.
+     * Test case: 2014-11-28 Machines have Machine with animation.  Expect to access machine node animation.
      */
     parsePropTypeCCBFile:function (node, parent, ccbReader, readerClass) {
         var ccbFileName = ccbReader.getCCBRootPath() + ccbReader.readCachedString();
@@ -1839,10 +1842,18 @@ cc.BuilderReader10 = cc.Class.extend({
         var ccbFileNode = myCCBReader.readFileWithCleanUp(false);
 
         ccbReader.setAnimationManagers(myCCBReader.getAnimationManagers());
-
+        this.extend(ccbReader.getNodesWithAnimationManagers(), myCCBReader.getNodesWithAnimationManagers());
+        this.extend(ccbReader.getAnimationManagersForNodes(), myCCBReader.getAnimationManagersForNodes());
         this.autoPlayAnimation(ccbFileNode);
 
         return ccbFileNode;
+    },
+
+    extend: function(nodes, moreNodes)
+    {
+        for (var i = 0; i < moreNodes.length; i++) {
+            nodes.push(moreNodes[i]);
+        }
     },
 
     /**

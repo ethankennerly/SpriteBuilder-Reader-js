@@ -142,7 +142,7 @@ var scene5;
 function testReader5(parent, basePath) {
     cc.log('TestCCBReader10: version 5 CocosBuilder'
        + '"' + basePath + '"');
-    scene5 = cc.BuilderReader.loadAsScene(basePath);
+    scene5 = cc.BuilderReader.load(basePath);
     parent.addChild(scene5);
     _parent = parent;
 }
@@ -157,7 +157,7 @@ var scene10;
 function testReader10(parent, basePath, preservePosition) {
     cc.log('TestCCBReader10: version 10 SpriteBuilder '
        + '"' + basePath + '"');
-    var scene = cc.BuilderReader10.loadAsScene(basePath);
+    var scene = cc.BuilderReader10.load(basePath);
     var prop = basePath.replace(/^\d/g, '_')
                        .replace(/[- /]/g, '_');
     parent[prop] = scene;
@@ -191,12 +191,12 @@ function TestCCBReader10(parent) {
      */
     scene = testReader10(parent, "Machine");
     // cc.BuilderReader10._currentReader.getAnimationManager().runAnimations("down");
-    testAnimation = scene.getChildren()[0].CircleButton;
+    testAnimation = scene.CircleButton;
     // testAnimation.animationManager.runAnimations("down");
     testAnimation.animationManager.runAnimations("up");
     cc.log("Look circle moving down and highlight rotating clockwise.");
     // TODO: Access animation of sub CCBI file.
-    // scene = testReader10(parent, "Machines");
+    scene = testReader10(parent, "Machines");
     // scene = testReader10(parent, "Machines", true);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");
