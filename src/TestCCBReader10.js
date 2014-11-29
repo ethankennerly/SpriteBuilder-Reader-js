@@ -178,6 +178,7 @@ function TestCCBReader10(parent) {
     testFloat32Array();
     testReadFloat();
     testReadFloatVersion5();
+    /*
     testReader5(parent, "ccb/MainScene_5");
     scene = testReader10(parent, "ccb/MainScene_10", true);
     scene.setScale(0.25);
@@ -187,13 +188,14 @@ function TestCCBReader10(parent) {
     // scene = testReader10(parent, "ccb/Seal");
     // scene = testReader10(parent, "ccb/Penguin");
     // scene = testReader10(parent, "ccb/WaitingPenguin");
+     */
     scene = testReader10(parent, "Machine");
-    cc.BuilderReader10._currentReader.getAnimationManager().runAnimations("down");
+    // cc.BuilderReader10._currentReader.getAnimationManager().runAnimations("down");
     testAnimation = scene.getChildren()[0].CircleButton;
-    testAnimation.animationManager.runAnimations("down");
+    // testAnimation.animationManager.runAnimations("down");
+    testAnimation.animationManager.runAnimations("up");
     cc.log("Look circle moving down and highlight rotating clockwise.");
-    // TODO:
-    // testAnimation.animationManager.runAnimations("up");
+    // TODO: Access animation of sub CCBI file.
     // scene = testReader10(parent, "Machines");
     // scene = testReader10(parent, "Machines", true);
     // Physics or something else not parsed:

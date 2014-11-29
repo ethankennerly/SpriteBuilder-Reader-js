@@ -601,6 +601,7 @@ cc.BuilderReader10 = cc.Class.extend({
      * Should be = "preferredSize". This is a typo in cocos2d-iphone, cocos2d-x and CocosBuilder!
      */
     overrideConstants: function() {
+        PROPERTY_NAME = "name";
         PROPERTY_PREFEREDSIZE = "preferredSize";
         PROPERTY_MAXSIZE = "maxSize";
         PROPERTY_USER_INTERACTION_ENABLED = "userInteractionEnabled";
@@ -917,7 +918,13 @@ cc.BuilderReader10 = cc.Class.extend({
         return true;
     },
 
-    readKeyframe:function (type) {
+    /**
+     * Version 10 adds float keyframe type.
+     * To catch more types unsupported, throw error on an unsupported type.
+     * If name is "opacity" and type is float, then convert float to byte.
+     * Test case: 2014-11-29 Expect machine background opacity fades in.  Got disappears.
+     */
+    readKeyframe:function (type, name) {
         var keyframe = new cc.BuilderKeyframe();
         keyframe.setTime(this.readFloat());
         var easingType = this.readInt(false);
@@ -942,11 +949,12 @@ cc.BuilderReader10 = cc.Class.extend({
             value = this.readByte();
         } else if (type == CCB_PROPTYPE_COLOR3
         || type == CCB_PROPTYPE_COLOR4) {
-            var c4 = this.readColor();
+            var c4 = this.readColor(name);
             value = cc.Color4BWapper.create(c4);
-        } else if (type == CCB_PROPTYPE_FLOATXY) {
-            value = [this.readFloat(), this.readFloat()];
-        } else if (type == CCB_PROPTYPE_DEGREES) {
+        } else if (type == CCB_PROPTYPE_FLOAT && name == PROPERTY_OPACITY) {
+            value = this.float2byte(this.readFloat(), name);
+        } else if (type == CCB_PROPTYPE_DEGREES
+        || type == CCB_PROPTYPE_FLOAT) {
             value = this.readFloat();
         } else if (type == CCB_PROPTYPE_SCALELOCK 
         || type == CCB_PROPTYPE_FLOATXY
@@ -954,6 +962,10 @@ cc.BuilderReader10 = cc.Class.extend({
             value = [this.readFloat(), this.readFloat()];
         } else if (type == CCB_PROPTYPE_SPRITEFRAME) {
             value = this.readSpriteFrame();
+        }
+        else {
+            throw new Error("Expected to read keyframe type " + type 
+                + " in file " + this._currentCCBFile);
         }
         keyframe.setValue(value);
         return keyframe;
@@ -1056,15 +1068,36 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     /**
-     * Version 10 reads keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
+     * Cocos2D v2 has color and opacity range [0..255].
+     * Cocos2D v3 has color and opacity range [0.0..1.0].
+     * @param   float {Number}  Error if not a number or out of bounds [0.0..1.0].
+     * @return  Cocos2D v3 [0.0..1.0] converted to v2 [0..255].
      */
-    readColor: function()
+    float2byte: function(float, name)
     {
         var max = 255;
-        var r = Math.round(max * this.readFloat());
-        var g = Math.round(max * this.readFloat());
-        var b = Math.round(max * this.readFloat());
-        var a = Math.round(max * this.readFloat());
+        if (float < 0.0 || isNaN(float)) {
+            throw new Error("Expected float between 0.0 and 1.0. Got " + float 
+                + " for property name " + name);
+        }
+        else if (1.0 < float) {
+            cc.log("cc.BuilderReader10.float2byte: Expected float between 0.0 and 1.0. Got " +  float 
+                + " for property name " + name);
+            max = 1;
+        }
+        var byte = Math.round(max * float);
+        return byte;
+    },
+
+    /**
+     * Version 10 reads keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
+     */
+    readColor: function(propertyName)
+    {
+        var r = this.float2byte(this.readFloat(), propertyName + ".r");
+        var g = this.float2byte(this.readFloat(), propertyName + ".g");
+        var b = this.float2byte(this.readFloat(), propertyName + ".b");
+        var a = this.float2byte(this.readFloat(), propertyName + ".a");
         var c4 = cc.c4(r, g, b, a);
         return c4;
     },
@@ -1114,9 +1147,6 @@ cc.BuilderReader10 = cc.Class.extend({
         return true;
     },
 
-    /**
-     * Version 10:  HACK:  Replace "name" with "tag" in string cache.
-     */
     _readStringCacheEntry:function () {
         var b0 = this.readByte();
         var b1 = this.readByte();
@@ -1132,9 +1162,6 @@ cc.BuilderReader10 = cc.Class.extend({
         str = decodeURIComponent(str);
 
         this._currentByte += numBytes;
-        if ("name" == str) {
-            str = PROPERTY_TAG;
-        }
         this._stringCache.push(str);
     },
 
@@ -1193,20 +1220,21 @@ cc.BuilderReader10 = cc.Class.extend({
 
             for (var j = 0; j < numProps; ++j) {
                 var seqProp = new cc.BuilderSequenceProperty();
-                seqProp.setName(this.readCachedString());
+                var name = this.readCachedString();
+                seqProp.setName(name);
                 seqProp.setType(this.readInt(false));
 
-                locAnimatedProps.push(seqProp.getName());
+                locAnimatedProps.push(name);
                 var numKeyframes = this.readInt(false);
                 var locKeyframes = seqProp.getKeyframes();
                 for (var k = 0; k < numKeyframes; ++k) {
-                    var keyFrame = this.readKeyframe(seqProp.getType());
+                    var keyFrame = this.readKeyframe(seqProp.getType(), name);
                     locKeyframes.push(keyFrame);
                 }
                 seqNodeProps.setObject(seqProp, seqProp.getName());
                 this.getNodesWithAnimationManagers().push(node);
                 this.getAnimationManagersForNodes().push(locActionManager);
-                cc.log('cc.BuilderReader10._readNodeGraph: sequence "' + seqProp.getName() + '"');
+                cc.log('cc.BuilderReader10._readNodeGraph: sequence "' + name + '"');
             }
             seqs.setObject(seqNodeProps, seqId);
         }
@@ -1692,7 +1720,7 @@ cc.BuilderReader10 = cc.Class.extend({
                 {
                     var text = ccbReader.readCachedString();
                     var localized = ccbReader.readBool();  // TODO
-                    if (propertyName == PROPERTY_TAG)
+                    if (propertyName == PROPERTY_NAME)
                     {
                         cc.BuilderReader10.setName(node, text);
                         cc.BuilderReader10.trySetParentVariable(parent, text, node);
@@ -1809,7 +1837,7 @@ cc.BuilderReader10 = cc.Class.extend({
      */
     parsePropTypeColor4: function (
     node, parent, ccbReader, propertyName) {
-        var color = ccbReader.readColor();
+        var color = ccbReader.readColor(propertyName);
         if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
             ccbReader.getAnimationManager().setBaseValue(cc.Color3BWapper.create(color),node, propertyName);
         }

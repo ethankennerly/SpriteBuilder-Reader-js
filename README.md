@@ -92,6 +92,8 @@ Not supported
  
  * Scale content to percent of parent size.
 
+ * Node property:  Flip, BlockCCControl, Block.
+
  * Node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
  
  * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
