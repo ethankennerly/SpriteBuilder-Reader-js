@@ -1267,10 +1267,10 @@ cc.BuilderReader10 = cc.Class.extend({
             embeddedNode.setRotation(node.getRotation());
             embeddedNode.setScaleX(node.getScaleX());
             embeddedNode.setScaleY(node.getScaleY());
-            if (node.hasOwnProperty("getName")) {
+            if (node.getName) {
                 var name = node.getName();
                 cc.BuilderReader10.setName(embeddedNode, name);
-                cc.BuilderReader10.trySetParentVariable(parent, name, embeddedNode);
+                cc.BuilderReader10.trySetParentVariable(parent, name, embeddedNode, node);
             }
             var visible = node.isVisible() !== false;
             if (!visible) {
@@ -2138,18 +2138,19 @@ cc.BuilderReader10.setName = function(node, name)
 /**
  * Set parent variable name of node, if valid and not already taken.
  * Flash Professional sets parent member variable to instance name.
+ * @param   overwriteValue  If parent property equals this, overwrite.  Otherwise, if it exists do not overwrite.
  */
-cc.BuilderReader10.trySetParentVariable = function(parent, name, node)
+cc.BuilderReader10.trySetParentVariable = function(parent, name, node, overwriteValue)
 {
     if (!parent || !name) {
     }
-    else if (undefined === parent[name]) {
+    else if (undefined === parent[name] || overwriteValue === parent[name]) {
         try {
             parent[name] = node;
         }
         catch (err) {
-        cc.log('cc.BuilderReader10.trySetParentVariable: Cannot set "' 
-            + parent + '" variable with a name of "' + name + '" to node "' + node + '".');
+            cc.log('cc.BuilderReader10.trySetParentVariable: Cannot set "' 
+                + parent + '" variable with a name of "' + name + '" to node "' + node + '".');
         }
     }
     else {

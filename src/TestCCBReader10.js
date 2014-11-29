@@ -171,6 +171,21 @@ function testReader10(parent, basePath, preservePosition) {
 
 var testAnimation;
 
+function testMultipleAnimations(parent) {
+    scene = testReader10(parent, "Machine");
+    // cc.BuilderReader10._currentReader.getAnimationManager().runAnimations("down");
+    testAnimation = scene.CircleButton;
+    // testAnimation.animationManager.runAnimations("down");
+    testAnimation.animationManager.runAnimations("up");
+    cc.log("Look for circle moving down and highlight rotating clockwise.");
+    scene = testReader10(parent, "Machines");
+    scene.getChildren()[1].getChildren()[1].animationManager.runAnimations("down");
+    scene.getChildren()[2].getChildren()[1].animationManager.runAnimations("up");
+    scene.machine_5.CircleButton.animationManager.runAnimations("down");
+    scene.machine_6.CircleButton.animationManager.runAnimations("up");
+    cc.log("Testing animation in sub CCBI:  Look for circle moving down on two left machines and up on two right machines.");
+}
+
 function TestCCBReader10(parent) {
     testReadIntOLD();
     testReadVariableLengthIntFromArray();
@@ -189,15 +204,7 @@ function TestCCBReader10(parent) {
     // scene = testReader10(parent, "ccb/Penguin");
     // scene = testReader10(parent, "ccb/WaitingPenguin");
      */
-    scene = testReader10(parent, "Machine");
-    // cc.BuilderReader10._currentReader.getAnimationManager().runAnimations("down");
-    testAnimation = scene.CircleButton;
-    // testAnimation.animationManager.runAnimations("down");
-    testAnimation.animationManager.runAnimations("up");
-    cc.log("Look circle moving down and highlight rotating clockwise.");
-    // TODO: Access animation of sub CCBI file.
-    scene = testReader10(parent, "Machines");
-    // scene = testReader10(parent, "Machines", true);
+    testMultipleAnimations(parent);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");
     // scene.setScale(0.25);
