@@ -1,4 +1,5 @@
 TODO
+	Play animation of sub CCBI file "Machine" in "Machines".
 	Wire play button.
 	Step through Gameplay physics nodes.
 	Load Gameplay.ccbi

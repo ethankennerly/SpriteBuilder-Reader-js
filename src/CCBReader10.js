@@ -1771,9 +1771,25 @@ cc.BuilderReader10 = cc.Class.extend({
                         throw new Error("CCBReader: Failed to find node UUID:" + uuid);
                     }
                     node[propertyName] = mappedNode;
+                    break;
+                }
+                case CCB_PROPTYPE_FLOAT_CHECK:
+                {
+                    var float = this.readFloat();
+                    var enabled = this.readBool();
+                    cc.log('cc.BuilderReader10._readPropertiesForNode: float check not supported.' 
+                        + '  CCB file "' + this._currentCCBFile + '"'
+                        + ', property name "' + propertyName + '"'
+                        + ', float: ' + float 
+                        + ', enabled: ' + enabled );
+                    node[propertyName + "Enabled"] = enabled;
+                    if(enabled)
+                    {
+                        node[propertyName] = float;
+                    }
+                    break;
                 }
                 // Not supported:
-                // CCB_PROPTYPE_FLOAT_CHECK
                 // CCB_PROPTYPE_EFFECTS
                 default:
                     ASSERT_FAIL_UNEXPECTED_PROPERTYTYPE(type);
