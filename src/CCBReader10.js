@@ -178,6 +178,8 @@ cc.BuilderReader10 = cc.Class.extend({
     ctor:function (ccNodeLoaderLibrary, ccbMemberVariableAssigner, ccbSelectorResolver, ccNodeLoaderListener) {
         cc.BuilderReader10.requiring();
         cc.BuilderReader10.extend();
+        this._nodesWithAnimationManagers = [];
+        this._animationManagerForNodes = [];
         this._stringCache = [];
         this._loadedSpriteSheets = [];
         this._currentBit = -1;
@@ -446,7 +448,6 @@ cc.BuilderReader10 = cc.Class.extend({
     /**
      * @return  32-bit (4-byte) float.
      *
-     * New byte
      * Depends on TypedArray support.
      * http://www.html5rocks.com/en/tutorials/webgl/typed_arrays/
      * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
@@ -612,6 +613,9 @@ cc.BuilderReader10 = cc.Class.extend({
         PROPERTY_TITLECOLOR_DISABLED = "labelColor|Disabled";
     },
 
+    /**
+     * Version 10 joints feature is not read and is not supported.
+     */
     readFileWithCleanUp:function (cleanUp) {
         this.overrideConstants();
         if (!this._readHeader())
@@ -622,7 +626,7 @@ cc.BuilderReader10 = cc.Class.extend({
             return null;
 
         var node = this._readNodeGraph();
-        this.readJoints();
+        // this.readJoints();
         this._animationManagers.setObject(this._animationManager, node);
 
         if (cleanUp)
@@ -813,6 +817,9 @@ cc.BuilderReader10 = cc.Class.extend({
         }
     },
 
+    /**
+     * Cocos2d-x does not like setting user object to null, so do nothing.
+     */
     _cleanUpNodeGraph:function (node) {
         //- this.setUserObject(node, null);
         var getChildren = node.getChildren();
@@ -881,7 +888,7 @@ cc.BuilderReader10 = cc.Class.extend({
      * Reads but ignores if has physics nodes.
      * Sets animation manager, fixedTimeStep which is ignored.
      */
-    _readSequences:function () {
+    _readSequences: function() {
         var sequences = this._animationManager.getSequences();
         var numSeqs = this.readInt(false);
         var hasPhysicsBodies = this.readBool();
@@ -1140,7 +1147,7 @@ cc.BuilderReader10 = cc.Class.extend({
      * To debug, record current class name.
      * Disable zoomOnTouchDown by default.
      */
-    _readNodeGraph:function (parent) {
+    _readNodeGraph: function(parent) {
         /* Read class name. */
         var className = this.readCachedString();
         this._currentClassName = className;
@@ -1197,6 +1204,9 @@ cc.BuilderReader10 = cc.Class.extend({
                     locKeyframes.push(keyFrame);
                 }
                 seqNodeProps.setObject(seqProp, seqProp.getName());
+                this.getNodesWithAnimationManagers().push(node);
+                this.getAnimationManagersForNodes().push(locActionManager);
+                cc.log('cc.BuilderReader10._readNodeGraph: sequence "' + seqProp.getName() + '"');
             }
             seqs.setObject(seqNodeProps, seqId);
         }
@@ -1217,6 +1227,9 @@ cc.BuilderReader10 = cc.Class.extend({
             this.nodeMapping[uuid] = node;
         }
         this.readPropertiesForNode(node, parent, this, ccNodeLoader);
+        if (node.getName && node.getName()) {
+            cc.log('cc.BuilderReader10._readNodeGraph: node name "' + node.getName() + '"');
+        }
 
         //handle sub ccb files(remove middle node)
         var isCCBFileNode = node instanceof cc.BuilderFile;
@@ -1226,18 +1239,21 @@ cc.BuilderReader10 = cc.Class.extend({
             embeddedNode.setRotation(node.getRotation());
             embeddedNode.setScaleX(node.getScaleX());
             embeddedNode.setScaleY(node.getScaleY());
-            if (node.hasOwnProperty("getTag")) {
-                embeddedNode.setName(node.getTag());
+            if (node.hasOwnProperty("getName")) {
+                var name = node.getName();
+                cc.BuilderReader10.setName(embeddedNode, name);
+                cc.BuilderReader10.trySetParentVariable(parent, name, embeddedNode);
             }
             var visible = node.isVisible() !== false;
             if (!visible) {
-                cc.log("cc.BuilderReader10._readNodeGraph: hiding node " + embeddedNod);
+                cc.log("cc.BuilderReader10._readNodeGraph: hiding node " + embeddedNode);
             }
             embeddedNode.setVisible(visible);
             //embeddedNode.ignoreAnchorPointForPosition(node.isIgnoreAnchorPointForPosition());
 
             locActionManager.moveAnimationsFromNode(node, embeddedNode);
             node.setCCBFileNode(null);
+            node._beforeEmbedded = node;
             node = embeddedNode;
         }
         var target = null, locMemberAssigner = null;
@@ -1679,6 +1695,7 @@ cc.BuilderReader10 = cc.Class.extend({
                     if (propertyName == PROPERTY_TAG)
                     {
                         cc.BuilderReader10.setName(node, text);
+                        cc.BuilderReader10.trySetParentVariable(parent, text, node);
                     }
                     else {
                         if (node.hasOwnProperty(propertyName)) {
@@ -1750,6 +1767,10 @@ cc.BuilderReader10 = cc.Class.extend({
      * Test case: Load version 10 CCBI which refers to sub files.  Expect subfiles are parsed with version 10 reader.
      * @param   readerClass Unlike other parsers, the readerClass is added.
      * @return  node of CCB file.
+     *
+     * Call "getByteArrayFromFile" with exactly one argument:  the file path.
+     * In Cocos2D-HTML5 the other arguments are ignored.
+     * Test case: 2014-11-28 Load with Cocos2d-x 2.2.2.  Error: wrong number of arguments: 3, was expecting 3.  (sic)
      */
     parsePropTypeCCBFile:function (node, parent, ccbReader, readerClass) {
         var ccbFileName = ccbReader.getCCBRootPath() + ccbReader.readCachedString();
@@ -1764,7 +1785,7 @@ cc.BuilderReader10 = cc.Class.extend({
         var myCCBReader = new readerClass(ccbReader);
 
         var size ;
-        var bytes = fileUtils.getByteArrayFromFile(path,"rb", size);
+        var bytes = fileUtils.getByteArrayFromFile(path);
 
         myCCBReader.initWithData(bytes,ccbReader.getOwner());
         myCCBReader.getAnimationManager().setRootContainerSize(parent.getContentSize());
@@ -2045,15 +2066,41 @@ cc.BuilderReader10.load = function (ccbFilePath, owner, parentSize, ccbRootPath)
 };
 
 /**
- * Set tag and name.  Version 2.2.2 supports integer tag.
- * Version 3 supports string name.
+ * Set property "name".
+ * Do not set tag.  Version 2.2.2 supports integer tag.  Cocos2d-x crashes if passing a string.
+ * Version 3 supports string name.  Would be more compatible to getName/setName.
  */
 cc.BuilderReader10.setName = function(node, name)
 {
-    if (node.setTag) {
-        node.setTag(name);
+    if (node.setName) {
+        node.setName(name);
     }
-    node.name = name;
+    else {
+        node.name = name;
+    }
+};
+
+/**
+ * Set parent variable name of node, if valid and not already taken.
+ * Flash Professional sets parent member variable to instance name.
+ */
+cc.BuilderReader10.trySetParentVariable = function(parent, name, node)
+{
+    if (!parent || !name) {
+    }
+    else if (undefined === parent[name]) {
+        try {
+            parent[name] = node;
+        }
+        catch (err) {
+        cc.log('cc.BuilderReader10.trySetParentVariable: Cannot set "' 
+            + parent + '" variable with a name of "' + name + '" to node "' + node + '".');
+        }
+    }
+    else {
+        cc.log('cc.BuilderReader10.trySetParentVariable: "' 
+            + parent + '" already has variable "' + name + '" of value "' + parent[name] + '".');
+    }
 };
 
 cc.BuilderReader10.loadSpriteFrame = function(spriteFile, rootPath)
@@ -2420,6 +2467,18 @@ cc.BuilderReader10.extend = function()
     }
     if (!cc.Point) {
         cc.Point = cc.p;
+    }
+
+    /**
+     * Cocos2d-x v3 uses setName and getName.
+     */
+    if (!cc.Node.prototype.setName) {
+        cc.Node.prototype.setName = function(name) {
+            this._name = name;
+        };
+        cc.Node.prototype.getName = function() {
+            return this._name;
+        };
     }
 }
 

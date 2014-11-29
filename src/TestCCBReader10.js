@@ -177,7 +177,6 @@ function TestCCBReader10(parent) {
     testReadFloat();
     testReadFloatVersion5();
     testReader5(parent, "ccb/MainScene_5");
-    scene = testReader10(parent, "Machines", true);
     scene = testReader10(parent, "ccb/MainScene_10", true);
     scene.setScale(0.25);
     scene.setPositionY(320);
@@ -188,7 +187,10 @@ function TestCCBReader10(parent) {
     // scene = testReader10(parent, "ccb/WaitingPenguin");
     scene = testReader10(parent, "Machine");
     cc.BuilderReader10._currentReader.getAnimationManager().runAnimations("down");
+    var button = scene.getChildren()[0].CircleButton;
+    button.animationManager.runAnimations("down");
     cc.log("Look circle moving down and highlight rotating clockwise.");
+    scene = testReader10(parent, "Machines");
     // scene = testReader10(parent, "Machines", true);
     // Physics or something else not parsed:
     // scene = testReader10(parent, "ccb/Gameplay");
