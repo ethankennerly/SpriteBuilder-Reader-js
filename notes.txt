@@ -1,10 +1,9 @@
 TODO
-	Step through Gameplay physics nodes.
-	Load Gameplay.ccbi
 	Load sprite sheet.
+	Load Gameplay.ccbi
+	Assign member variable assignmer name.  Example:  "_physicsNode" https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/blob/master/PeevedPenguins.spritebuilder/SpriteBuilder%20Resources/Gameplay.ccb
 	Position MainScene 10 play button.
-	Research member variable assignmer name.  Example:  "_physicsNode" https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/blob/master/PeevedPenguins.spritebuilder/SpriteBuilder%20Resources/Gameplay.ccb
-	Research ControlSwitch.
+	Example ControlSwitch.
 
 SPRITEBUILDER
 

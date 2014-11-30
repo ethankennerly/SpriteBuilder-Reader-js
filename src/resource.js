@@ -6,9 +6,12 @@ var g_resources = [
     //image
     {src:s_HelloWorld},
     {src:s_CloseNormal},
-    {src:s_CloseSelected}
+    {src:s_CloseSelected},
 
     //plist
+    {src: "main.plist"},
+    {src: "PeevedPenguinsAssets.plist"},
+    {src: "spriteFrameFileList.plist"}
 
     //fnt
 

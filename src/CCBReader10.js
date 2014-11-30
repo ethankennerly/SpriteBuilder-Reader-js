@@ -2621,9 +2621,10 @@ cc.Color4BWapper.create = function (color) {
 };
 
 /**
- * Load sprite sheets.
+ * Load sprite sheets.  
+ * Expects all sprite sheet property lists were preloaded.
  *
- * @param   plist   SpriteBuilder saves "spriteFrameFileList.plist" that contains array "spriteFrameFiles" with sprite sheet file names. 
+ * @param   plist   SpriteBuilder saves "spriteFrameFileList.plist" that contains array "spriteFrameFiles" with sprite sheet file names.  But the loader expects each sprite sheet was preloaded, so spriteFrameFileList.plist appears to not be used.
  */
 cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
     if (undefined == cc.SpriteFrameCache.loadedFile) {
@@ -2633,20 +2634,14 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
         return;
     if(!plist)
         throw "cc.SpriteFrameCache.loadSpriteFramesFromFile(): plist should be non-null";
-    var TODO = true;
-    if (TODO) {
-        cc.log("    TODO: Load sprite sheet.");
+    var fileUtils = cc.FileUtils.getInstance();
+    var fullPath = fileUtils.fullPathForFilename(plist);
+    var dict = fileUtils.dictionaryWithContentsOfFileThreadSafe(fullPath);
+    var frameCache = cc.SpriteFrameCache.getInstance();
+    for (var s = 0; s < dict.spriteFrameFiles.length; s++) {
+        var spriteSheet = dict.spriteFrameFiles[s];
+        frameCache.addSpriteFrames(spriteSheet);
     }
-    else {
-        var fileUtils = cc.FileUtils.getInstance();
-        var fullPath = fileUtils.fullPathForFilename(plist);
-        var dict = fileUtils.dictionaryWithContentsOfFileThreadSafe(fullPath);
-        var frameCache = cc.SpriteFrameCache.getInstance();
-        for (var s = 0; s < dict.spriteFrameFiles.length; s++) {
-            var spriteSheet = dict.spriteFrameFiles[s];
-            frameCache.addSpriteFrames(spriteSheet);
-        }
-        cc.SpriteFrameCache.loadedFile[plist] = true;
-    }
+    cc.SpriteFrameCache.loadedFile[plist] = true;
 };
 

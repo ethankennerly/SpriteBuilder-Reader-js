@@ -1,5 +1,6 @@
 /**
  * Test reading version 5 and version 10 of CCBI format.
+ * Expects sprite frame plists were preloaded.
  */
 
 // http://stackoverflow.com/questions/15313418/javascript-assert
@@ -208,7 +209,7 @@ function testButtonCallback(parent) {
     var controller = new TestController();
     var reader = new cc.BuilderReader10.defaultReader(null, controller);
     scene = cc.BuilderReader10.loadReader(reader, "MainScene_10", true);
-    scene.setScale(0.25);
+    // scene.setScale(0.25);
     scene.setPosition(320, 720);
     parent.addChild(scene);
     cc.log("Testing button:  Click button.  Look at log.  Expect to read 'play'.");
@@ -219,7 +220,7 @@ function testButtonCallback(parent) {
  */
 function testIgnorePhysics(parent) {
     scene = testReader10(parent, "Gameplay", true);
-    scene.setScale(0.25);
+    // scene.setScale(0.25);
     cc.log("Look for button in top left of screen.");
 }
 
@@ -230,7 +231,7 @@ function TestCCBReader10(parent) {
     testFloat32Array();
     testReadFloat();
     testReadFloatVersion5();
-    // testReader5(parent, "ccb/MainScene_5");
+    // testReader5(parent, "MainScene_5");
     /*
     scene = testReader10(parent, "Bear");
     cc.log("Look for bear in center of screen with arm rotating.");
