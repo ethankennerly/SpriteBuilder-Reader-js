@@ -124,7 +124,7 @@ var CCB_SIZE_UNIT_INSET_POINTS = 3;
 var CCB_SIZE_UNIT_INSET_UI_POINTS = 4;    
     
 
-var _ccbGlobalContext = _ccbGlobalContext || window;
+var _ccbGlobalContext = _ccbGlobalContext || this;
 
 cc.BuilderFile = cc.Node.extend({
     _ccbFileNode:null,
@@ -601,6 +601,7 @@ cc.BuilderReader10 = cc.Class.extend({
      * Should be = "preferredSize". This is a typo in cocos2d-iphone, cocos2d-x and CocosBuilder!
      */
     overrideConstants: function() {
+        PROPERTY_GRAVITY = "gravity";
         PROPERTY_NAME = "name";
         PROPERTY_PREFEREDSIZE = "preferredSize";
         PROPERTY_MAXSIZE = "maxSize";
@@ -1191,11 +1192,18 @@ cc.BuilderReader10 = cc.Class.extend({
         var useLoader = null != this._ccNodeLoaderLibrary.getCCNodeLoader(className);
         var node;
         if (!useLoader) {
-            try {
-                node = eval("new " + className + "()");
-                cc.log('cc.BuilderReader10._readNodeGraph: new class name "' + className + '"');
+            var nodeClass = _ccbGlobalContext[className];
+            if (nodeClass) {
+                try {
+                    node = new nodeClass();
+                    //- node = eval("new " + className + "()");
+                    cc.log('cc.BuilderReader10._readNodeGraph: new class name "' + className + '"');
+                }
+                catch (err) {
+                    useLoader = true;
+                }
             }
-            catch (err) {
+            else {
                 useLoader = true;
             }
         }
@@ -1246,10 +1254,12 @@ cc.BuilderReader10 = cc.Class.extend({
         var uuid = this.readInt(false);
         if(uuid)
         {
+            /*
             cc.log('cc.BuilderReader10._readNodeGraph: Node reference not supported.' 
                 + '  CCB file "' + this._currentCCBFile + '"'
                 + ', class name "' + className + '"'
                 + ', UUID <' + uuid + '>');
+             */
             if (undefined == this.nodeMapping) {
                 this.nodeMapping = {};
             }
@@ -1491,6 +1501,8 @@ cc.BuilderReader10 = cc.Class.extend({
      * Read if node is a physics body.  Throw error if physics body.
      * Adapt sprite frame property name to display frame, which the version 5 sprite loader expects.
      *
+     * Ignore PhysicsNode gravity.  Reads floats to avoid corrupting data.
+     * https://github.com/spritebuilder/SpriteBuilder/blob/979516511d1bd91d235ade5000bddd20c14c9ca8/SpriteBuilder/CCPhysicsNode/CCBPProperties.plist
      */
     readPropertiesForNode: function (node, parent, ccbReader, ccNodeLoader) {
         var numRegularProps = ccbReader.readInt(false);
@@ -1524,16 +1536,17 @@ cc.BuilderReader10 = cc.Class.extend({
             switch (type) {
                 case CCB_PROPTYPE_POSITION:
                 {
-                    var position = this.parsePropTypePosition(node, parent, ccbReader, propertyName);
-                    //- if (setProp)
-                    //-    ccNodeLoader.onHandlePropTypePosition(node, parent, propertyName, position, ccbReader);
+                    var position = this.readPosition();
+                    if (setProp)
+                        this.onHandlePropTypePosition(node, parent, propertyName, position, ccbReader);
                     break;
                 }
                 case CCB_PROPTYPE_POINT:
                 {
                     var point = ccNodeLoader.parsePropTypePoint(node, parent, ccbReader);
-                    if (setProp)
+                    if (setProp) {
                         ccNodeLoader.onHandlePropTypePoint(node, parent, propertyName, point, ccbReader);
+                    }
                     break;
                 }
                 case CCB_PROPTYPE_POINTLOCK:
@@ -1892,13 +1905,10 @@ cc.BuilderReader10 = cc.Class.extend({
      * Read version 5 position in version 10 format.
      * @param   propertyName    If "position", set absolute position.
      */
-    parsePropTypePosition: function (
-    node, parent, ccbReader, propertyName) {
-
-        var pos = ccbReader.readPosition();
-
+    onHandlePropTypePosition: function(
+    node, parent, propertyName, pos, ccbReader) {
         if (PROPERTY_POSITION == propertyName) {
-            var containerSize = this.getContainerSize(parent);
+            var containerSize = ccbReader.getContainerSize(parent);
             var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
                 containerSize, propertyName);
             node.setPosition(cc.getAbsolutePosition(pt, pos.type, 
@@ -2484,10 +2494,13 @@ cc.BuilderReader10.extend = function()
          * Listen for button touch beginning.
          * @param   blockData   Expects properties "selMenuHander" {Function} and "target" {ControlSpriteButton}.
          *                      Note "selMenuHander" (sic) was misspelled in CCNodeLoader, so misspell it here too.
+         *                      Ignore if null. 
          */
         onHandlePropTypeBlock:function (node, parent, propertyName, blockData, ccbReader) {
-            node._addTargetWithActionForControlEvent(blockData.target, blockData.selMenuHander, 
-                cc.CONTROL_EVENT_TOUCH_DOWN);
+            if (null != blockData) {
+                node._addTargetWithActionForControlEvent(blockData.target, blockData.selMenuHander, 
+                    cc.CONTROL_EVENT_TOUCH_DOWN);
+            }
         },
     });
 
@@ -2506,7 +2519,7 @@ cc.BuilderReader10.extend = function()
                 }
             }
         }
-        cc.log('cc.NodeLoaderLibrary.guessClass: ' + guessed + '"');
+        cc.log('cc.NodeLoaderLibrary.guessClass: "' + guessed + '"');
         return guessed;
     };
 

@@ -1,37 +1,66 @@
 SpriteBuilder-Reader-js
 =======================
 
-TODO:  JavaScript CCBI reader of version 10, SpriteBuilder format compatible with Cocos2d 2.2.2.  
+Upgrade JavaScript CCBI reader from version 5 to version 10, SpriteBuilder format compatible with Cocos2d 2.2.2.
+
+Ethan Kennerly
 
 
 Usage
 -----
 
-Clone cocos2d-html commit 5fd806ab9f72865618205195b59e7281eedffbad
-
 In terminal:
-cd directory that contains cocos2d-html and SpriteBuilder-Reader-js
-python -m SimpleHTTPServer
+Go to directory that will contain cocos2d-html and SpriteBuilder-Reader-js
+Example:
+
+    cd ../SpriteBuilder-Reader-js/..
+
+Clone cocos2d-html5 v2.2.2.
+
+    git clone https://github.com/cocos2d/cocos2d-html5.git 
+    cd cocos2d-html5
+    git checkout 5fd806ab9f72865618205195b59e7281eedffbad
+
+Start a local web server.
+
+    cd ..
+    python -m SimpleHTTPServer
 
 Open Chrome or another web browser.  
-Open console.
+Open JavaScript console.
 Load URL:
-localhost:8000/SpriteBuilder-Reader-js
 
-In TestCCBReader10.js, uncomment the tests you want to see.  
+    localhost:8000/SpriteBuilder-Reader-js
+
+In a text editor, open:
+
+    src/TestCCBReader10.js
+
+Uncomment the tests you want to see.  
 Reload.
 
-SpriteBuilder CCBI and images from MakeGamesWithUs tutorial assets:
-https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS
 
-https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/blob/master/PeevedPenguins.spritebuilder/SpriteBuilder%20Resources/Bear.ccb
+Credits
+-------
+
+SpriteBuilder CCBI and images from MakeGamesWithUs tutorial assets:
+<https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/tree/master/PeevedPenguins.spritebuilder/Source/Resources/Published-iOS>
+
+Plist of Bear:
+<https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/blob/master/PeevedPenguins.spritebuilder/SpriteBuilder%20Resources/Bear.ccb>
 
 CocosBuilder example MainScene.ccbi from store example by Soomla:
-https://github.com/soomla/cocos2dx-js-store-example/blob/master/Resources/ccb
+<https://github.com/soomla/cocos2dx-js-store-example/blob/master/Resources/ccb>
 
 CCBReader.js was forked from Cocos2d 2.2.1
-https://github.com/cocos2d/cocos2d-html5
+<https://github.com/cocos2d/cocos2d-html5>
 commit f8b8f4c
+
+Cocos2D-Swift implements reader version 10:
+<https://github.com/cocos2d/cocos2d-swift/blob/398daf201e5188bc288a644e162f44d1a3ab8304/cocos2d-ui/CCBReader/CCBReader.m>
+
+SpriteBuilder implements corresponding writer:
+<https://github.com/spritebuilder/SpriteBuilder/blob/master/SpriteBuilder/Cocos2D%20iPhone/CCBXCocos2diPhoneWriter.m>
 
 
 Features
@@ -76,14 +105,14 @@ Extra Features
 
  * Set member variable to child names.
 
+
 Todo
 ----
-
- * Wire Peeved Penguins play button to log message.
 
  * Load Peeved Penguins Gameplay, ignoring physics.
 
  * Load sprite sheet.
+
  
 Not supported
 -------------
@@ -122,7 +151,6 @@ Not supported
  *     Unexpected property: 'fontSize'!
  *     Unexpected property: 'horizontalPadding'!
  *     Unexpected property: 'verticalPadding'!
- *     Unexpected property: 'fontColor'!
  *     Unexpected property: 'opacity'!
  *     Unexpected property: 'outlineColor'!
  *     Unexpected property: 'opacity'!
@@ -158,4 +186,5 @@ Not supported
  
  * SpriteKit sprite frame reader override.
 
- * SpriteBuilder appears to save font color and shadow color as byte instead of float.
+ * fontColor: SpriteBuilder appears to save font color and shadow color as byte instead of float.
+<https://github.com/spritebuilder/SpriteBuilder/blob/master/SpriteBuilder/CCLabelTTF/CCBPProperties.plist#L178>

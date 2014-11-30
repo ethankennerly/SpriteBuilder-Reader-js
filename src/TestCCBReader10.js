@@ -119,7 +119,12 @@ function testReadFloat() {
 }
 
 // testReader5 expects custom classes already defined:
-var MainScene = cc.Node.extend({});
+var MainScene = cc.Node.extend({
+    ctor: function() {
+        this._super();
+        cc.log("MainScene: Constructed custom class.");
+    }
+});
 
 var MainScreen = cc.Node.extend({});
 var StoreAScene = cc.Node.extend({});
@@ -177,6 +182,14 @@ function testMultipleAnimations(parent) {
 }
 
 /**
+ * TODO
+ */
+function testSpriteFrameAnimation(parent) {
+    cc.log("testSpriteFrameAnimation: TODO");
+    scene = testReader10(parent, "WaitingPenguin");
+}
+
+/**
  * The animation manager expects a function "onResolveCCBCCMenuItemSelector" to bind a function.
  */
 function testButtonCallback(parent) {
@@ -194,11 +207,20 @@ function testButtonCallback(parent) {
     });
     var controller = new TestController();
     var reader = new cc.BuilderReader10.defaultReader(null, controller);
-    scene = cc.BuilderReader10.loadReader(reader, "ccb/MainScene_10", true);
+    scene = cc.BuilderReader10.loadReader(reader, "MainScene_10", true);
     scene.setScale(0.25);
     scene.setPosition(320, 720);
     parent.addChild(scene);
     cc.log("Testing button:  Click button.  Look at log.  Expect to read 'play'.");
+}
+
+/**
+ * Physics or something else not parsed.
+ */
+function testIgnorePhysics(parent) {
+    scene = testReader10(parent, "Gameplay", true);
+    scene.setScale(0.25);
+    cc.log("Look for button in top left of screen.");
 }
 
 function TestCCBReader10(parent) {
@@ -208,18 +230,15 @@ function TestCCBReader10(parent) {
     testFloat32Array();
     testReadFloat();
     testReadFloatVersion5();
+    // testReader5(parent, "ccb/MainScene_5");
     /*
-    testReader5(parent, "ccb/MainScene_5");
-    scene = testReader10(parent, "ccb/Bear");
+    scene = testReader10(parent, "Bear");
     cc.log("Look for bear in center of screen with arm rotating.");
-    // scene = testReader10(parent, "ccb/Seal");
-    // scene = testReader10(parent, "ccb/Penguin");
-    // scene = testReader10(parent, "ccb/WaitingPenguin");
+    // scene = testReader10(parent, "Seal");
+    // scene = testReader10(parent, "Penguin");
      */
+    // testSpriteFrameAnimation(parent);
     testButtonCallback(parent);
     // testMultipleAnimations(parent);
-    // Physics or something else not parsed:
-    // scene = testReader10(parent, "ccb/Gameplay");
-    // scene.setScale(0.25);
-    // cc.log("Look for button in top left of screen.");
+    testIgnorePhysics(parent);
 }
