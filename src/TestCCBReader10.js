@@ -165,6 +165,11 @@ function testReader10(parent, basePath, preservePosition) {
     return scene;
 }
 
+function testSingleAnimation(parent) {
+    scene = testReader10(parent, "Bear");
+    cc.log("Testing single animation: Look for a bear with its arm rotating.");
+}
+
 var testAnimation;
 
 function testMultipleAnimations(parent) {
@@ -209,19 +214,31 @@ function testButtonCallback(parent) {
     var controller = new TestController();
     var reader = new cc.BuilderReader10.defaultReader(null, controller);
     scene = cc.BuilderReader10.loadReader(reader, "MainScene_10", true);
-    // scene.setScale(0.25);
     scene.setPosition(320, 720);
     parent.addChild(scene);
     cc.log("Testing button:  Click button.  Look at log.  Expect to read 'play'.");
 }
 
 /**
- * Physics or something else not parsed.
+ * Read physics but don't wire the physical properties.
+ * Expect to assign a member variable.
+ * Constructs global node class "Gameplay", that the reader expects.
  */
 function testIgnorePhysics(parent) {
+    var assigned = false;
+    Gameplay = cc.Node.extend({
+        onAssignCCBMemberVariable: function(target, memberVarAssignmentName, node) {
+            cc.log("Gameplay.onAssignCCBMemberVariable: " + target 
+                + " name " + memberVarAssignmentName 
+                + " node.name " + node.getName());
+            assigned = true;
+            return assigned;
+        }
+    });
     scene = testReader10(parent, "Gameplay", true);
-    // scene.setScale(0.25);
-    cc.log("Look for button in top left of screen.");
+    scene.setPositionY(40);
+    cc.log("Testing ignoring physics:  Look for button in top or bottom left of screen.");
+    assertEquals(true, assigned, "assigned");
 }
 
 function TestCCBReader10(parent) {
@@ -232,14 +249,11 @@ function TestCCBReader10(parent) {
     testReadFloat();
     testReadFloatVersion5();
     // testReader5(parent, "MainScene_5");
-    /*
-    scene = testReader10(parent, "Bear");
-    cc.log("Look for bear in center of screen with arm rotating.");
-    // scene = testReader10(parent, "Seal");
-    // scene = testReader10(parent, "Penguin");
-     */
-    // testSpriteFrameAnimation(parent);
-    testButtonCallback(parent);
     // testMultipleAnimations(parent);
     testIgnorePhysics(parent);
+    // testButtonCallback(parent);
+    testSingleAnimation(parent);
+    scene = testReader10(parent, "Seal");
+    scene = testReader10(parent, "Penguin");
+    testSpriteFrameAnimation(parent);
 }
