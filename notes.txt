@@ -1,5 +1,5 @@
 TODO
-	Clipping UI convention, like Flash Professional "mask".
+	Clipping UI convention, like Flash Professional "mask" with non rectangular.
 	Sprite frame animation.
 	Auto-create class.
 

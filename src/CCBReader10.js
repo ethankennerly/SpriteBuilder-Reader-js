@@ -1190,6 +1190,7 @@ cc.BuilderReader10 = cc.Class.extend({
             this.nodeMapping[uuid] = node;
         }
         this.readPropertiesForNode(node, parent, this, ccNodeLoader);
+        cc.BuilderReader10.clipByStencilName(parent, node);
         if (node.getName && node.getName()) {
             cc.log('cc.BuilderReader10._readNodeGraph: node name "' + node.getName() + '"');
         }
@@ -2815,14 +2816,17 @@ cc.BuilderReader10.getDefinitionByName = function(scope, address)
  *             masked
  *             stencil (name of a cc.Sprite or cc.Node)
  *             masked
+ * HTML5 does not trim the pixels.  It shows rectangle rotated to the stencil.
  */
-cc.BuilderReader10.clipByStencilName = function(clippingNode, node) {
+cc.BuilderReader10.clipByStencilName = function(clippingNode, nodeNamedStencil) {
     if (clippingNode instanceof cc.ClippingNode) {
-        if ("stencil" == node.getName()) {
-            clippingNode.setStencil(node);
-            clippingNode.setAlphaThreshold(0.0);
-            var stencilSize = stencil.getContentSize();
+        if ("stencil" == nodeNamedStencil.getName()) {
+            clippingNode.setStencil(nodeNamedStencil);
+            clippingNode.setAlphaThreshold(0.5);
+            var stencilSize = nodeNamedStencil.getContentSize();
             clippingNode.setContentSize(stencilSize.width, stencilSize.height);
+            nodeNamedStencil.setZOrder(-99999);
+            clippingNode._cangodhelpme(true);
         }
     }
 }

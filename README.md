@@ -68,6 +68,12 @@ Features
 
  * Layout by absolute position.
 
+ * Node position properties:  Corner, x unit, y unit.
+ 
+ * Adapt position type and and size type.
+
+ * Scale content to percent of parent size.
+
  * Wire node animations.
 
  * Read keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
@@ -103,32 +109,13 @@ Features
 Extra Features
 --------------
 
- * Set parent variable to child names.
+ * Set parent variable to child names, like Flash instance names.
 
 
 Not supported
 -------------
 
- * Node properties:  corner, x unit, y unit.  How would Cocos2D version 2.2.2 interpret these?
- 
- * Version 10 adds node properties:  position type, scale X, scale Y.  How would Cocos2D version 2.2.2 interpret these?
- 
- * Adapt position and size type and size xUnit and yUnit, which were handled in CCNodeLoader. 
-
- * Position Peeved Penguins example of button with normalized and absolute position.
-
- * Scale content to percent of parent size.
-
  * Animation of sprite frames.
- 
- * Node property:  BlockCCControl, Block.
-
- * Nodes with physics.  Opening a scene with physics causes a crash.
-
- * Internet Explorer 9: For version 5 and version 10, FileUtils calls TypedArray (bytearray), which is not supported in IE9.
- <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays>
-
- * Only sets position property, not shadowOffset position.  Does not support shadowOffset.
  
  * Button properties:
  *     'title' --> 'title|Normal'
@@ -160,6 +147,15 @@ Not supported
  *     labelOpacity|Disabled
  *     labelOpacity|Selected
 
+ * Node property:  BlockCCControl.
+
+ * Nodes with physics.
+
+ * Internet Explorer 9: For version 5 and version 10, FileUtils calls TypedArray (bytearray), which is not supported in IE9.
+ <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays>
+
+ * Only sets position property, not shadowOffset position.  Does not support shadowOffset.
+ 
  * configCocos2d.plist 
  
  * Control button Scale9Sprite not supported.

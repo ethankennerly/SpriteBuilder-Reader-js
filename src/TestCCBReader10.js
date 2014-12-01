@@ -325,12 +325,26 @@ function testIgnorePhysics(parent) {
     assertEquals(true, assigned, "assigned");
 }
 
+function testClipByStencilName(parent)
+{
+    var clipper = cc.ClippingNode.create();
+    scene = testReader10(clipper, "Machine", true);
+    var circle = scene.CircleButton;
+    circle.setName("stencil");
+    cc.BuilderReader10.clipByStencilName(clipper, circle);
+    clipper.setPosition(100, 480);
+    // circle.gotoAndPlay("down");
+    parent.addChild(clipper);
+    cc.log("Testing clipping node by stencil name: Look for blue circle.");
+}
+
 function TestCCBReader10(parent) {
     testReadNumbers();
     testConvertToPoints();
     testGetDefinitionByName();
     // testReader5(parent, "MainScene_5");
     testMultipleAnimations(parent);
+    testClipByStencilName(parent);
     // testIgnorePhysics(parent);
     // testButtonCallback(parent);
     // testSingleAnimation(parent);
