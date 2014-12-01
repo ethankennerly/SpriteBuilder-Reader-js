@@ -977,92 +977,6 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     /**
-     * Ignores xUnit and yUnit.
-     * How would version 2.2.2 support these?
-     * Corner is same as type.
-     */
-    readPosition: function()
-    {
-        var pos = {};
-        pos.x = this.readFloat();
-        pos.y = this.readFloat();
-        pos.corner = this.readByte();  // Same as type
-        pos.xUnit = this.readByte();  // TODO
-        pos.yUnit = this.readByte();  // TODO
-        pos.type = this._adaptPositionType(pos.xUnit, pos.yUnit, pos.corner);
-        return pos;
-    },
-
-    _adaptPositionType: function(xUnit, yUnit, corner)
-    {
-        var type = CCB_POSITIONTYPE_RELATIVE_BOTTOM_LEFT;
-        if (CCB_POSITION_UNIT_POINTS == xUnit
-        || CCB_POSITION_UNIT_POINTS == yUnit
-        || CCB_SIZE_UNIT_INSET_POINTS == xUnit
-        || CCB_SIZE_UNIT_INSET_POINTS == yUnit) {
-            type = corner;
-        }
-        else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
-        || CCB_POSITION_UNIT_NORMALIZED == yUnit) {
-            type = CCB_POSITIONTYPE_PERCENT;
-        }
-        else if (CCB_SIZE_UNIT_INSET_UI_POINTS == xUnit
-        || CCB_SIZE_UNIT_INSET_UI_POINTS == yUnit) {
-            type = CCB_POSITIONTYPE_MULTIPLY_RESOLUTION;
-        }
-        else {
-            cc.log("Unexpected position unit");
-        }
-        return type;
-    },
-
-    readSize: function()
-    {
-        var size = {};
-        size.width = this.readFloat();
-        size.height = this.readFloat();
-        size.w = size.width;
-        size.h = size.height;
-        size.xUnit = this.readByte();  // TODO
-        size.yUnit = this.readByte();  // TODO
-        size.type = this._adaptSizeType(size);
-        return size;
-    },
-
-    /**
-     * Absolute position not supported.
-     */
-    _adaptSizeType: function(size)
-    {
-        var xUnit = size.xUnit;
-        var yUnit = size.yUnit;
-        var type = CCB_SIZETYPE_RELATIVE_CONTAINER;
-        if (CCB_POSITION_UNIT_POINTS == xUnit
-        || CCB_POSITION_UNIT_POINTS == yUnit) {
-            type = CCB_SIZETYPE_ABSOLUTE;
-        }
-        else if (CCB_SIZE_UNIT_INSET_POINTS == xUnit
-        || CCB_SIZE_UNIT_INSET_POINTS == yUnit) {
-            type = CCB_SIZETYPE_RELATIVE_CONTAINER;
-        }
-        else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
-        || CCB_POSITION_UNIT_NORMALIZED == yUnit) {
-            type = CCB_SIZETYPE_PERCENT;
-            size.width *= 100.0;
-            size.height *= 100.0;
-        }
-        else if (CCB_SIZE_UNIT_INSET_UI_POINTS == xUnit
-        || CCB_SIZE_UNIT_INSET_UI_POINTS == yUnit) {
-            type = CCB_SIZETYPE_MULTIPLY_RESOLUTION;
-        }
-        else {
-            cc.log("Unexpected size unit");
-        }
-        size.type = size;
-        return type;
-    },
-
-    /**
      * Expects sprite sheets were already loaded.
      * If sprite frame image not found, load image file.
      */
@@ -1916,7 +1830,8 @@ cc.BuilderReader10 = cc.Class.extend({
     node, parent, propertyName, posAndType, ccbReader) {
         if (PROPERTY_POSITION == propertyName) {
             var containerSize = ccbReader.getContainerSize(parent);
-            var point = cc.Node.convertPositionToPoints(posAndType, posAndType, containerSize);
+            var point = cc.Node.convertPositionToPoints(posAndType, posAndType, containerSize,
+                cc.BuilderReader10.UIScaleFactor);
             node.setPosition(point);
             /*-
             var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
@@ -1937,42 +1852,67 @@ cc.BuilderReader10 = cc.Class.extend({
         return point;
     },
 
+    /**
+     * Ignores xUnit and yUnit.
+     * How would version 2.2.2 support these?
+     * Corner is same as type.
+     */
+    readPosition: function()
+    {
+        var pos = {};
+        pos.x = this.readFloat();
+        pos.y = this.readFloat();
+        pos.corner = this.readByte();  // Same as type
+        pos.xUnit = this.readByte();  // TODO
+        pos.yUnit = this.readByte();  // TODO
+        pos.type = this._adaptPositionType(pos.xUnit, pos.yUnit, pos.corner);
+        return pos;
+    },
+
+    _adaptPositionType: function(xUnit, yUnit, corner)
+    {
+        var type = CCB_POSITIONTYPE_RELATIVE_BOTTOM_LEFT;
+        if (CCB_POSITION_UNIT_POINTS == xUnit
+        || CCB_POSITION_UNIT_POINTS == yUnit
+        || CCB_SIZE_UNIT_INSET_POINTS == xUnit
+        || CCB_SIZE_UNIT_INSET_POINTS == yUnit) {
+            type = corner;
+        }
+        else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
+        || CCB_POSITION_UNIT_NORMALIZED == yUnit) {
+            type = CCB_POSITIONTYPE_PERCENT;
+        }
+        else if (CCB_SIZE_UNIT_INSET_UI_POINTS == xUnit
+        || CCB_SIZE_UNIT_INSET_UI_POINTS == yUnit) {
+            type = CCB_POSITIONTYPE_MULTIPLY_RESOLUTION;
+        }
+        else {
+            cc.log("Unexpected position unit");
+        }
+        return type;
+    },
+
+    readSize: function()
+    {
+        var size = {};
+        size.width = this.readFloat();
+        size.height = this.readFloat();
+        size.w = size.width;
+        size.h = size.height;
+        size.widthUnit = this.readByte();
+        size.heightUnit = this.readByte();
+        return size;
+    },
+
+    /**
+     * Convert SpriteBuilder v3 content size to v2 absolute points.
+     */
     parsePropTypeSize: function (
     node, parent, ccbReader) {
         var size = ccbReader.readSize();
-        var type = size.type;
-        var width = size.width;
-        var height = size.height;
         var containerSize = ccbReader.getContainerSize(parent);
-        switch (type) {
-            case CCB_SIZETYPE_ABSOLUTE:
-                /* Nothing. */
-                break;
-            case CCB_SIZETYPE_RELATIVE_CONTAINER:
-                width = containerSize.width - width;
-                height = containerSize.height - height;
-                break;
-            case CCB_SIZETYPE_PERCENT:
-                width = (containerSize.width * width / 100.0);
-                height = (containerSize.height * height / 100.0);
-                break;
-            case CCB_SIZETYPE_HORIZONTAL_PERCENT:
-                width = (containerSize.width * width / 100.0);
-                break;
-            case CCB_SIZETYPE_VERTICAL_PERCENT:
-                height = (containerSize.height * height / 100.0);
-                break;
-            case CCB_SIZETYPE_MULTIPLY_RESOLUTION:
-                var resolutionScale = cc.BuilderReader.getResolutionScale();
-                width *= resolutionScale;
-                height *= resolutionScale;
-                break;
-            default:
-                cc.log("Unknown CCB type.");
-                break;
-        }
-
-        return new cc.Size(width, height);
+        var size = cc.Node.convertContentSizeToPoints(size, size, containerSize, cc.BuilderReader10.UIScaleFactor);
+        return size;
     },
 
     /**
@@ -2012,6 +1952,7 @@ cc.BuilderReader10 = cc.Class.extend({
     }
 });
 
+cc.BuilderReader10.UIScaleFactor = 1.0;
 cc.BuilderReader10._ccbResolutionScale = 1;
 cc.BuilderReader10.setResolutionScale = function(scale){
     cc.BuilderReader10._ccbResolutionScale = scale;
@@ -2661,7 +2602,10 @@ if (cc.Node.prototype.convertPositionToPoints) {
 }
 
 /**
- * Static function for easy unit testing.  Example @see TestCCBReader10.js
+ * SpriteBuilder v3 format to absolute points in v2.
+ * Static function for easy unit testing.  
+ * Example @see TestCCBReader10.js
+ *
  * Line ported from cocos2d-iphone v3 file CCNode.m
  * @param   positionType    Expects properties "corner", "xUnit", "yUnit".
  * @return  Retrofitted SpriteBuilder position and position type to Cocos2D v2 coordinate system of absolute points.
@@ -2751,7 +2695,10 @@ if (cc.Node.prototype.convertContentSizeToPoints) {
 }
 
 /**
- * Static function for easy unit testing.  Example @see TestCCBReader10.js
+ * SpriteBuilder v3 format to absolute points in v2.
+ * Static function for easy unit testing.  
+ * Example @see TestCCBReader10.js
+ *
  * Line ported from cocos2d-iphone v3 file CCNode.m
  * @param   sizeType    Expects properties "widthUnit", "heightUnit".
  * @return  Retrofitted SpriteBuilder size and size type to Cocos2D v2 coordinate system of absolute points.

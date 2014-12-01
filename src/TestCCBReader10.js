@@ -315,8 +315,8 @@ function TestCCBReader10(parent) {
     testConvertToPoints();
     // testReader5(parent, "MainScene_5");
     // testMultipleAnimations(parent);
-    testIgnorePhysics(parent);
-    // testButtonCallback(parent);
+    // testIgnorePhysics(parent);
+    testButtonCallback(parent);
     // testSingleAnimation(parent);
     // scene = testReader10(parent, "Seal");
     // scene = testReader10(parent, "Penguin");
