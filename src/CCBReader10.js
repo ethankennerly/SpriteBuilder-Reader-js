@@ -1885,8 +1885,9 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     /**
-     * If no parent, return size 0.
+     * If no parent, return window size.
      * Cocos2d-x says parent is null and crashes.
+     * A child setting its position as a fraction of parent content size expects parent has a non-zero content size.
      */
     getContainerSize: function(parent) {
         var size;
@@ -1894,9 +1895,10 @@ cc.BuilderReader10 = cc.Class.extend({
             size = this.getAnimationManager().getContainerSize(parent);
         }
         else {
-            cc.log("cc.BuilderReader10.getContainerSize: Expected parent. Got " + parent 
-                 + ". Defaulting to size 0." );
-            size = new cc.Size(0, 0);
+            size = cc.Director.getInstance().getWinSize();
+            cc.log("cc.BuilderReader10.getContainerSize:"
+                + " No parent of class " + this._currentClassName + "."
+                + " Defaulting to window size: " + size.width + ", " + size.height );
         }
         return size;
     },
@@ -2645,3 +2647,65 @@ cc.SpriteFrameCache.loadSpriteFramesFromFile = function(plist) {
     cc.SpriteFrameCache.loadedFile[plist] = true;
 };
 
+if (cc.Node.prototype.convertPositionToPoints) {
+    throw new Error("Did not expect cc.Node.convertPositionToPoints was defined.");
+}
+
+/**
+ * Static function for easy unit testing.  Example @see TestCCBReader10.js
+ * Line ported from cocos2d-iphone v3 file CCNode.m
+ * @param   positionType    Expects properties "corner", "xUnit", "yUnit".
+ * @return  Retrofitted SpriteBuilder position and position type to Cocos2D v2 coordinate system of absolute points.
+ */
+cc.Node.convertPositionToPoints = function(position, positionType, parentContentSize, uiScaleFactor) {
+    return position;
+    /*
+- (CGPoint) convertPositionToPoints:(CGPoint)position type:(CCPositionType)type
+{
+    CCDirector* director = [CCDirector sharedDirector];
+    
+    CGPoint positionInPoints;
+    float x = 0;
+    float y = 0;
+    
+    // Convert position to points
+    CCPositionUnit xUnit = type.xUnit;
+    if (xUnit == CCPositionUnitPoints) x = position.x;
+    else if (xUnit == CCPositionUnitUIPoints) x = position.x * director.UIScaleFactor;
+    else if (xUnit == CCPositionUnitNormalized) x = position.x * _parent.contentSizeInPoints.width;
+    
+    CCPositionUnit yUnit = type.yUnit;
+    if (yUnit == CCPositionUnitPoints) y = position.y;
+    else if (yUnit == CCPositionUnitUIPoints) y = position.y * director.UIScaleFactor;
+    else if (yUnit == CCPositionUnitNormalized) y = position.y * _parent.contentSizeInPoints.height;
+    
+    // Account for reference corner
+    CCPositionReferenceCorner corner = type.corner;
+    if (corner == CCPositionReferenceCornerBottomLeft)
+    {
+        // Nothing needs to be done
+    }
+    else if (corner == CCPositionReferenceCornerTopLeft)
+    {
+        // Reverse y-axis
+        y = _parent.contentSizeInPoints.height - y;
+    }
+    else if (corner == CCPositionReferenceCornerTopRight)
+    {
+        // Reverse x-axis and y-axis
+        x = _parent.contentSizeInPoints.width - x;
+        y = _parent.contentSizeInPoints.height - y;
+    }
+    else if (corner == CCPositionReferenceCornerBottomRight)
+    {
+        // Reverse x-axis
+        x = _parent.contentSizeInPoints.width - x;
+    }
+    
+    positionInPoints.x = x;
+    positionInPoints.y = y;
+    
+    return positionInPoints;
+}
+     */
+}

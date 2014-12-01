@@ -1,8 +1,9 @@
 TODO
-	Assign member variable assignmer name.  Example:  "_physicsNode" https://github.com/MakeGamesWithUs/PeevedPenguins-Spritebuilder/blob/master/PeevedPenguins.spritebuilder/SpriteBuilder%20Resources/Gameplay.ccb
+	Unit test MainScene play button position type.
 	Position MainScene 10 play button.
 	director.setContentScaleFactor
 	Example ControlSwitch.
+	Sprite frame animation.
 
 SPRITEBUILDER
 
@@ -189,5 +190,37 @@ alternatives:
 		read property block
 		handle selector and target of block, on pressed.
 
+
+Sun 11/30/2014 
+16:13
+
+Unit test
+
+containerSize: 
+height: 0
+width: 0
+
+pos: Object
+corner: 0
+type: 4
+x: 0.5
+xUnit: 2
+y: 0.5
+yUnit: 2
+
+Expect half way of parent.
+
+containerSize: 
+height: 0
+width: 0
+
+
+pos: Object
+corner: 0
+type: 0
+x: 0.5
+xUnit: 2
+y: 94
+yUnit: 0
 
 

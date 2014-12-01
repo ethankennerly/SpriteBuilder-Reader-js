@@ -103,17 +103,9 @@ Features
 Extra Features
 --------------
 
- * Set member variable to child names.
+ * Set parent variable to child names.
 
 
-Todo
-----
-
- * Load Peeved Penguins Gameplay, ignoring physics.
-
- * Load sprite sheet.
-
- 
 Not supported
 -------------
 

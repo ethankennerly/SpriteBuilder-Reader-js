@@ -119,6 +119,42 @@ function testReadFloat() {
     assertEquals(-14, reader.readFloat());
 }
 
+function testReadNumbers() {
+    testReadIntOLD();
+    testReadVariableLengthIntFromArray();
+    testReadInt();
+    testFloat32Array();
+    testReadFloat();
+    testReadFloatVersion5();
+}
+
+function testConvertPositionToPointsBasic() {
+    var position = new cc.p(-2.0, 3.0);
+    var positionType = {corner: 0, xUnit: 0, yUnit: 0};
+    var parentContentSize = new cc.Size(640, 960);
+    var uiScaleFactor = 0.5;
+    var point = cc.Node.convertPositionToPoints(position, positionType, 
+        parentContentSize, uiScaleFactor);
+    assertEquals(point.x, -2);
+    assertEquals(point.y, 3);
+}
+
+function testConvertPositionToPointsNormalized() {
+    var position = new cc.p(0.5, 94);
+    var positionType = {corner: 0, xUnit: 2, yUnit: 0};
+    var parentContentSize = new cc.Size(640, 960);
+    var uiScaleFactor = 0.5;
+    var point = cc.Node.convertPositionToPoints(position, positionType, 
+        parentContentSize, uiScaleFactor);
+    assertEquals(point.x, 320);
+    assertEquals(point.y, 94);
+}
+
+function testConvertPositionToPoints() {
+    testConvertPositionToPointsBasic();
+    testConvertPositionToPointsNormalized();
+}
+
 // testReader5 expects custom classes already defined:
 var MainScene = cc.Node.extend({
     ctor: function() {
@@ -214,7 +250,7 @@ function testButtonCallback(parent) {
     var controller = new TestController();
     var reader = new cc.BuilderReader10.defaultReader(null, controller);
     scene = cc.BuilderReader10.loadReader(reader, "MainScene_10", true);
-    scene.setPosition(320, 720);
+    scene.setPositionY(720);
     parent.addChild(scene);
     cc.log("Testing button:  Click button.  Look at log.  Expect to read 'play'.");
 }
@@ -242,18 +278,14 @@ function testIgnorePhysics(parent) {
 }
 
 function TestCCBReader10(parent) {
-    testReadIntOLD();
-    testReadVariableLengthIntFromArray();
-    testReadInt();
-    testFloat32Array();
-    testReadFloat();
-    testReadFloatVersion5();
+    testReadNumbers();
+    testConvertPositionToPoints();
     // testReader5(parent, "MainScene_5");
     // testMultipleAnimations(parent);
-    testIgnorePhysics(parent);
-    // testButtonCallback(parent);
-    testSingleAnimation(parent);
-    scene = testReader10(parent, "Seal");
-    scene = testReader10(parent, "Penguin");
-    testSpriteFrameAnimation(parent);
+    // testIgnorePhysics(parent);
+    testButtonCallback(parent);
+    // testSingleAnimation(parent);
+    // scene = testReader10(parent, "Seal");
+    // scene = testReader10(parent, "Penguin");
+    // testSpriteFrameAnimation(parent);
 }
