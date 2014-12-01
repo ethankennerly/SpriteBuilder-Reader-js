@@ -925,6 +925,8 @@ cc.BuilderReader10 = cc.Class.extend({
      * To catch more types unsupported, throw error on an unsupported type.
      * If name is "opacity" and type is float, then convert float to byte.
      * Test case: 2014-11-29 Expect machine background opacity fades in.  Got disappears.
+     *
+     * WARNING: If this node has a normalized or scaled position, then keyframe position will be off.
      */
     readKeyframe:function (type, name) {
         var keyframe = new cc.BuilderKeyframe();
@@ -1905,16 +1907,22 @@ cc.BuilderReader10 = cc.Class.extend({
 
     /**
      * Read version 5 position in version 10 format.
+     * Animation expects v2 point, so animation might be off.
+     * @param   posAndType      Object with properties of position and v3 positionType.
      * @param   propertyName    If "position", set absolute position.
      */
     onHandlePropTypePosition: function(
-    node, parent, propertyName, pos, ccbReader) {
+    node, parent, propertyName, posAndType, ccbReader) {
         if (PROPERTY_POSITION == propertyName) {
             var containerSize = ccbReader.getContainerSize(parent);
+            var point = cc.Node.convertPositionToPoints(posAndType, posAndType, containerSize);
+            node.setPosition(point);
+            /*-
             var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
                 containerSize, propertyName);
             node.setPosition(cc.getAbsolutePosition(pt, pos.type, 
                 containerSize, propertyName));   //different to -x    node.setPosition(pt);
+            -*/
         }
         else {
             ASSERT_FAIL_UNEXPECTED_PROPERTY(propertyName);
@@ -1925,7 +1933,7 @@ cc.BuilderReader10 = cc.Class.extend({
             ccbReader.getAnimationManager().setBaseValue(baseValue,node,propertyName);
         }
 
-        return pt;
+        return point;
     },
 
     parsePropTypeSize: function (
@@ -2656,56 +2664,63 @@ if (cc.Node.prototype.convertPositionToPoints) {
  * Line ported from cocos2d-iphone v3 file CCNode.m
  * @param   positionType    Expects properties "corner", "xUnit", "yUnit".
  * @return  Retrofitted SpriteBuilder position and position type to Cocos2D v2 coordinate system of absolute points.
+ * @param   UIScaleFactor {Number}   If not defined, default to 1.0.  One use case of UI scale factor, (which is different from content scale factor) is to set UI scale factor for iPhad to be at 50% and iPhone to be at 100% so UI elements, such as a HUD, is not much larger on iPad.  Example from cocos2d-iphone CCAppDelegate.m: director.UIScaleFactor = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 1.0 : 0.5);
+ *
+ * A previous porter had replaced iphone CapitalCase unit constants with html5 ALL_CAPS constants, so I continued that search and replace labor here for html5 consistency.
  */
-cc.Node.convertPositionToPoints = function(position, positionType, parentContentSize, uiScaleFactor) {
-    return position;
-    /*
-- (CGPoint) convertPositionToPoints:(CGPoint)position type:(CCPositionType)type
+cc.Node.convertPositionToPoints = function(position, positionType, 
+parentContentSizeInPoints, UIScaleFactor) 
 {
-    CCDirector* director = [CCDirector sharedDirector];
-    
-    CGPoint positionInPoints;
-    float x = 0;
-    float y = 0;
+    if (undefined === UIScaleFactor) 
+    {
+        UIScaleFactor = 1.0;
+    }
+    var positionInPoints = new cc.p(0.0, 0.0);
+    var x = 0.0;
+    var y = 0.0;
     
     // Convert position to points
-    CCPositionUnit xUnit = type.xUnit;
-    if (xUnit == CCPositionUnitPoints) x = position.x;
-    else if (xUnit == CCPositionUnitUIPoints) x = position.x * director.UIScaleFactor;
-    else if (xUnit == CCPositionUnitNormalized) x = position.x * _parent.contentSizeInPoints.width;
+    var xUnit = positionType.xUnit;
+    if (xUnit == CCB_POSITION_UNIT_POINTS) 
+        x = position.x;
+    else if (xUnit == CCB_POSITION_UNIT_UI_POINTS) 
+        x = position.x * UIScaleFactor;
+    else if (xUnit == CCB_POSITION_UNIT_NORMALIZED) 
+        x = position.x * parentContentSizeInPoints.width;
     
-    CCPositionUnit yUnit = type.yUnit;
-    if (yUnit == CCPositionUnitPoints) y = position.y;
-    else if (yUnit == CCPositionUnitUIPoints) y = position.y * director.UIScaleFactor;
-    else if (yUnit == CCPositionUnitNormalized) y = position.y * _parent.contentSizeInPoints.height;
+    var yUnit = positionType.yUnit;
+    if (yUnit == CCB_POSITION_UNIT_POINTS) 
+        y = position.y;
+    else if (yUnit == CCB_POSITION_UNIT_UI_POINTS) 
+        y = position.y * UIScaleFactor;
+    else if (yUnit == CCB_POSITION_UNIT_NORMALIZED) 
+        y = position.y * parentContentSizeInPoints.height;
     
     // Account for reference corner
-    CCPositionReferenceCorner corner = type.corner;
-    if (corner == CCPositionReferenceCornerBottomLeft)
+    var corner = positionType.corner;
+    if (corner == CCB_POSITIONTYPE_RELATIVE_BOTTOM_LEFT)
     {
         // Nothing needs to be done
     }
-    else if (corner == CCPositionReferenceCornerTopLeft)
+    else if (corner == CCB_POSITIONTYPE_RELATIVE_TOP_LEFT)
     {
         // Reverse y-axis
-        y = _parent.contentSizeInPoints.height - y;
+        y = parentContentSizeInPoints.height - y;
     }
-    else if (corner == CCPositionReferenceCornerTopRight)
+    else if (corner == CCB_POSITIONTYPE_RELATIVE_TOP_RIGHT)
     {
         // Reverse x-axis and y-axis
-        x = _parent.contentSizeInPoints.width - x;
-        y = _parent.contentSizeInPoints.height - y;
+        x = parentContentSizeInPoints.width - x;
+        y = parentContentSizeInPoints.height - y;
     }
-    else if (corner == CCPositionReferenceCornerBottomRight)
+    else if (corner == CCB_POSITIONTYPE_RELATIVE_BOTTOM_RIGHT)
     {
         // Reverse x-axis
-        x = _parent.contentSizeInPoints.width - x;
+        x = parentContentSizeInPoints.width - x;
     }
     
     positionInPoints.x = x;
     positionInPoints.y = y;
     
     return positionInPoints;
-}
-     */
 }

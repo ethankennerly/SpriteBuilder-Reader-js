@@ -150,6 +150,12 @@ function testConvertPositionToPointsNormalized() {
     assertEquals(point.y, 94);
 }
 
+function exampleUIScaleFactor() {
+    var size = cc.Director.getInstance().getWinSize();
+    var min = Math.min(size.width, size.height);
+    UIScaleFactor = min <= 640 ? 1.0 : 0.5;
+}
+
 function testConvertPositionToPoints() {
     testConvertPositionToPointsBasic();
     testConvertPositionToPointsNormalized();
@@ -250,9 +256,8 @@ function testButtonCallback(parent) {
     var controller = new TestController();
     var reader = new cc.BuilderReader10.defaultReader(null, controller);
     scene = cc.BuilderReader10.loadReader(reader, "MainScene_10", true);
-    scene.setPositionY(720);
     parent.addChild(scene);
-    cc.log("Testing button:  Click button.  Look at log.  Expect to read 'play'.");
+    cc.log("Testing button:  Click button at bottom-center.  Look at log.  Expect to read 'play'.");
 }
 
 /**
@@ -282,8 +287,8 @@ function TestCCBReader10(parent) {
     testConvertPositionToPoints();
     // testReader5(parent, "MainScene_5");
     // testMultipleAnimations(parent);
-    // testIgnorePhysics(parent);
-    testButtonCallback(parent);
+    testIgnorePhysics(parent);
+    // testButtonCallback(parent);
     // testSingleAnimation(parent);
     // scene = testReader10(parent, "Seal");
     // scene = testReader10(parent, "Penguin");
