@@ -931,9 +931,11 @@ cc.BuilderReader10 = cc.Class.extend({
      * If name is "opacity" and type is float, then convert float to byte.
      * Test case: 2014-11-29 Expect machine background opacity fades in.  Got disappears.
      *
-     * WARNING: If this node has a normalized or scaled position, then keyframe position will be off.
+     * @param   node    If this node has a normalized or scaled position, then keyframe position needs position type.
+     *
+     * cocos2d-iphone reader scale lock keyframe does not read a scale type.
      */
-    readKeyframe:function (type, name) {
+    readKeyframe:function (type, name, positionType) {
         var keyframe = new cc.BuilderKeyframe();
         keyframe.setTime(this.readFloat());
         var easingType = this.readInt(false);
@@ -966,9 +968,10 @@ cc.BuilderReader10 = cc.Class.extend({
         || type == CCB_PROPTYPE_FLOAT) {
             value = this.readFloat();
         } else if (type == CCB_PROPTYPE_SCALELOCK 
-        || type == CCB_PROPTYPE_FLOATXY
-        || type == CCB_PROPTYPE_POSITION) {
+        || type == CCB_PROPTYPE_FLOATXY) {
             value = [this.readFloat(), this.readFloat()];
+        } else if (type == CCB_PROPTYPE_POSITION) {
+            value = [this.readFloat(), this.readFloat(), positionType];
         } else if (type == CCB_PROPTYPE_SPRITEFRAME) {
             value = this.readSpriteFrame();
         }
@@ -1158,7 +1161,7 @@ cc.BuilderReader10 = cc.Class.extend({
                 var numKeyframes = this.readInt(false);
                 var locKeyframes = seqProp.getKeyframes();
                 for (var k = 0; k < numKeyframes; ++k) {
-                    var keyFrame = this.readKeyframe(seqProp.getType(), name);
+                    var keyFrame = this.readKeyframe(seqProp.getType(), name, node._positionType);
                     locKeyframes.push(keyFrame);
                 }
                 seqNodeProps.setObject(seqProp, seqProp.getName());
@@ -1196,6 +1199,7 @@ cc.BuilderReader10 = cc.Class.extend({
         if (isCCBFileNode) {
             var embeddedNode = node.getCCBFileNode();
             embeddedNode.setPosition(node.getPosition());
+            embeddedNode._positionType = node._positionType;
             embeddedNode.setRotation(node.getRotation());
             embeddedNode.setScaleX(node.getScaleX());
             embeddedNode.setScaleY(node.getScaleY());
@@ -1795,12 +1799,18 @@ cc.BuilderReader10 = cc.Class.extend({
      * Mostly add and adapt units.
      * Nevermind scale lock: read byte and int is probably the same.
      * Node loader is referenced in several files.
+     * AnimationManager only sets RGB (Color3), so only save RGB to animation color.
+     * Set base value of alpha to opacity.
      */
     parsePropTypeColor4: function (
     node, parent, ccbReader, propertyName) {
         var color = ccbReader.readColor(propertyName);
         if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
-            ccbReader.getAnimationManager().setBaseValue(cc.Color3BWapper.create(color),node, propertyName);
+            ccbReader.getAnimationManager().setBaseValue(cc.Color3BWapper.create(color),
+                node, propertyName);
+        }
+        if(ccbReader.getAnimatedProperties().indexOf(PROPERTY_OPACITY) > -1){
+            ccbReader.getAnimationManager().setBaseValue(color.a, node, PROPERTY_OPACITY);
         }
         return color;
     },
@@ -1825,18 +1835,19 @@ cc.BuilderReader10 = cc.Class.extend({
     },
 
     /**
-     * Read version 5 position in version 10 format.
-     * Animation expects v2 point, so animation might be off.
-     * @param   posAndType      Object with properties of position and v3 positionType.
+     * Map version 10 position to Cocos2d v2.
+     * @param   posAndType      Object with properties of position and v3 positionType.  
+     *                          Sets node property "_positionType" used by reading keyframe.
+     *                          Sets base value for animation manager to be converted to absolute position.
      * @param   propertyName    If "position", set absolute position.
      */
     onHandlePropTypePosition: function(
     node, parent, propertyName, posAndType, ccbReader) {
         if (PROPERTY_POSITION == propertyName) {
             var containerSize = ccbReader.getContainerSize(parent);
-            var point = cc.Node.convertPositionToPoints(posAndType, posAndType, containerSize,
-                cc.BuilderReader10.UIScaleFactor);
-            node.setPosition(point);
+            var points = cc.Node.convertPositionToPoints(posAndType, posAndType, containerSize);
+            node.setPosition(points);
+            node._positionType = posAndType;
             /*-
             var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
                 containerSize, propertyName);
@@ -1849,62 +1860,39 @@ cc.BuilderReader10 = cc.Class.extend({
         }
 
         if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
-            var baseValue = [pos.x, pos.y, pos.type];
-            ccbReader.getAnimationManager().setBaseValue(baseValue,node,propertyName);
+            var baseValue = [posAndType.x, posAndType.y, posAndType];
+            ccbReader.getAnimationManager().setBaseValue(baseValue, node, propertyName);
         }
 
-        return point;
+        return points;
     },
 
     /**
-     * Ignores xUnit and yUnit.
-     * How would version 2.2.2 support these?
-     * Corner is same as type.
+     * Reads xUnit and yUnit.
      */
     readPosition: function()
     {
         var pos = {};
         pos.x = this.readFloat();
         pos.y = this.readFloat();
-        pos.corner = this.readByte();  // Same as type
-        pos.xUnit = this.readByte();  // TODO
-        pos.yUnit = this.readByte();  // TODO
-        pos.type = this._adaptPositionType(pos.xUnit, pos.yUnit, pos.corner);
+        pos.corner = this.readByte();
+        pos.xUnit = this.readByte();
+        pos.yUnit = this.readByte();
         return pos;
     },
 
-    _adaptPositionType: function(xUnit, yUnit, corner)
-    {
-        var type = CCB_POSITIONTYPE_RELATIVE_BOTTOM_LEFT;
-        if (CCB_POSITION_UNIT_POINTS == xUnit
-        || CCB_POSITION_UNIT_POINTS == yUnit
-        || CCB_SIZE_UNIT_INSET_POINTS == xUnit
-        || CCB_SIZE_UNIT_INSET_POINTS == yUnit) {
-            type = corner;
-        }
-        else if (CCB_POSITION_UNIT_NORMALIZED == xUnit
-        || CCB_POSITION_UNIT_NORMALIZED == yUnit) {
-            type = CCB_POSITIONTYPE_PERCENT;
-        }
-        else if (CCB_SIZE_UNIT_INSET_UI_POINTS == xUnit
-        || CCB_SIZE_UNIT_INSET_UI_POINTS == yUnit) {
-            type = CCB_POSITIONTYPE_MULTIPLY_RESOLUTION;
-        }
-        else {
-            cc.log("Unexpected position unit");
-        }
-        return type;
-    },
-
+    /**
+     * Also saves properties "w" and "h" just in case.
+     */
     readSize: function()
     {
         var size = {};
         size.width = this.readFloat();
         size.height = this.readFloat();
-        size.w = size.width;
-        size.h = size.height;
         size.widthUnit = this.readByte();
         size.heightUnit = this.readByte();
+        size.w = size.width;
+        size.h = size.height;
         return size;
     },
 
@@ -1915,7 +1903,7 @@ cc.BuilderReader10 = cc.Class.extend({
     node, parent, ccbReader) {
         var size = ccbReader.readSize();
         var containerSize = ccbReader.getContainerSize(parent);
-        var size = cc.Node.convertContentSizeToPoints(size, size, containerSize, cc.BuilderReader10.UIScaleFactor);
+        var size = cc.Node.convertContentSizeToPoints(size, size, containerSize);
         return size;
     },
 
@@ -1925,7 +1913,7 @@ cc.BuilderReader10 = cc.Class.extend({
     parsePropTypeSpriteFrame: function (node, parent, ccbReader, propertyName) {
         var spriteFrame = ccbReader.readSpriteFrame();
         if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
-            ccbReader.getAnimationManager().setBaseValue(spriteFrame,node,propertyName);
+            ccbReader.getAnimationManager().setBaseValue(spriteFrame, node, propertyName);
         }
         return spriteFrame;
     },
@@ -2553,6 +2541,19 @@ cc.BuilderReader10.extend = function()
             return this._name;
         };
     }
+
+    /**
+     * Ovewrite v2 absolute position transformation with v3.
+     * This is used in the animation manager and node loader.
+     */
+    if (!cc.getAbsolutePosition) {
+        throw new Error("Expected cc.getAbsolutePosition(pt...)");
+    }
+    if (!cc._getAbsolutePosition) {
+        throw new Error("Expected cc._getAbsolutePosition(x, y...)");
+    }
+    cc.getAbsolutePosition = cc.Node.convertPositionToPoints;
+    cc._getAbsolutePosition = cc.Node.convertPositionToPointsXY;
 }
 
 /**
@@ -2621,7 +2622,7 @@ if (cc.Node.prototype.convertPositionToPoints) {
  * A previous porter had replaced iphone CapitalCase unit constants with html5 ALL_CAPS constants, so I continued that search and replace labor here for html5 consistency.
  */
 cc.Node.convertPositionToPoints = function(position, positionType, 
-parentContentSizeInPoints, UIScaleFactor) 
+parentContentSizeInPoints, propertyNameIgnored, UIScaleFactor) 
 {
     if (isNaN(position.x)) 
     {
@@ -2645,7 +2646,7 @@ parentContentSizeInPoints, UIScaleFactor)
     }
     if (undefined === UIScaleFactor) 
     {
-        UIScaleFactor = 1.0;
+        UIScaleFactor = cc.BuilderReader10.UIScaleFactor;
     }
     var positionInPoints = new cc.p(0.0, 0.0);
     var x = 0.0;
@@ -2697,6 +2698,13 @@ parentContentSizeInPoints, UIScaleFactor)
     return positionInPoints;
 }
 
+cc.Node.convertPositionToPointsXY = function(x, y, positionType, 
+parentContentSizeInPoints, propertyNameIgnored, UIScaleFactor) 
+{
+    return cc.Node.convertPositionToPoints({x: x, y: y}, positionType, 
+        parentContentSizeInPoints, propertyNameIgnored, UIScaleFactor);
+}
+
 if (cc.Node.prototype.convertContentSizeToPoints) {
     throw new Error("Did not expect cc.Node.convertContentSizeToPoints was defined.");
 }
@@ -2732,7 +2740,7 @@ parentContentSizeInPoints, UIScaleFactor)
     }
     if (undefined === UIScaleFactor) 
     {
-        UIScaleFactor = 1.0;
+        UIScaleFactor = cc.BuilderReader10.UIScaleFactor;
     }
     var sizeInPoints = new cc.Size(0.0, 0.0);
     var width = 0.0;
@@ -2791,4 +2799,30 @@ cc.BuilderReader10.getDefinitionByName = function(scope, address)
         parent = child;
     }
     return child;
+}
+
+/**
+ * If parent is a cc.ClippingNode and child is named "stencil", then set stencil.
+ * Adapted from example: http://www.waitingfy.com/archives/1093
+ *
+ * Clipping UI convention, like Flash Professional "mask".
+ *     Flash Professional
+ *         mask layer
+ *             masked layer
+ *             masked layer
+ *     Cocos2d
+ *         ClippingNode (class)
+ *             masked
+ *             stencil (name of a cc.Sprite or cc.Node)
+ *             masked
+ */
+cc.BuilderReader10.clipByStencilName = function(clippingNode, node) {
+    if (clippingNode instanceof cc.ClippingNode) {
+        if ("stencil" == node.getName()) {
+            clippingNode.setStencil(node);
+            clippingNode.setAlphaThreshold(0.0);
+            var stencilSize = stencil.getContentSize();
+            clippingNode.setContentSize(stencilSize.width, stencilSize.height);
+        }
+    }
 }

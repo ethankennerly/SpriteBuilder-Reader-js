@@ -330,9 +330,9 @@ function TestCCBReader10(parent) {
     testConvertToPoints();
     testGetDefinitionByName();
     // testReader5(parent, "MainScene_5");
-    // testMultipleAnimations(parent);
+    testMultipleAnimations(parent);
     // testIgnorePhysics(parent);
-    testButtonCallback(parent);
+    // testButtonCallback(parent);
     // testSingleAnimation(parent);
     // scene = testReader10(parent, "Seal");
     // scene = testReader10(parent, "Penguin");
