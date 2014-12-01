@@ -189,6 +189,8 @@ function testConvertToPoints() {
     testConvertContentSizeToPointsNormalized();
 }
 
+// Test Reader 5
+
 // testReader5 expects custom classes already defined:
 var MainScene = cc.Node.extend({
     ctor: function() {
@@ -213,10 +215,23 @@ function testReader5(parent, basePath) {
     _parent = parent;
 }
 
+// Test Reader 10
+
 // testReader10 expects custom classes already defined:
 var Penguin = cc.Sprite.extend({});
 var Seal = cc.Sprite.extend({});
 var WaitingPenguin = cc.Sprite.extend({});
+
+var global = this;
+
+function testGetDefinitionByName() {
+    assertEquals(cc, cc.BuilderReader10.getDefinitionByName(global, "cc", "cc"));
+    assertEquals(cc.BuilderReader10, cc.BuilderReader10.getDefinitionByName(global, "cc.BuilderReader10", "cc.BuilderReader10"));
+    assertEquals(cc.BuilderReader10.getDefinitionByName, cc.BuilderReader10.getDefinitionByName(global, "cc.BuilderReader10.getDefinitionByName", "cc.BuilderReader10.getDefinitionByName"));
+    assertEquals(cc.Node, cc.BuilderReader10.getDefinitionByName(global, "cc.Node", "cc.Node"));
+    assertEquals(cc.ClippingNode, cc.BuilderReader10.getDefinitionByName(global, "cc.ClippingNode", "cc.ClippingNode"));
+    assertEquals(Penguin, cc.BuilderReader10.getDefinitionByName(global, "Penguin", "Penguin"));
+}
 
 var scene10;
 
@@ -313,6 +328,7 @@ function testIgnorePhysics(parent) {
 function TestCCBReader10(parent) {
     testReadNumbers();
     testConvertToPoints();
+    testGetDefinitionByName();
     // testReader5(parent, "MainScene_5");
     // testMultipleAnimations(parent);
     // testIgnorePhysics(parent);

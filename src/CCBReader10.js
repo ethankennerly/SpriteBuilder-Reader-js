@@ -22,6 +22,8 @@
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
+
+ Partially upgraded to version 10 by Ethan Kennerly
  ****************************************************************************/
 
 /**
@@ -124,7 +126,9 @@ var CCB_SIZE_UNIT_INSET_POINTS = 3;
 /// Content size is the size of the parents container inset by the supplied value multiplied by the UIScaleFactor (as defined by CCDirector)
 var CCB_SIZE_UNIT_INSET_UI_POINTS = 4;    
     
-
+/**
+ * "this" instead of "window" in case on a device that does not define "window".
+ */
 var _ccbGlobalContext = _ccbGlobalContext || this;
 
 cc.BuilderFile = cc.Node.extend({
@@ -1089,7 +1093,7 @@ cc.BuilderReader10 = cc.Class.extend({
      * Try to create node as a custom class.  
      * Fall back on loading a node.
      * Test case:  Seal is a predefined custom class that inherits cc.Sprite.  Expect sprite loader and sprite node class.
-     * XXX eval class in case Cocos2D is on a mobile device without access to global namespace.
+     * Resolve class in case Cocos2D is on a mobile device without access to global namespace.
      * To debug, record current class name.
      * Disable zoomOnTouchDown by default.
      */
@@ -1109,7 +1113,7 @@ cc.BuilderReader10 = cc.Class.extend({
         var useLoader = null != this._ccNodeLoaderLibrary.getCCNodeLoader(className);
         var node;
         if (!useLoader) {
-            var nodeClass = _ccbGlobalContext[className];
+            var nodeClass = cc.BuilderReader10.getDefinitionByName(_ccbGlobalContext, className);
             if (nodeClass) {
                 try {
                     node = new nodeClass();
@@ -2390,9 +2394,13 @@ cc.BuilderReader10.extend = function()
 
     cc.BuilderReader10.extendClasses();
     /**
+     * Like a ControlButton, except:
      * Do not zoom.
      * Sprite instead of Scale9Sprite.
      * Center margins on sprite.
+     *
+     * http://yannickloriot.com/2013/03/cccontrolextension-the-buttons/
+     * http://yannickloriot.com/2013/02/the-control-extension-for-cocos2d/
      */
     cc.ControlSpriteButton = cc.ControlButton.extend({
         /**
@@ -2415,7 +2423,6 @@ cc.BuilderReader10.extend = function()
          */
         setBackgroundSpriteFrameForState: function(spriteFrame, state) {
             var sprite = cc.Sprite.createWithSpriteFrame(spriteFrame);
-            //? this.setPreferredSize(new cc.Size(0, 0));
             if (!sprite.setPreferredSize) {
                 sprite.setPreferredSize = sprite.setContentSize;
                 sprite.getPreferredSize = sprite.getContentSize;
@@ -2427,9 +2434,9 @@ cc.BuilderReader10.extend = function()
         centerMargins: function(sprite)
         {
             var size = sprite.getContentSize();
-            cc.log("ControlSpriteButton.centerMargins: width " + size.width + " height " + size.height);
+            cc.log("ControlSpriteButton.centerMargins: width " + size.width 
+                                                   + " height " + size.height);
             this.setMargins(size.width * 0.5, size.height * 0.5);
-            //? this.setMargins(9.5, 9);
         }
     });
 
@@ -2760,4 +2767,28 @@ parentContentSizeInPoints, UIScaleFactor)
     sizeInPoints.height = height;
     
     return sizeInPoints;
+}
+
+/**
+ * @param   scope {Object}      Where to search, such as global scope.
+ * @param   address {String}    JavaScript address, such as "cc.Node".  Does not tolerate "".
+ * Example @see TestCCBReader10.js
+ */
+cc.BuilderReader10.getDefinitionByName = function(scope, address)
+{
+    if (undefined == scope) {
+        throw new Error("Expected scope.");
+    }
+    var lineage = address.split(".");
+    if (lineage.length <= 0) {
+        throw new Error("Expected address.");
+    }
+    var child;
+    var parent = scope;
+    for (var i = 0; i < lineage.length; i++) {
+        var name = lineage[i];
+        child = parent[name];
+        parent = child;
+    }
+    return child;
 }
