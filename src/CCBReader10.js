@@ -112,6 +112,7 @@ var CCB_SCALETYPE_ABSOLUTE = 0;
 var CCB_SCALETYPE_MULTIPLY_RESOLUTION = 1;
 
 // Version 10:
+// Reusing POSITION_UNITs for SIZE_UNITs
 /// Content size is set in points (this is the default)
 var CCB_POSITION_UNIT_POINTS = 0;
 /// Position is UI points, on iOS this corresponds to the native point system
@@ -2671,6 +2672,26 @@ if (cc.Node.prototype.convertPositionToPoints) {
 cc.Node.convertPositionToPoints = function(position, positionType, 
 parentContentSizeInPoints, UIScaleFactor) 
 {
+    if (isNaN(position.x)) 
+    {
+        throw new Error("Expected x.");
+    }
+    if (isNaN(position.y)) 
+    {
+        throw new Error("Expected y.");
+    }
+    if (isNaN(positionType.corner)) 
+    {
+        throw new Error("Expected corner.");
+    }
+    if (isNaN(positionType.xUnit)) 
+    {
+        throw new Error("Expected xUnit.");
+    }
+    if (isNaN(positionType.yUnit)) 
+    {
+        throw new Error("Expected yUnit.");
+    }
     if (undefined === UIScaleFactor) 
     {
         UIScaleFactor = 1.0;
@@ -2723,4 +2744,73 @@ parentContentSizeInPoints, UIScaleFactor)
     positionInPoints.y = y;
     
     return positionInPoints;
+}
+
+if (cc.Node.prototype.convertContentSizeToPoints) {
+    throw new Error("Did not expect cc.Node.convertContentSizeToPoints was defined.");
+}
+
+/**
+ * Static function for easy unit testing.  Example @see TestCCBReader10.js
+ * Line ported from cocos2d-iphone v3 file CCNode.m
+ * @param   sizeType    Expects properties "widthUnit", "heightUnit".
+ * @return  Retrofitted SpriteBuilder size and size type to Cocos2D v2 coordinate system of absolute points.
+ * @param   UIScaleFactor {Number}   If not defined, default to 1.0.  
+ */
+cc.Node.convertContentSizeToPoints = function(size, sizeType, 
+parentContentSizeInPoints, UIScaleFactor) 
+{
+    if (isNaN(size.width)) 
+    {
+        throw new Error("Expected width.");
+    }
+    if (isNaN(size.height)) 
+    {
+        throw new Error("Expected height.");
+    }
+    if (isNaN(sizeType.widthUnit)) 
+    {
+        throw new Error("Expected widthUnit.");
+    }
+    if (isNaN(sizeType.heightUnit)) 
+    {
+        throw new Error("Expected heightUnit.");
+    }
+    if (undefined === UIScaleFactor) 
+    {
+        UIScaleFactor = 1.0;
+    }
+    var sizeInPoints = new cc.Size(0.0, 0.0);
+    var width = 0.0;
+    var height = 0.0;
+    
+    // Convert size to points
+    var widthUnit = sizeType.widthUnit;
+    if (widthUnit == CCB_POSITION_UNIT_POINTS) 
+        width = size.width;
+    else if (widthUnit == CCB_POSITION_UNIT_UI_POINTS) 
+        width = size.width * UIScaleFactor;
+    else if (widthUnit == CCB_POSITION_UNIT_NORMALIZED) 
+        width = size.width * parentContentSizeInPoints.width;
+    else if (widthUnit == CCB_SIZE_UNIT_INSET_POINTS) 
+        width = parentContentSizeInPoints.width - size.width;
+    else if (widthUnit == CCB_SIZE_UNIT_INSET_UI_POINTS) 
+        width = parentContentSizeInPoints.width - size.width * UIScaleFactor;
+    
+    var heightUnit = sizeType.heightUnit;
+    if (heightUnit == CCB_POSITION_UNIT_POINTS) 
+        height = size.height;
+    else if (heightUnit == CCB_POSITION_UNIT_UI_POINTS) 
+        height = size.height * UIScaleFactor;
+    else if (heightUnit == CCB_POSITION_UNIT_NORMALIZED) 
+        height = size.height * parentContentSizeInPoints.height;
+    else if (heightUnit == CCB_SIZE_UNIT_INSET_POINTS) 
+        height = parentContentSizeInPoints.height - size.height;
+    else if (heightUnit == CCB_SIZE_UNIT_INSET_UI_POINTS) 
+        height = parentContentSizeInPoints.height - size.height * UIScaleFactor;
+    
+    sizeInPoints.width = width;
+    sizeInPoints.height = height;
+    
+    return sizeInPoints;
 }

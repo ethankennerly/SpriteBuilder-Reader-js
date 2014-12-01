@@ -133,10 +133,10 @@ function testConvertPositionToPointsBasic() {
     var positionType = {corner: 0, xUnit: 0, yUnit: 0};
     var parentContentSize = new cc.Size(640, 960);
     var uiScaleFactor = 0.5;
-    var point = cc.Node.convertPositionToPoints(position, positionType, 
+    var points = cc.Node.convertPositionToPoints(position, positionType, 
         parentContentSize, uiScaleFactor);
-    assertEquals(point.x, -2);
-    assertEquals(point.y, 3);
+    assertEquals(-2, points.x);
+    assertEquals(3, points.y);
 }
 
 function testConvertPositionToPointsNormalized() {
@@ -144,21 +144,49 @@ function testConvertPositionToPointsNormalized() {
     var positionType = {corner: 0, xUnit: 2, yUnit: 0};
     var parentContentSize = new cc.Size(640, 960);
     var uiScaleFactor = 0.5;
-    var point = cc.Node.convertPositionToPoints(position, positionType, 
+    var points = cc.Node.convertPositionToPoints(position, positionType, 
         parentContentSize, uiScaleFactor);
-    assertEquals(point.x, 320);
-    assertEquals(point.y, 94);
+    assertEquals(320, points.x);
+    assertEquals(94, points.y);
 }
 
-function exampleUIScaleFactor() {
+function testConvertContentSizeToPointsBasic() {
+    var size = new cc.Size(20.0, 30.0);
+    var sizeType = {corner: 0, widthUnit: 0, heightUnit: 0};
+    var parentContentSize = new cc.Size(640, 960);
+    var uiScaleFactor = 0.5;
+    var points = cc.Node.convertContentSizeToPoints(size, sizeType, 
+        parentContentSize, uiScaleFactor);
+    assertEquals(20, points.width);
+    assertEquals(30, points.height);
+}
+
+function testConvertContentSizeToPointsNormalized() {
+    var size = new cc.Size(1.0, 93);
+    var sizeType = {corner: 0, widthUnit: 2, heightUnit: 0};
+    var parentContentSize = new cc.Size(640, 960);
+    var uiScaleFactor = 0.5;
+    var points = cc.Node.convertContentSizeToPoints(size, sizeType, 
+        parentContentSize, uiScaleFactor);
+    assertEquals(640, points.width);
+    assertEquals(93, points.height);
+}
+
+/**
+ * @param   UIScaleFactor {Number}   If not defined, default to 1.0.  One use case of UI scale factor, (which is different from content scale factor) is to set UI scale factor for iPhad to be at 50% and iPhone to be at 100% so UI elements, such as a HUD, is not much larger on iPad.  Example from cocos2d-iphone CCAppDelegate.m: director.UIScaleFactor = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 1.0 : 0.5);
+ */
+function UIScaleFactorIpadHalf() {
     var size = cc.Director.getInstance().getWinSize();
     var min = Math.min(size.width, size.height);
-    UIScaleFactor = min <= 640 ? 1.0 : 0.5;
+    var UIScaleFactor = min <= 640 ? 1.0 : 0.5;
+    return UIScaleFactor;
 }
 
-function testConvertPositionToPoints() {
+function testConvertToPoints() {
     testConvertPositionToPointsBasic();
     testConvertPositionToPointsNormalized();
+    testConvertContentSizeToPointsBasic();
+    testConvertContentSizeToPointsNormalized();
 }
 
 // testReader5 expects custom classes already defined:
@@ -284,7 +312,7 @@ function testIgnorePhysics(parent) {
 
 function TestCCBReader10(parent) {
     testReadNumbers();
-    testConvertPositionToPoints();
+    testConvertToPoints();
     // testReader5(parent, "MainScene_5");
     // testMultipleAnimations(parent);
     testIgnorePhysics(parent);
