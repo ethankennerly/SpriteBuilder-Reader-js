@@ -333,9 +333,10 @@ function testClipByStencilName(parent)
     circle.setName("stencil");
     cc.BuilderReader10.clipByStencilName(clipper, circle);
     clipper.setPosition(100, 480);
-    // circle.gotoAndPlay("down");
     parent.addChild(clipper);
-    cc.log("Testing clipping node by stencil name: Look for blue circle.");
+    // circle.gotoAndPlay("down");
+    circle.animationManager.runAnimations("down");
+    cc.log("Testing clipping node by stencil name: Look for blue circle.  If it is square, try enabling browser Web GL and reloading.");
 }
 
 function TestCCBReader10(parent) {

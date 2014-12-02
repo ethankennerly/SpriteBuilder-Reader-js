@@ -1,7 +1,7 @@
 SpriteBuilder-Reader-js
 =======================
 
-Upgrade JavaScript CCBI reader from version 5 to version 10, SpriteBuilder format compatible with Cocos2d 2.2.2.
+Upgrade JavaScript CCBI reader from version 5 to version 10, SpriteBuilder format only compatible with Cocos2d-js 2.2.2.
 
 Ethan Kennerly
 
@@ -74,7 +74,7 @@ Features
 
  * Scale content to percent of parent size.
 
- * Wire node animations.
+ * Wire node animations of properties: position, rotation, opacity.
 
  * Read keyframe RGBA (alpha) instead of RGB.  (Color4).  Whenever property type color3 (RGB) [0..255] is encountered, it is parsed as RGBA float [0.0 .. 1.0]
   
@@ -114,6 +114,8 @@ Extra Features
 
 Not supported
 -------------
+
+ * Animation of any node properties not tested above, such as: scale, skew.
 
  * Animation of sprite frames.
  
@@ -158,7 +160,7 @@ Not supported
  
  * configCocos2d.plist 
  
- * Control button Scale9Sprite not supported.
+ * Control button Scale9Sprite.
  
  * Strings.ccblang
  
@@ -167,8 +169,6 @@ Not supported
  * Float scale.
  
  * Effects.
- 
- * Button maxSize
  
  * fileLookup.plist
  

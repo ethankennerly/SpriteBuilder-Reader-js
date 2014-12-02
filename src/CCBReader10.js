@@ -1,4 +1,5 @@
 /****************************************************************************
+ 2014 Partially upgraded to version 10 for Cocos2d-js v2.2.2. by Ethan Kennerly
  Copyright (c) 2010-2012 cocos2d-x.org
  Copyright (c) 2008-2010 Ricardo Quesada
  Copyright (c) 2011      Zynga Inc.
@@ -23,7 +24,6 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 
- Partially upgraded to version 10 by Ethan Kennerly
  ****************************************************************************/
 
 /**
@@ -227,7 +227,7 @@ cc.BuilderReader10 = cc.Class.extend({
     initWithData:function (data, owner) {
 
         //setup action manager
-        this._animationManager = new cc.BuilderAnimationManager();
+        this._animationManager = new cc.BuilderAnimationManager10();
 
         //setup byte array
         //Array replace to CCData in Javascript
@@ -930,12 +930,13 @@ cc.BuilderReader10 = cc.Class.extend({
      * To catch more types unsupported, throw error on an unsupported type.
      * If name is "opacity" and type is float, then convert float to byte.
      * Test case: 2014-11-29 Expect machine background opacity fades in.  Got disappears.
+     * Retrofit position.
      *
      * @param   node    If this node has a normalized or scaled position, then keyframe position needs position type.
      *
      * cocos2d-iphone reader scale lock keyframe does not read a scale type.
      */
-    readKeyframe:function (type, name, positionType) {
+    readKeyframe:function (type, name, node) {
         var keyframe = new cc.BuilderKeyframe();
         keyframe.setTime(this.readFloat());
         var easingType = this.readInt(false);
@@ -967,11 +968,16 @@ cc.BuilderReader10 = cc.Class.extend({
         } else if (type == CCB_PROPTYPE_DEGREES
         || type == CCB_PROPTYPE_FLOAT) {
             value = this.readFloat();
+        } else if (type == CCB_PROPTYPE_SCALELOCK
+        || type == CCB_PROPTYPE_FLOATXY) {
+            value = [this.readFloat(), this.readFloat()];
         } else if (type == CCB_PROPTYPE_SCALELOCK 
         || type == CCB_PROPTYPE_FLOATXY) {
             value = [this.readFloat(), this.readFloat()];
         } else if (type == CCB_PROPTYPE_POSITION) {
-            value = [this.readFloat(), this.readFloat(), positionType];
+            var x = this.readFloat();
+            var y = this.readFloat();
+            value = this.convertPositionToAbsoluteKeyframe(x, y, node);
         } else if (type == CCB_PROPTYPE_SPRITEFRAME) {
             value = this.readSpriteFrame();
         }
@@ -981,6 +987,24 @@ cc.BuilderReader10 = cc.Class.extend({
         }
         keyframe.setValue(value);
         return keyframe;
+    },
+
+    /**
+     * @return  Convert from v3 to absolute v2 position [x, y].
+     * Cocos2d-x v2 hardcodes the animation manager to accept only position values as [x, y].
+     * Test case:  Cocos2d-x v2.2.2.  Set base value or animation plays.  Error: Invalid Native Object.
+     */
+    convertPositionToAbsoluteKeyframe: function(x, y, node)
+    {
+        var points = cc.Node.convertPositionToPointsXY(x, y, node._positionType, 
+            this.getContainerSize(node.getParent()));
+        var value = [points.x, points.y, 0];
+        var value = new Array();
+        value.push(points.x);
+        value.push(points.y);
+        value.push(0);
+        cc.log("cc.BuilderReader10.convertPositionToAbsoluteKeyframe: " + value);
+        return value;
     },
 
     /**
@@ -1161,7 +1185,7 @@ cc.BuilderReader10 = cc.Class.extend({
                 var numKeyframes = this.readInt(false);
                 var locKeyframes = seqProp.getKeyframes();
                 for (var k = 0; k < numKeyframes; ++k) {
-                    var keyFrame = this.readKeyframe(seqProp.getType(), name, node._positionType);
+                    var keyFrame = this.readKeyframe(seqProp.getType(), name, node);
                     locKeyframes.push(keyFrame);
                 }
                 seqNodeProps.setObject(seqProp, seqProp.getName());
@@ -1849,6 +1873,8 @@ cc.BuilderReader10 = cc.Class.extend({
             var points = cc.Node.convertPositionToPoints(posAndType, posAndType, containerSize);
             node.setPosition(points);
             node._positionType = posAndType;
+            cc.log("cc.BuilderReader10.onHandlePropTypePosition: _positionType.corner " 
+                + node._positionType.corner);
             /*-
             var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
                 containerSize, propertyName);
@@ -1861,7 +1887,8 @@ cc.BuilderReader10 = cc.Class.extend({
         }
 
         if(ccbReader.getAnimatedProperties().indexOf(propertyName) > -1){
-            var baseValue = [posAndType.x, posAndType.y, posAndType];
+            var baseValue = this.convertPositionToAbsoluteKeyframe(posAndType.x, posAndType.y, node);
+            cc.log("onHandlePropTypePosition: " + baseValue + " node " + node + " propertyName " + propertyName);
             ccbReader.getAnimationManager().setBaseValue(baseValue, node, propertyName);
         }
 
@@ -1969,7 +1996,7 @@ cc.BuilderReader10.load = function (ccbFilePath, owner, parentSize, ccbRootPath)
 };
 
 /**
- * Default loader library.
+ * Default loader library.  Optionally customize variable assigner, selector resolver, and loader listener.
  */
 cc.BuilderReader10.defaultReader = function(ccbMemberVariableAssigner, ccbSelectorResolver, ccNodeLoaderListener) {
     var reader = new cc.BuilderReader10(cc.NodeLoaderLibrary.newDefaultCCNodeLoaderLibrary(),
@@ -2149,7 +2176,6 @@ cc.BuilderReader10.loadSpriteFrame = function(spriteFile, rootPath)
         rootPath = "";
     }
     var frame;
-    cc.SpriteFrameCache.loadSpriteFramesFromFile("spriteFrameFileList.plist");
     var frameCache = cc.SpriteFrameCache.getInstance();
     frame = frameCache.getSpriteFrame(spriteFile);
     if (!frame) {
@@ -2251,7 +2277,8 @@ cc.BuilderReader10.extendClassNames = [
     "LayerRGBA",
     "Control",
     "ControlButton",
-    "NodeRGBA"
+    "NodeRGBA",
+    "BuilderAnimationManager"
 ];
 
 /**
@@ -2512,16 +2539,6 @@ cc.BuilderReader10.extend = function()
     }
 
     /**
-     * Cocos2d-x does not define this helper method.
-     * Dummy assignment that is ignored.
-     */
-    if (!cc.BuilderAnimationManager.prototype.setOwner) {
-        cc.BuilderAnimationManager.prototype.setOwner = function(owner) {
-            this._owner = owner;
-        };
-    }
-
-    /**
      * Cocos2d-x defines "size" but not "Size".  HTML5 defines "Size".
      */
     if (!cc.Size) {
@@ -2555,6 +2572,17 @@ cc.BuilderReader10.extend = function()
     }
     cc.getAbsolutePosition = cc.Node.convertPositionToPoints;
     cc._getAbsolutePosition = cc.Node.convertPositionToPointsXY;
+
+    /**
+     * Cocos2d-x does not define this helper method.
+     * Dummy assignment that is ignored.
+     */
+    if (!cc.BuilderAnimationManager.prototype.setOwner) {
+        cc.BuilderAnimationManager.prototype.setOwner = function(owner) {
+            this._owner = owner;
+        };
+    }
+
 }
 
 /**
@@ -2633,6 +2661,7 @@ parentContentSizeInPoints, propertyNameIgnored, UIScaleFactor)
     {
         throw new Error("Expected y.");
     }
+    if (positionType) { 
     if (isNaN(positionType.corner)) 
     {
         throw new Error("Expected corner.");
@@ -2644,6 +2673,14 @@ parentContentSizeInPoints, propertyNameIgnored, UIScaleFactor)
     if (isNaN(positionType.yUnit)) 
     {
         throw new Error("Expected yUnit.");
+    }
+    }
+    else {
+        // cc.log("cc.Node.convertPositionToPoints: Assuming v2 absolute positionType.");
+        positionType = {
+            corner: CCB_POSITIONTYPE_RELATIVE_BOTTOM_LEFT, 
+            xUnit: CCB_POSITION_UNIT_POINTS, 
+            yUnit: CCB_POSITION_UNIT_POINTS};
     }
     if (undefined === UIScaleFactor) 
     {
@@ -2830,3 +2867,721 @@ cc.BuilderReader10.clipByStencilName = function(clippingNode, nodeNamedStencil) 
         }
     }
 }
+
+/****************************************************************************
+ Copyright (c) 2010-2012 cocos2d-x.org
+ Copyright (c) 2008-2010 Ricardo Quesada
+ Copyright (c) 2011      Zynga Inc.
+
+ http://www.cocos2d-x.org
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ ****************************************************************************/
+
+/**
+ * For JSB support, duplicate code of BuilderAnimationManager.
+ * Cocos2d-x v2.2.2 bindings failed to map JS Array to a CCArray.
+ * Test Case:
+ * animationManager.setBaseValue([0, 0, 0], node, "position");
+ * Invalid Native Object.
+ * jsb_cocos2dx_extension_auto.cpp: js_cocos2dx_extension_CCBAnimationManager_setBaseValue
+ *
+ * Create Sequence without using an array.
+ * I loaded SpriteBuilder layouts in Cocos2d-x and animations in Cocos-html5.  But Cocos2d-x crashes complaining that the JavaScript array is not converted to a Cocos2D array.
+ * Fixed in Cocos2d-js after v2.2.2:
+ * https://github.com/cocos2d/cocos2d-x/pull/3891/files
+ */
+cc.BuilderAnimationManager10 = cc.Class.extend({
+    _sequences:null,
+    _nodeSequences:null,
+    _baseValues:null,
+    _autoPlaySequenceId:0,
+
+    _rootNode:null,
+    _owner:null,
+    _rootContainerSize:null,
+
+    _delegate:null,
+    _runningSequence:null,
+
+    _documentOutletNames:null,
+    _documentOutletNodes:null,
+    _documentCallbackNames:null,
+    _documentCallbackNodes:null,
+    _documentCallbackControlEvents:null,
+    _documentControllerName:"",
+    _lastCompletedSequenceName:"",
+    _keyframeCallbacks:null,
+    _keyframeCallFuncs:null,
+
+    _animationCompleteCallbackFunc:null,
+    _target:null,
+    _jsControlled:false,
+
+    ctor:function () {
+        this._rootContainerSize = cc.size(0, 0);
+        this.init();
+    },
+
+    init:function () {
+        this._sequences = [];
+        this._nodeSequences = new cc._Dictionary();
+        this._baseValues = new cc._Dictionary();
+
+        this._documentOutletNames = [];
+        this._documentOutletNodes = [];
+        this._documentCallbackNames = [];
+        this._documentCallbackNodes = [];
+        this._documentCallbackControlEvents = [];
+
+        this._keyframeCallbacks = [];
+        this._keyframeCallFuncs = {};
+
+        return true;
+    },
+
+    getSequences:function () {
+        return this._sequences;
+    },
+
+    setSequences:function(seqs){
+        this._sequences = seqs;
+    },
+
+    getAutoPlaySequenceId:function () {
+        return this._autoPlaySequenceId;
+    },
+    setAutoPlaySequenceId:function (autoPlaySequenceId) {
+        this._autoPlaySequenceId = autoPlaySequenceId;
+    },
+
+    getRootNode:function () {
+        return this._rootNode;
+    },
+    setRootNode:function (rootNode) {
+        this._rootNode = rootNode;
+    },
+
+    getOwner:function () {
+        return this._owner;
+    },
+    setOwner:function (owner) {
+        this._owner = owner;
+    },
+
+    addDocumentCallbackNode:function(node){
+        this._documentCallbackNodes.push(node);
+    },
+
+    addDocumentCallbackName:function(name){
+        this._documentCallbackNames.push(name);
+    },
+
+    addDocumentCallbackControlEvents:function(controlEvents){
+        this._documentCallbackControlEvents.push(controlEvents);
+    },
+
+    addDocumentOutletNode:function(node){
+        this._documentOutletNodes.push(node);
+    },
+
+    addDocumentOutletName:function(name){
+        this._documentOutletNames.push(name);
+    },
+
+    setDocumentControllerName:function(name){
+        this._documentControllerName = name;
+    },
+
+    getDocumentControllerName:function(){
+        return this._documentControllerName;
+    },
+
+    getDocumentCallbackNames:function(){
+        return this._documentCallbackNames;
+    },
+
+    getDocumentCallbackNodes:function(){
+        return this._documentCallbackNodes;
+    },
+
+    getDocumentCallbackControlEvents:function(){
+        return this._documentCallbackControlEvents;
+    },
+
+    getDocumentOutletNames:function(){
+        return this._documentOutletNames;
+    },
+
+    getDocumentOutletNodes:function(){
+        return this._documentOutletNodes;
+    },
+
+    getLastCompletedSequenceName:function(){
+        return this._lastCompletedSequenceName;
+    },
+
+    getKeyframeCallbacks:function(){
+        return this._keyframeCallbacks;
+    },
+
+    getRootContainerSize:function () {
+        return this._rootContainerSize;
+    },
+    setRootContainerSize:function (rootContainerSize) {
+        this._rootContainerSize = cc.size(rootContainerSize.width, rootContainerSize.height);
+    },
+
+    getDelegate:function () {
+        return this._delegate;
+    },
+    setDelegate:function (delegate) {
+        this._delegate = delegate;
+    },
+
+    getRunningSequenceName:function () {
+        if(this._runningSequence)
+            return this._runningSequence.getName();
+        return null;
+    },
+
+    getContainerSize:function (node) {
+        if (node)
+            return node.getContentSize();
+        else
+            return this._rootContainerSize;
+    },
+
+    addNode:function (node, seq) {
+        this._nodeSequences.setObject(seq, node);
+    },
+    setBaseValue:function (value, node, propName) {
+        var props = this._baseValues.objectForKey(node);
+        if (!props) {
+            props = new cc._Dictionary();
+            this._baseValues.setObject(props, node);
+        }
+        props.setObject(value, propName);
+    },
+
+    moveAnimationsFromNode:function(fromNode,toNode){
+        // Move base values
+        var locBaseValues = this._baseValues;
+        var baseValue = locBaseValues.objectForKey(fromNode);
+        if(baseValue != null) {
+            locBaseValues.setObject(baseValue, toNode);
+            locBaseValues.removeObjectForKey(fromNode);
+        }
+
+        // Move seqs
+        var locNodeSequences = this._nodeSequences;
+        var seqs = locNodeSequences.objectForKey(fromNode);
+        if(seqs != null) {
+            locNodeSequences.setObject(seqs, toNode);
+            locNodeSequences.removeObjectForKey(fromNode);
+        }
+    },
+
+    getActionForCallbackChannel:function(channel) {
+        var lastKeyframeTime = 0;
+
+        var actions = [];
+        var keyframes = channel.getKeyframes();
+        var numKeyframes = keyframes.length;
+
+        for (var i = 0; i < numKeyframes; ++i) {
+            var keyframe = keyframes[i];
+            var timeSinceLastKeyframe = keyframe.getTime() - lastKeyframeTime;
+            lastKeyframeTime = keyframe.getTime();
+            if(timeSinceLastKeyframe > 0) {
+                actions.push(cc.DelayTime.create(timeSinceLastKeyframe));
+            }
+
+            var keyVal = keyframe.getValue();
+            var selectorName = keyVal[0];
+            var selectorTarget = keyVal[1];
+
+            if(this._jsControlled) {
+                var callbackName = selectorTarget + ":" + selectorName;    //add number to the stream
+                var callback = this._keyframeCallFuncs[callbackName];
+
+                if(callback != null)
+                    actions.push(callback);
+            } else {
+                var target;
+                if(selectorTarget == CCB_TARGETTYPE_DOCUMENTROOT)
+                    target = this._rootNode;
+                else if (selectorTarget == CCB_TARGETTYPE_OWNER)
+                    target = this._owner;
+
+                if(target != null) {
+                    if(selectorName.length > 0) {
+                        var selCallFunc = 0;
+
+                        var targetAsCCBSelectorResolver = target;
+
+                        if(target.onResolveCCBCCCallFuncSelector != null)
+                            selCallFunc = targetAsCCBSelectorResolver.onResolveCCBCCCallFuncSelector(target, selectorName);
+                        if(selCallFunc == 0)
+                            cc.log("Skipping selector '" + selectorName + "' since no CCBSelectorResolver is present.");
+                        else
+                            actions.push(cc.CallFunc.create(selCallFunc,target));
+                    } else {
+                        cc.log("Unexpected empty selector.");
+                    }
+                }
+            }
+        }
+        if(actions.length < 1)
+            return null;
+
+        return cc.Sequence.create.apply(this, actions);
+    },
+    getActionForSoundChannel:function(channel) {
+        var lastKeyframeTime = 0;
+
+        var actions = [];
+        var keyframes = channel.getKeyframes();
+        var numKeyframes = keyframes.length;
+
+        for (var i = 0; i < numKeyframes; ++i) {
+            var keyframe = keyframes[i];
+            var timeSinceLastKeyframe = keyframe.getTime() - lastKeyframeTime;
+            lastKeyframeTime = keyframe.getTime();
+            if(timeSinceLastKeyframe > 0) {
+                actions.push(cc.DelayTime.create(timeSinceLastKeyframe));
+            }
+
+            var keyVal = keyframe.getValue();
+            var soundFile = cc.BuilderReader.getResourcePath() + keyVal[0];
+            var pitch = parseFloat(keyVal[1]), pan = parseFloat(keyVal[2]), gain = parseFloat(keyVal[3]);
+            actions.push(cc.BuilderSoundEffect.create(soundFile, pitch, pan, gain));
+        }
+
+        if(actions.length < 1)
+            return null;
+
+        return cc.Sequence.create.apply(this, actions);
+    },
+
+    runAnimationsForSequenceNamed:function(name){
+        this.runAnimationsForSequenceIdTweenDuration(this._getSequenceId(name), 0);
+    },
+
+    runAnimationsForSequenceNamedTweenDuration:function(name, tweenDuration){
+         this.runAnimationsForSequenceIdTweenDuration(this._getSequenceId(name), tweenDuration);
+    },
+
+    runAnimationsForSequenceIdTweenDuration:function(nSeqId, tweenDuration){
+        cc.log("runAnimationsForSequenceIdTweenDuration: " + nSeqId + " tween " + tweenDuration);
+        if(nSeqId === -1)
+            throw "cc.BuilderAnimationManager.runAnimationsForSequenceIdTweenDuration(): Sequence id should not be -1";
+        tweenDuration = tweenDuration || 0;
+
+        this._rootNode.stopAllActions();
+
+        var allKeys = this._nodeSequences.allKeys();
+        for(var i  = 0,len = allKeys.length  ; i< len;i++){
+            var node = allKeys[i];
+            node.stopAllActions();
+
+            var seqs = this._nodeSequences.objectForKey(node);
+            var seqNodeProps = seqs.objectForKey(nSeqId);
+            var j;
+            var seqNodePropNames = [];
+            if(seqNodeProps){
+                var propKeys = seqNodeProps.allKeys();
+                for(j = 0; j < propKeys.length; j++){
+                    var propName = propKeys[j];
+                    var seqProp = seqNodeProps.objectForKey(propName);
+                    seqNodePropNames.push(propName);
+
+                    this._setFirstFrame(node, seqProp,tweenDuration);
+                    this._runAction(node,seqProp,tweenDuration);
+                }
+            }
+
+            var nodeBaseValues = this._baseValues.objectForKey(node);
+            if(nodeBaseValues){
+                var baseKeys = nodeBaseValues.allKeys();
+                for(j = 0; j < baseKeys.length;j++){
+                    var selBaseKey =  baseKeys[j];
+                    if(seqNodePropNames.indexOf(selBaseKey) == -1){
+                        var value = nodeBaseValues.objectForKey(selBaseKey);
+                        if(value != null)
+                            this._setAnimatedProperty(selBaseKey,node, value, tweenDuration);
+                    }
+                }
+            }
+        }
+
+        // Make callback at end of sequence
+        var seq = this._getSequence(nSeqId);
+        var completeAction = cc.Sequence.create(cc.DelayTime.create(seq.getDuration() + tweenDuration),
+            cc.CallFunc.create(this._sequenceCompleted,this));
+        this._rootNode.runAction(completeAction);
+
+        // Playback callbacks and sounds
+        var action;
+        if (seq.getCallbackChannel()) {
+            // Build sound actions for channel
+            action = this.getActionForCallbackChannel(seq.getCallbackChannel());
+            if (action) {
+                this._rootNode.runAction(action);
+            }
+        }
+
+        if (seq.getSoundChannel()) {
+            // Build sound actions for channel
+            action = this.getActionForSoundChannel(seq.getSoundChannel());
+            if (action) {
+                this._rootNode.runAction(action);
+            }
+        }
+        // Set the running scene
+        this._runningSequence = this._getSequence(nSeqId);
+    },
+
+    runAnimations:function (name, tweenDuration) {
+        tweenDuration = tweenDuration || 0;
+        var nSeqId;
+        if(typeof(name) === "string")
+            nSeqId = this._getSequenceId(name);
+        else
+            nSeqId = name;
+
+        this.runAnimationsForSequenceIdTweenDuration(nSeqId, tweenDuration);
+    },
+
+    setAnimationCompletedCallback:function(target,callbackFunc){
+        this._target = target;
+        this._animationCompleteCallbackFunc = callbackFunc;
+    },
+
+    setCompletedAnimationCallback:function(target,callbackFunc){
+        this.setAnimationCompletedCallback(target,callbackFunc);
+    },
+    setCallFunc:function(callFunc, callbackNamed) {
+        this._keyframeCallFuncs[callbackNamed] = callFunc;
+    },
+
+    debug:function () {
+    },
+
+    _getBaseValue:function (node, propName) {
+        var props = this._baseValues.objectForKey(node);
+        if (props)
+            return props.objectForKey(propName);
+        return null;
+    },
+
+    _getSequenceId:function (sequenceName) {
+        var element = null;
+        var locSequences = this._sequences;
+        for (var i = 0, len = locSequences.length; i < len; i++) {
+            element = locSequences[i];
+            if (element && element.getName() === sequenceName)
+                return element.getSequenceId();
+        }
+        return -1;
+    },
+
+    _getSequence:function (sequenceId) {
+        var element = null;
+        var locSequences = this._sequences;
+        for (var i = 0, len = locSequences.length; i < len; i++) {
+            element = locSequences[i];
+            if (element && element.getSequenceId() === sequenceId)
+                return element;
+        }
+        return null;
+    },
+
+    /**
+     * Use cc.RotateTo instead of cc.BuilderRotateTo.
+     * Duplicate JavaScript of cc.BuilderRotateTo.
+     * Cocos2d-js v2 did not respond to cc.BuilderRotateTo.
+     * Cocos2d-x v2.2.2. Try rotation.  No rotation and log "[Action update]. override me"
+     * Still says this with cc.BuilderRotateTo10.
+     */
+    _getAction:function (keyframe0, keyframe1, propName, node) {
+        var duration = keyframe1.getTime() - (keyframe0 ? keyframe0.getTime() : 0);
+        var getArr,type,getValueArr, x, y;
+
+        if (propName === "rotation") {
+            return cc.RotateTo.create(duration, keyframe1.getValue());
+                //- cc.BuilderRotateTo10.create(duration, keyframe1.getValue());
+        } else if (propName === "rotationX") {
+            return cc.BuilderRotateXTo.create(duration, keyframe1.getValue());
+        } else if (propName === "rotationY") {
+            return cc.BuilderRotateYTo.create(duration, keyframe1.getValue());
+        } else if (propName === "opacity") {
+            return cc.FadeTo.create(duration, keyframe1.getValue());
+        } else if (propName === "color") {
+            var selColor = keyframe1.getValue().getColor();
+            return cc.TintTo.create(duration, selColor.r, selColor.g, selColor.b);
+        } else if (propName === "visible") {
+            var isVisible = keyframe1.getValue();
+            if (isVisible) {
+                return cc.Sequence.create(cc.DelayTime.create(duration), cc.Show.create());
+            } else {
+                return cc.Sequence.create(cc.DelayTime.create(duration), cc.Hide.create());
+            }
+        } else if (propName === "displayFrame") {
+            return cc.Sequence.create(cc.DelayTime.create(duration), cc.BuilderSetSpriteFrame.create(keyframe1.getValue()));
+        } else if(propName === "position"){
+            getArr = this._getBaseValue(node,propName);
+            type = getArr[2];
+
+            //get relative position
+            getValueArr = keyframe1.getValue();
+            x = getValueArr[0];
+            y = getValueArr[1];
+
+            var containerSize = this.getContainerSize(node.getParent());
+
+            var absPos = cc._getAbsolutePosition(x,y, type,containerSize,propName);
+
+            return cc.MoveTo.create(duration,absPos);
+        } else if( propName === "scale"){
+            getArr = this._getBaseValue(node,propName);
+            type = getArr[2];
+
+            //get relative position
+            getValueArr = keyframe1.getValue();
+            x = getValueArr[0];
+            y = getValueArr[1];
+
+            if(type === CCB_SCALETYPE_MULTIPLY_RESOLUTION){
+                //TODO need to test
+                var resolutionScale = cc.BuilderReader.getResolutionScale();
+                x *= resolutionScale;
+                y *= resolutionScale;
+            }
+
+            return cc.ScaleTo.create(duration,x,y);
+        } else if( propName === "skew") {
+            //get relative position
+            getValueArr = keyframe1.getValue();
+            x = getValueArr[0];
+            y = getValueArr[1];
+            return cc.SkewTo.create(duration,x,y);
+        } else {
+            cc.log("BuilderReader: Failed to create animation for property: " + propName);
+        }
+        return null;
+    },
+
+    _setAnimatedProperty:function (propName, node, value, tweenDuration) {
+        if(tweenDuration > 0){
+            // Create a fake keyframe to generate the action from
+            var kf1 = new cc.BuilderKeyframe();
+            kf1.setValue(value);
+            kf1.setTime(tweenDuration);
+            kf1.setEasingType(CCB_KEYFRAME_EASING_LINEAR);
+
+            // Animate
+            var tweenAction = this._getAction(null, kf1, propName, node);
+            node.runAction(tweenAction);
+        } else {
+            // Just set the value
+            var getArr, nType, x,y;
+            if(propName === "position"){
+                getArr = this._getBaseValue(node,propName);
+                nType = getArr[2];
+
+                x = value[0];
+                y = value[1];
+                node.setPosition(cc._getAbsolutePosition(x,y,nType, this.getContainerSize(node.getParent()),propName));
+            }else if(propName === "scale"){
+                getArr = this._getBaseValue(node,propName);
+                nType = getArr[2];
+
+                x = value[0];
+                y = value[1];
+
+                cc.setRelativeScale(node,x,y,nType,propName);
+            } else if( propName === "skew") {
+                x = value[0];
+                y = value[1];
+                node.setSkewX(x);
+                node.setSkewY(y);
+            }else {
+                // [node setValue:value forKey:name];
+                // TODO only handle rotation, opacity, displayFrame, color
+                if(propName === "rotation"){
+                    node.setRotation(value);
+                } else if(propName === "opacity"){
+                    node.setOpacity(value);
+                } else if(propName === "displayFrame"){
+                    node.setDisplayFrame(value);
+                } else if(propName === "color"){
+                    var ccColor3B = value.getColor();
+                    if(ccColor3B.r !== 255 || ccColor3B.g !== 255 || ccColor3B.b !== 255){
+                        node.setColor(ccColor3B);
+                    }
+                } else if( propName === "visible"){
+                    value = value || false;
+                    node.setVisible(value);
+                } else {
+                    cc.log("unsupported property name is "+ propName);
+                }
+            }
+        }
+    },
+
+    _setFirstFrame:function (node, seqProp, tweenDuration) {
+        var keyframes = seqProp.getKeyframes();
+
+        if (keyframes.length === 0) {
+            // Use base value (no animation)
+            var baseValue = this._getBaseValue(node, seqProp.getName());
+            if(!baseValue)
+                cc.log("cc.BuilderAnimationManager._setFirstFrame(): No baseValue found for property");
+            this._setAnimatedProperty(seqProp.getName(), node, baseValue, tweenDuration);
+        } else {
+            // Use first keyframe
+            var keyframe = keyframes[0];
+            this._setAnimatedProperty(seqProp.getName(), node, keyframe.getValue(), tweenDuration);
+        }
+    },
+
+    _getEaseAction:function (action, easingType, easingOpt) {
+        if (easingType === CCB_KEYFRAME_EASING_LINEAR || easingType === CCB_KEYFRAME_EASING_INSTANT ) {
+            return action;
+        } else if (easingType === CCB_KEYFRAME_EASING_CUBIC_IN) {
+            return cc.EaseIn.create(action, easingOpt);
+        } else if (easingType === CCB_KEYFRAME_EASING_CUBIC_OUT) {
+            return cc.EaseOut.create(action, easingOpt);
+        } else if (easingType === CCB_KEYFRAME_EASING_CUBIC_INOUT) {
+            return cc.EaseInOut.create(action, easingOpt);
+        } else if (easingType === CCB_KEYFRAME_EASING_BACK_IN) {
+            return cc.EaseBackIn.create(action);
+        } else if (easingType === CCB_KEYFRAME_EASING_BACK_OUT) {
+            return cc.EaseBackOut.create(action);
+        } else if (easingType === CCB_KEYFRAME_EASING_BACK_INOUT) {
+            return cc.EaseBackInOut.create(action);
+        } else if (easingType === CCB_KEYFRAME_EASING_BOUNCE_IN) {
+            return cc.EaseBounceIn.create(action);
+        } else if (easingType === CCB_KEYFRAME_EASING_BOUNCE_OUT) {
+            return cc.EaseBounceOut.create(action);
+        } else if (easingType === CCB_KEYFRAME_EASING_BOUNCE_INOUT) {
+            return cc.EaseBounceInOut.create(action);
+        } else if (easingType === CCB_KEYFRAME_EASING_ELASTIC_IN) {
+            return cc.EaseElasticIn.create(action, easingOpt);
+        } else if (easingType === CCB_KEYFRAME_EASING_ELASTIC_OUT) {
+            return cc.EaseElasticOut.create(action, easingOpt);
+        } else if (easingType === CCB_KEYFRAME_EASING_ELASTIC_INOUT) {
+            return cc.EaseElasticInOut.create(action, easingOpt);
+        } else {
+            cc.log("BuilderReader: Unkown easing type " + easingType);
+            return action;
+        }
+    },
+
+    _runAction:function (node, seqProp, tweenDuration) {
+        var keyframes = seqProp.getKeyframes();
+        var numKeyframes = keyframes.length;
+
+        if (numKeyframes > 1) {
+            // Make an animation!
+            var actions = [];
+
+            var keyframeFirst = keyframes[0];
+            var timeFirst = keyframeFirst.getTime() + tweenDuration;
+
+            if (timeFirst > 0) {
+                actions.push(cc.DelayTime.create(timeFirst));
+            }
+
+            for (var i = 0; i < numKeyframes - 1; ++i) {
+                var kf0 = keyframes[i];
+                var kf1 = keyframes[(i+1)];
+
+                var action = this._getAction(kf0, kf1, seqProp.getName(), node);
+                if (action) {
+                    // Apply easing
+                    action = this._getEaseAction(action, kf0.getEasingType(), kf0.getEasingOpt());
+                    actions.push(action);
+                }
+            }
+
+            var seq = cc.Sequence.create.apply(this, actions);
+            node.runAction(seq);
+        }
+    },
+
+    _sequenceCompleted:function () {
+        var locRunningSequence = this._runningSequence;
+
+        var locRunningName = locRunningSequence.getName();
+
+        if(this._lastCompletedSequenceName != locRunningSequence.getName()){
+            this._lastCompletedSequenceName = locRunningSequence.getName();
+        }
+
+        var nextSeqId = locRunningSequence.getChainedSequenceId();
+        this._runningSequence = null;
+
+        if (nextSeqId != -1)
+            this.runAnimations(nextSeqId, 0);
+
+        if (this._delegate)
+            this._delegate.completedAnimationSequenceNamed(locRunningName);
+
+        if(this._target && this._animationCompleteCallbackFunc){
+            this._animationCompleteCallbackFunc.call(this._target);
+        }
+    },
+
+    /**
+     * An extension to transform keyframe values.
+     */
+    adjustScale: function(targetNode, factor) {
+        var allKeys = this._nodeSequences.allKeys();
+        for(var i  = 0,len = allKeys.length  ; i< len;i++){
+            var node = allKeys[i];
+            if (targetNode != node) {
+                continue;
+            }
+            var seqs = this._nodeSequences.objectForKey(node);
+            for (var nSeqId = 0; nSeqId < this._sequences.length; nSeqId++) {
+                var seqNodeProps = seqs.objectForKey(nSeqId);
+                var j;
+                if(seqNodeProps){
+                    var propKeys = seqNodeProps.allKeys();
+                    for(j = 0; j < propKeys.length; j++){
+                        var propName = propKeys[j];
+                        if (PROPERTY_SCALE != propName) {
+                            continue;
+                        }
+                        var seqProp = seqNodeProps.objectForKey(propName);
+                        var keyframes = seqProp.getKeyframes();
+                        for (var k = 0; k < keyframes.length; k++) {
+                            var value = keyframes[k].getValue();
+                            value[0] *= factor;
+                            value[1] *= factor;
+                            cc.log("cc.BuilderAnimator10.adjustScale: " + value);
+                        }
+                    }
+                }
+            }
+        }
+    }
+});
