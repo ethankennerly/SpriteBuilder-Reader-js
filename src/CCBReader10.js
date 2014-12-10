@@ -604,6 +604,7 @@ cc.BuilderReader10 = cc.Class.extend({
     /**
      * Version 10 fixes typo of control loader "preferedSize" as "preferredSize".
      * Should be = "preferredSize". This is a typo in cocos2d-iphone, cocos2d-x and CocosBuilder!
+     * SpriteBuilder 1.3 exports normalMapSpriteFrame.  Ignore this.
      */
     overrideConstants: function() {
         PROPERTY_GRAVITY = "gravity";
@@ -615,6 +616,7 @@ cc.BuilderReader10 = cc.Class.extend({
         PROPERTY_BACKGROUNDSPRITEFRAME_HIGHLIGHTED = "backgroundSpriteFrame|Highlighted";
         PROPERTY_BACKGROUNDSPRITEFRAME_DISABLED = "backgroundSpriteFrame|Disabled";
         PROPERTY_BACKGROUNDSPRITEFRAME_SELECTED = "backgroundSpriteFrame|Selected";
+        PROPERTY_NORMAL_MAP_SPRITEFRAME = "normalMapSpriteFrame";
         PROPERTY_TITLECOLOR_NORMAL = "labelColor|Normal";
         PROPERTY_TITLECOLOR_HIGHLIGHTED = "labelColor|Highlighted";
         PROPERTY_TITLECOLOR_DISABLED = "labelColor|Disabled";
@@ -1014,7 +1016,7 @@ cc.BuilderReader10 = cc.Class.extend({
     readSpriteFrame: function() 
     {
         var spriteFile = this.readCachedString();
-        return cc.BuilderReader10.loadSpriteFrame(spriteFile, this._ccbRootPath);
+        return cc.BuilderReader10.loadSpriteFrame(spriteFile, this._ccbRootPath, this._currentCCBFile);
     },
 
     /**
@@ -1200,20 +1202,22 @@ cc.BuilderReader10 = cc.Class.extend({
             locActionManager.addNode(node, seqs);
 
         var uuid = this.readInt(false);
+        this._currentUuid = uuid;
         if(uuid)
         {
-            /*
+            /**/
             cc.log('cc.BuilderReader10._readNodeGraph: Node reference not supported.' 
                 + '  CCB file "' + this._currentCCBFile + '"'
                 + ', class name "' + className + '"'
                 + ', UUID <' + uuid + '>');
-             */
+            //*/
             if (undefined == this.nodeMapping) {
                 this.nodeMapping = {};
             }
             this.nodeMapping[uuid] = node;
         }
         this.readPropertiesForNode(node, parent, this, ccNodeLoader);
+        cc.BuilderReader10.mayScaleCapInsets(node, cc.BuilderReader10.capInsetsScale, false);
         cc.BuilderReader10.clipByStencilName(parent, node);
         if (node.getName && node.getName()) {
             cc.log('cc.BuilderReader10._readNodeGraph: node name "' + node.getName() + '"');
@@ -1754,7 +1758,14 @@ cc.BuilderReader10 = cc.Class.extend({
                     break;
                 }
                 // Not supported:
-                // CCB_PROPTYPE_EFFECTS
+                case CCB_PROPTYPE_EFFECTS:
+                {
+                    var numEffects = this.readInt();
+                    if (0 != numEffects) {
+                        throw new Error('cc.BuilderReader10._readPropertiesForNode: Effects not supported. Property name "' + propertyName + '" has a count of: ' + numEffects);
+                    }
+                    break;
+                }
                 default:
                     ASSERT_FAIL_UNEXPECTED_PROPERTYTYPE(type);
                         break;
@@ -1793,6 +1804,7 @@ cc.BuilderReader10 = cc.Class.extend({
         var fileUtils = cc.FileUtils.getInstance();
         var path = fileUtils.fullPathFromRelativePath(ccbFileName);
         var myCCBReader = new readerClass(ccbReader);
+        myCCBReader._currentCCBFile = ccbFileName;
 
         var size ;
         var bytes = fileUtils.getByteArrayFromFile(path);
@@ -1873,8 +1885,8 @@ cc.BuilderReader10 = cc.Class.extend({
             var points = cc.Node.convertPositionToPoints(posAndType, posAndType, containerSize);
             node.setPosition(points);
             node._positionType = posAndType;
-            cc.log("cc.BuilderReader10.onHandlePropTypePosition: _positionType.corner " 
-                + node._positionType.corner);
+            // cc.log("cc.BuilderReader10.onHandlePropTypePosition: _positionType.corner " 
+            //     + node._positionType.corner);
             /*-
             var pt = cc._getAbsolutePosition(pos.x, pos.y, pos.type, 
                 containerSize, propertyName);
@@ -1963,14 +1975,70 @@ cc.BuilderReader10 = cc.Class.extend({
                 cc.log("cc.BuilderReader10.onHandlePropTypeSpriteFrame: " + spriteFrame.name 
                      + " node x " + node.getPositionX());
                 node.setDisplayFrame(spriteFrame);
+                wasHandled = true;
             }
             else {
                 cc.log("cc.BuilderReader10.onHandlePropTypeSpriteFrame: ERROR: SpriteFrame is null");
             }
         }
+        else if (propertyName === PROPERTY_NORMAL_MAP_SPRITEFRAME) {
+            if(spriteFrame) {
+                cc.log("cc.BuilderReader10.onHandlePropTypeSpriteFrame: Normal map sprite frame is not supported.");
+            }
+            wasHandled = true;
+        }
         return wasHandled;
-    }
+    },
+
 });
+
+/**
+ * Alias cross-platform rectangle.
+ * Cocos2d-js expects cc.rect but Cocos-html5 expects cc.Rect.  
+ */
+if (cc.rect && !cc.Rect) {
+    cc.Rect = cc.rect;
+}
+
+cc.BuilderReader10.capInsetsScale = new cc.Rect(0, 0, 1, 1);
+
+/**
+ * Scale cap insets of ControlButton Scale9Sprite.  
+ * To disable overwriting default cap insets, set this to null.
+ * At (0, 0, 1, 1) cap insets disable Scale9Sprite.
+ * Set preferred size to original sprite size.
+ *
+ * @param   enableZoomOnTouch   If defined, set zoom on touch down.
+ */
+cc.BuilderReader10.mayScaleCapInsets = function(node, scale, enableZoomOnTouch) {
+    if (node instanceof cc.ControlButton) {
+        if (undefined !== enableZoomOnTouch) {
+            node.setZoomOnTouchDown(enableZoomOnTouch);
+        }
+        function hasArea(rect) {
+            return rect && (rect.x || rect.y || rect.width || rect.height);
+        }
+        if (hasArea(scale)) {
+            var states = [cc.CONTROL_STATE_NORMAL, cc.CONTROL_STATE_HIGHLIGHTED, 
+                          cc.CONTROL_STATE_DISABLED, cc.CONTROL_STATE_SELECTED,
+                          "Normal", "Highlighted", "Disabled", "Selected"];
+            for (var s = 0; s < states.length; s++) {
+                var state = states[s];
+                var scale9Sprite = node.getBackgroundSpriteForState(state);
+                if (scale9Sprite) {
+                    var size = scale9Sprite.getOriginalSize();
+                    var width = size.width;
+                    var height = size.height;
+                    var insets = new cc.Rect(scale.x * width, scale.y * height, 
+                        scale.width * width, scale.height * height);
+                    scale9Sprite.setCapInsets(insets);
+                    var size = new cc.Size(width, height);
+                    node.setPreferredSize(size);
+                }
+            }
+        }
+    }
+}
 
 cc.BuilderReader10.UIScaleFactor = 1.0;
 cc.BuilderReader10._ccbResolutionScale = 1;
@@ -2170,8 +2238,14 @@ cc.BuilderReader10.trySetDescendents = function(root)
     }
 };
 
-cc.BuilderReader10.loadSpriteFrame = function(spriteFile, rootPath)
+/**
+ * If no sprite file, then skip.
+ */
+cc.BuilderReader10.loadSpriteFrame = function(spriteFile, rootPath, ccbFile)
 {
+    if ("" == spriteFile) {
+        return;
+    }
     if (undefined == rootPath) {
         rootPath = "";
     }
@@ -2179,14 +2253,14 @@ cc.BuilderReader10.loadSpriteFrame = function(spriteFile, rootPath)
     var frameCache = cc.SpriteFrameCache.getInstance();
     frame = frameCache.getSpriteFrame(spriteFile);
     if (!frame) {
+        cc.log('cc.BuilderReader10.loadSpriteFrame: Sprite frame not found.  Loading separate "' + spriteFile 
+            + '" in CCB file "' + ccbFile + '"');
         spriteFile = rootPath + spriteFile;
         var texture = cc.TextureCache.getInstance().addImage(spriteFile);
         var locContentSize = texture.getContentSize();
-        var bounds = cc.rect(0, 0, locContentSize.width, locContentSize.height);
+        var bounds = new cc.Rect(0, 0, locContentSize.width, locContentSize.height);
         frame = cc.SpriteFrame.createWithTexture(texture, bounds);
         frameCache.addSpriteFrame(frame, spriteFile);
-        cc.log('cc.BuilderReader10.readSpriteFrame: Loaded separate file "' + spriteFile 
-            + '" to create frame "' + frame + '"');
     }
     cc.BuilderReader10.setName(frame, spriteFile);
     return frame;
@@ -2483,10 +2557,22 @@ cc.BuilderReader10.extend = function()
      * Guess "CCNode".  If that is not found in string cache, then try any registered loader in string cache.
      * Test case:  Gameplay.ccbi is CCNode yet has CCSprite and CCBFile in string cache.
      * Test case:  MainScene.ccbi has CCButton in string cache.  Expect to load cc.ControlButtonLoader
+     *
+     * If class name is an empty string, guess "CCSprite".
+     * Test case:  Load CCBI with multiple sprites and named nodes from SpriteBuilder 1.3.6.  
+     * Second sprite reads class name "".  
+     * XXX Some datum might have been overlooked.
      */
-    cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache) {
+    cc.NodeLoaderLibrary.prototype.guessClass = function(stringCache, className) {
+        var guessed;
+        if ("" === className) {
+            cc.log('cc.NodeLoaderLibrary.guessClass: Class name empty?  Was a property not read?  Cache: ' + stringCache);
+            guessed = "CCSprite";
+        }
+        else {
+            guessed = "CCNode";
+        }
         var loaders = this._ccNodeLoaders;
-        var guessed = "CCNode";
         if (stringCache.indexOf(guessed) <= -1) {
             for (var registered in loaders) {
                 if (0 <= stringCache.indexOf(registered)) {
@@ -2505,7 +2591,9 @@ cc.BuilderReader10.extend = function()
      */
     cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
         if (null == this.getCCNodeLoader("CCButton")) {
-            var loaderClass = cc.ControlSpriteButtonLoader;
+            var extendButton = false;
+            var loaderClass = extendButton ? cc.ControlSpriteButtonLoader
+                                           : cc.ControlButtonLoader;
             var loader = new loaderClass();
             this.registerCCNodeLoader("CCButton", loader);
         }
@@ -2514,14 +2602,14 @@ cc.BuilderReader10.extend = function()
             cc.log("cc.NodeLoaderLibrary.guess: loaded " + className );
         }
         else {
-            var loaderClassName = this.guessClass(stringCache);
+            var loaderClassName = this.guessClass(stringCache, className);
             ccNodeLoader = this.getCCNodeLoader(loaderClassName);
-            if (!ccNodeLoader) {
-                throw new Error('Could not load "' + className + '" or "' + loaderClassName + '"');
+            if (ccNodeLoader) {
+                cc.log('cc.NodeLoaderLibrary.guess: no corresponding node loader for "' 
+                    + className + '". Defaulting to ' + loaderClassName);
             }
             else {
-                cc.log("cc.NodeLoaderLibrary.guess: no corresponding node loader for " 
-                    + className + ". Defaulting to " + loaderClassName);
+                throw new Error('Could not load "' + className + '" or "' + loaderClassName + '"');
             }
         }
         return ccNodeLoader;

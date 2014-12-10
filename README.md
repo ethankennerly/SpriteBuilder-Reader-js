@@ -115,7 +115,11 @@ Extra Features
 Not supported
 -------------
 
+ * Timeline callback or sound effect.
+
  * Animation of any node properties not tested above, such as: scale, skew.
+
+ * Flipped X or Y.  Supported in cocos2d-html5, but not in cocos2d-js v.2.2.2.  Can scale -1 instead.
 
  * Animation of sprite frames.
  
@@ -169,6 +173,8 @@ Not supported
  * Float scale.
  
  * Effects.
+ 
+ * Normal map.
  
  * fileLookup.plist
  
