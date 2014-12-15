@@ -298,7 +298,10 @@ function testButtonCallback(parent) {
     });
     var controller = new TestController();
     var reader = new cc.BuilderReader10.defaultReader(null, controller);
-    scene = cc.BuilderReader10.loadReader(reader, "MainScene_10", true);
+    cc.SpriteFrameCache.getInstance().addSpriteFrames( "PeevedPenguinsAssets.plist", "PeevedPenguinsAssets.png" );
+    var ownerStub = true;
+    cc.BuilderReader10.extendButton = true;
+    scene = cc.BuilderReader10.loadReader(reader, "MainScene_10", ownerStub);
     parent.addChild(scene);
     cc.log("Testing button:  Click button at bottom-center.  Look at log.  Expect to read 'play'.");
 }
@@ -339,15 +342,22 @@ function testClipByStencilName(parent)
     cc.log("Testing clipping node by stencil name: Look for blue circle.  If it is square, try enabling browser Web GL and reloading.");
 }
 
+function testSubstituteFont(parent) {
+    cc.BuilderReader10.fontSubstitutions = {"Helvetica": "Courier", "Arial": "Times New Roman"};
+    scene = testReader10(parent, "Machines");
+    cc.log("Testing substituting font:  Look for 'Sample Text' in Courier font.  Button with '1' in ArialMT.  Button with '2' in Times New Roman");
+}
+
 function TestCCBReader10(parent) {
-    testReadNumbers();
-    testConvertToPoints();
-    testGetDefinitionByName();
+    testButtonCallback(parent);
+    // testReadNumbers();
+    // testConvertToPoints();
+    // testGetDefinitionByName();
     // testReader5(parent, "MainScene_5");
-    testMultipleAnimations(parent);
-    testClipByStencilName(parent);
+    // testMultipleAnimations(parent);
+    testSubstituteFont(parent);
+    // testClipByStencilName(parent);
     // testIgnorePhysics(parent);
-    // testButtonCallback(parent);
     // testSingleAnimation(parent);
     // scene = testReader10(parent, "Seal");
     // scene = testReader10(parent, "Penguin");

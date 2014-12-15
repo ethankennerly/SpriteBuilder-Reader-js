@@ -1125,6 +1125,7 @@ cc.BuilderReader10 = cc.Class.extend({
      * Resolve class in case Cocos2D is on a mobile device without access to global namespace.
      * To debug, record current class name.
      * Disable zoomOnTouchDown by default.
+     *
      */
     _readNodeGraph: function(parent) {
         /* Read class name. */
@@ -1144,14 +1145,8 @@ cc.BuilderReader10 = cc.Class.extend({
         if (!useLoader) {
             var nodeClass = cc.BuilderReader10.getDefinitionByName(_ccbGlobalContext, className);
             if (nodeClass) {
-                try {
-                    node = new nodeClass();
-                    //- node = eval("new " + className + "()");
-                    cc.log('cc.BuilderReader10._readNodeGraph: new class name "' + className + '"');
-                }
-                catch (err) {
-                    useLoader = true;
-                }
+                node = cc.BuilderReader10.tryCreate(nodeClass, className);
+                useLoader = null == node;
             }
             else {
                 useLoader = true;
@@ -1467,7 +1462,9 @@ cc.BuilderReader10 = cc.Class.extend({
             var isExtraProp = (i >= numRegularProps);
             var type = ccbReader.readInt(false);
             var propertyName = ccbReader.readCachedString();
-
+            if (node instanceof cc.ControlButton || node instanceof cc.LabelTTF) {
+                cc.log("cc.BuilderReader10.readPropertiesForNode: " + propertyName);
+            }
             var setProp = true;
 
             //forward properties for sub ccb files
@@ -1639,8 +1636,18 @@ cc.BuilderReader10 = cc.Class.extend({
                 {
                     var c4 = this.parsePropTypeColor4(node, parent, ccbReader, propertyName);
                     if (setProp) {
-                        ccNodeLoader.onHandlePropTypeColor3(node, parent, propertyName, c4, ccbReader);
-                        ccNodeLoader.onHandlePropTypeByte(node, parent, PROPERTY_OPACITY, c4.a, ccbReader);
+                        // Test case:  Load label.  Check log.  Expect color.   Got log of unexpected "fontColor".
+                        if ("fontColor" == propertyName && node.setFontFillColor) {
+                            node.setFontFillColor(c4);
+                        }
+                        else {
+                            ccNodeLoader.onHandlePropTypeColor3(node, parent, propertyName, c4, ccbReader);
+                        }
+                        // Test case.  Load label.  outlineColor alpha 0.  Expect to see text.  Got no text.
+                        var opacityValids = {"color": 1, "fontColor": 1};
+                        if (propertyName in opacityValids) {
+                            ccNodeLoader.onHandlePropTypeByte(node, parent, PROPERTY_OPACITY, c4.a, ccbReader);
+                        }
                     }
                     break;
                 }
@@ -1679,8 +1686,15 @@ cc.BuilderReader10 = cc.Class.extend({
                 case CCB_PROPTYPE_FONTTTF:
                 {
                     var fontTTF = ccNodeLoader.parsePropTypeFontTTF(node, parent, ccbReader);
+                    fontTTF = cc.BuilderReader10.substituteFont(fontTTF);
                     if (setProp) {
-                        ccNodeLoader.onHandlePropTypeFontTTF(node, parent, propertyName, fontTTF, ccbReader);
+                        // SpriteBuilder saves property "fontName" instead of "title|1".
+                        if ("fontName" == propertyName && node.setTitleTTFForState) {
+                            node.setTitleTTFForState(fontTTF, cc.CONTROL_STATE_NORMAL);
+                        }
+                        else {
+                            ccNodeLoader.onHandlePropTypeFontTTF(node, parent, propertyName, fontTTF, ccbReader);
+                        }
                     }
                     break;
                 }
@@ -1691,14 +1705,25 @@ cc.BuilderReader10 = cc.Class.extend({
                     var localized = ccbReader.readBool();  // TODO
                     if (propertyName == PROPERTY_NAME)
                     {
-                        cc.BuilderReader10.setName(node, text);
+                        if (setProp) {
+                            cc.BuilderReader10.setName(node, text);
+                        }
                     }
                     else {
-                        if (node.hasOwnProperty(propertyName)) {
-                            node[propertyName] = text;
-                        }
                         if (setProp) {
-                            ccNodeLoader.onHandlePropTypeString(node, parent, propertyName, text, ccbReader);
+                            if (node.hasOwnProperty(propertyName)) {
+                                node[propertyName] = text;
+                            }
+                            // Test case: Load label.  Expect text.  Got "".
+                            if (PROPERTY_STRING == propertyName && node.setString) {
+                                node.setString(text);
+                            }
+                            else if ("title" == propertyName && node.setTitleForState) {
+                                node.setTitleForState(text, cc.CONTROL_STATE_NORMAL);
+                            }
+                            else {
+                                ccNodeLoader.onHandlePropTypeString(node, parent, propertyName, text, ccbReader);
+                            }
                         }
                     }
                     break;
@@ -2007,6 +2032,8 @@ cc.BuilderReader10.capInsetsScale = new cc.Rect(0, 0, 1, 1);
  * To disable overwriting default cap insets, set this to null.
  * At (0, 0, 1, 1) cap insets disable Scale9Sprite.
  * Set preferred size to original sprite size.
+ * Refers to numerical control states. 
+ * Test case:  Cocos2d-js v2 does not accept string states.
  *
  * @param   enableZoomOnTouch   If defined, set zoom on touch down.
  */
@@ -2020,8 +2047,7 @@ cc.BuilderReader10.mayScaleCapInsets = function(node, scale, enableZoomOnTouch) 
         }
         if (hasArea(scale)) {
             var states = [cc.CONTROL_STATE_NORMAL, cc.CONTROL_STATE_HIGHLIGHTED, 
-                          cc.CONTROL_STATE_DISABLED, cc.CONTROL_STATE_SELECTED,
-                          "Normal", "Highlighted", "Disabled", "Selected"];
+                          cc.CONTROL_STATE_DISABLED, cc.CONTROL_STATE_SELECTED ];
             for (var s = 0; s < states.length; s++) {
                 var state = states[s];
                 var scale9Sprite = node.getBackgroundSpriteForState(state);
@@ -2040,6 +2066,34 @@ cc.BuilderReader10.mayScaleCapInsets = function(node, scale, enableZoomOnTouch) 
     }
 }
 
+/**
+ * Workaround: For each target, create a unique function.
+ *
+ * GOTCHA: In Cocos2d-x, adding the same function and event to a different target silently fails.
+ * "if (it->second->_jsFunc == jsFunc && arg2 == it->second->_type)"
+ * https://github.com/cocos2d/cocos2d-x/blame/v2/scripting/javascript/bindings/jsb_cocos2dx_extension_manual.cpp#L687
+ *
+ * Test case:
+ * cocos2d-html5 v2.2.2 accepts cc.Control.addTargetWithActionForControlEvents
+ * However, cocos2d-x jsb this code had no apparent effect on second and third button.
+ * The first button responds.
+ * http://www.cocos2d-x.org/reference/html5-js/V2.2.3/index.html
+ *
+ * Bug reported here:
+ * https://github.com/cocos2d/cocos2d-x/issues/9480
+ */
+cc.BuilderReader10.addTargetWithActionForControlEvents = function(control, methodOwner, method, event)
+{
+    if (null == method) {
+        throw new Error("Calling will expect a method.");
+    }
+    var uniqueFunction = function(){
+        return method.call(methodOwner, control, event);
+    };
+    return control.addTargetWithActionForControlEvents(methodOwner, uniqueFunction, event); 
+};
+
+cc.BuilderReader10.extendButton = false;
 cc.BuilderReader10.UIScaleFactor = 1.0;
 cc.BuilderReader10._ccbResolutionScale = 1;
 cc.BuilderReader10.setResolutionScale = function(scale){
@@ -2073,6 +2127,7 @@ cc.BuilderReader10.defaultReader = function(ccbMemberVariableAssigner, ccbSelect
 }
 
 /**
+ * If root node ends with no animation manager, assign the reader's.
  * @param   reader  Preconstruct and customize parameters.
  */
 cc.BuilderReader10.loadReader = function (reader, ccbFilePath, owner, parentSize, ccbRootPath) {
@@ -2094,7 +2149,7 @@ cc.BuilderReader10.loadReader = function (reader, ccbFilePath, owner, parentSize
             callbackName = ownerCallbackNames[i];
             callbackNode = ownerCallbackNodes[i];
             if(callbackNode instanceof cc.ControlButton)
-                callbackNode.addTargetWithActionForControlEvents(owner, owner[callbackName], 255);        //register all type of events
+                cc.BuilderReader10.addTargetWithActionForControlEvents(callbackNode, owner, owner[callbackName], 255);        //register all type of events
             else
                 callbackNode.setCallback(owner[callbackName], owner);
         }
@@ -2148,7 +2203,7 @@ cc.BuilderReader10.loadReader = function (reader, ccbFilePath, owner, parentSize
             callbackNode = documentCallbackNodes[j];
             callbackControlEvents = documentCallbackControlEvents[j];
             if(callbackNode instanceof cc.ControlButton)
-                callbackNode.addTargetWithActionForControlEvents(controller, controller[callbackName], callbackControlEvents);        //register all type of events
+                cc.BuilderReader10.addTargetWithActionForControlEvents(callbackNode, controller, controller[callbackName], callbackControlEvents);        //register all type of events
             else
                 callbackNode.setCallback(controller[callbackName], controller);
         }
@@ -2179,6 +2234,9 @@ cc.BuilderReader10.loadReader = function (reader, ccbFilePath, owner, parentSize
                 animationManager.setCallFunc(cc.CallFunc.create(owner[kfCallbackName], owner), keyframeCallbacks[j]);
             }
         }
+    }
+    if (!node.animationManager && reader.getAnimationManager()) {
+        node.animationManager = reader.getAnimationManager();
     }
 
     return node;
@@ -2320,6 +2378,7 @@ cc.BuilderReader10.requiresSubPaths = function(all) {
     subPaths.push('CCBReader/CCBSequence.js');
     subPaths.push('CCBReader/CCBRelativePositioning.js');
     subPaths.push('CCBReader/CCBKeyframe.js');
+    subPaths.push('CCBReader/CCBValue.js');
     if (all) {
         subPaths.push('GUI/CCControlExtension/CCControl.js');
         subPaths.push('GUI/CCControlExtension/CCControlButton.js');
@@ -2328,7 +2387,6 @@ cc.BuilderReader10.requiresSubPaths = function(all) {
         subPaths.push('GUI/CCControlExtension/CCScale9Sprite.js');
         subPaths.push('CCBReader/CCBReaderUtil.js');
         subPaths.push('CCBReader/CCBReader.js');
-        subPaths.push('CCBReader/CCBValue.js');
     }
     return subPaths;
 };
@@ -2492,7 +2550,9 @@ cc.BuilderReader10.extend = function()
      * http://yannickloriot.com/2013/03/cccontrolextension-the-buttons/
      * http://yannickloriot.com/2013/02/the-control-extension-for-cocos2d/
      */
-    cc.ControlSpriteButton = cc.ControlButton.extend({
+    cc.ControlSpriteButton = cc.ControlButton.extend({});
+
+    cc.ControlSpriteButton_DISABLED = cc.ControlButton.extend({
         /**
          * Do not zoom.  Margin at image center.
          */
@@ -2547,7 +2607,8 @@ cc.BuilderReader10.extend = function()
          */
         onHandlePropTypeBlock:function (node, parent, propertyName, blockData, ccbReader) {
             if (null != blockData) {
-                node._addTargetWithActionForControlEvent(blockData.target, blockData.selMenuHander, 
+                cc.BuilderReader10.addTargetWithActionForControlEvents(node, 
+                    blockData.target, blockData.selMenuHander, 
                     cc.CONTROL_EVENT_TOUCH_DOWN);
             }
         },
@@ -2591,9 +2652,15 @@ cc.BuilderReader10.extend = function()
      */
     cc.NodeLoaderLibrary.prototype.guess = function(className, stringCache) {
         if (null == this.getCCNodeLoader("CCButton")) {
-            var extendButton = false;
-            var loaderClass = extendButton ? cc.ControlSpriteButtonLoader
-                                           : cc.ControlButtonLoader;
+            var loaderClass;
+            if (cc.BuilderReader10.extendButton) {
+                cc.log("guess: Registering CCButton to ControlSpriteButtonLoader.");
+                loaderClass = cc.ControlSpriteButtonLoader;
+            }
+            else {
+                cc.log("guess: Registering CCButton to ControlButtonLoader.");
+                loaderClass = cc.ControlButtonLoader;
+            }
             var loader = new loaderClass();
             this.registerCCNodeLoader("CCButton", loader);
         }
@@ -2635,6 +2702,12 @@ cc.BuilderReader10.extend = function()
     if (!cc.Point) {
         cc.Point = cc.p;
     }
+    if (!cc.Color3B) {
+        cc.Color3B = cc.c3b;
+    }
+    if (!cc.Color4B) {
+        cc.Color4B = cc.c4b;
+    }
 
     /**
      * Cocos2d-x v3 uses setName and getName.
@@ -2645,6 +2718,15 @@ cc.BuilderReader10.extend = function()
         };
         cc.Node.prototype.getName = function() {
             return this._name;
+        };
+    }
+
+    /**
+     * HTML5 version does not support "isVisible", but JSB does not support "_visible".
+     */
+    if (!cc.Node.prototype.isVisible) {
+        cc.Node.prototype.isVisible = function() {
+            return this._visible;
         };
     }
 
@@ -2928,6 +3010,33 @@ cc.BuilderReader10.getDefinitionByName = function(scope, address)
 }
 
 /**
+ * If create static function exists, call it.  Otherwise try to create an instance.
+ * Cocos2d-x does not expose class, but does expose create static function.
+ */
+cc.BuilderReader10.tryCreate = function(nodeClass, logClassName)
+{
+    var node;
+    if (nodeClass.create) {
+        node = nodeClass.create();
+        if (logClassName) {
+            cc.log('cc.BuilderReader10._readNodeGraph: class created "' + logClassName + '"');
+        }
+    }
+    else {
+        try {
+            node = new nodeClass();
+            //- node = eval("new " + className + "()");
+            if (logClassName) {
+                cc.log('cc.BuilderReader10._readNodeGraph: new class name "' + logClassName + '"');
+            }
+        }
+        catch (err) {
+        }
+    }
+    return node;
+}
+
+/**
  * If parent is a cc.ClippingNode and child is named "stencil", then set stencil.
  * Adapted from example: http://www.waitingfy.com/archives/1093
  *
@@ -2941,17 +3050,20 @@ cc.BuilderReader10.getDefinitionByName = function(scope, address)
  *             masked
  *             stencil (name of a cc.Sprite or cc.Node)
  *             masked
- * HTML5 does not trim the pixels.  It shows rectangle rotated to the stencil.
+ * HTML5 without WebGL does not trim the pixels.  It shows rectangle rotated to the stencil.
  */
 cc.BuilderReader10.clipByStencilName = function(clippingNode, nodeNamedStencil) {
     if (clippingNode instanceof cc.ClippingNode) {
         if ("stencil" == nodeNamedStencil.getName()) {
             clippingNode.setStencil(nodeNamedStencil);
-            clippingNode.setAlphaThreshold(0.5);
+            clippingNode.setAlphaThreshold(0.000001);
             var stencilSize = nodeNamedStencil.getContentSize();
             clippingNode.setContentSize(stencilSize.width, stencilSize.height);
-            nodeNamedStencil.setZOrder(-99999);
-            clippingNode._cangodhelpme(true);
+            // nodeNamedStencil.setZOrder(-99999);
+            nodeNamedStencil.setVisible(false);
+            if (clippingNode._cangodhelpme) {
+                clippingNode._cangodhelpme(true);
+            }
         }
     }
 }
@@ -3665,7 +3777,7 @@ cc.BuilderAnimationManager10 = cc.Class.extend({
                             var value = keyframes[k].getValue();
                             value[0] *= factor;
                             value[1] *= factor;
-                            cc.log("cc.BuilderAnimator10.adjustScale: " + value);
+                            // cc.log("cc.BuilderAnimator10.adjustScale: " + value);
                         }
                     }
                 }
@@ -3673,3 +3785,94 @@ cc.BuilderAnimationManager10 = cc.Class.extend({
         }
     }
 });
+
+/**
+ * gotoAndPlay sequence name if not already at that currentState.
+ * @return if did go.
+ */
+cc.BuilderAnimationManager10.setState = function(rootNode, sequenceName)
+{
+    var isGoing = false;
+    if (sequenceName != rootNode.currentState) {
+        isGoing = cc.BuilderAnimationManager10.gotoAndPlay(rootNode, sequenceName)
+        rootNode.currentState = sequenceName;
+    }
+    return isGoing;
+}
+
+/**
+ * All descendents of root simultaneously play the named sequence label.
+ * The name "gotoAndPlay" follows Flash MovieClip gotoAndPlay.
+ * @return  If any descendent started playing anything now.
+ */
+cc.BuilderAnimationManager10.gotoAndPlay = function(rootNode, sequenceName)
+{
+    var isStarting = false;
+    var animationManager = rootNode.animationManager;
+    if (animationManager && 0 <= animationManager._getSequenceId(sequenceName)) {
+        animationManager.runAnimations(sequenceName);
+        isStarting = true;
+    }
+    var children = rootNode.getChildren();
+    for (var c = 0; c < children.length; c++) {
+        var child = children[c];
+        var isChildStarting = cc.BuilderAnimationManager10.gotoAndPlay(child, sequenceName);
+        isStarting = isChildStarting || isStarting;
+    }
+    return isStarting;
+}
+
+/**
+ * @return Deepest child node with name by "getName".
+ */
+cc.BuilderAnimationManager10.getDescendentByName = function(root, name)
+{
+    var children = root.getChildren();
+    var found;
+    for (var c = 0; c < children.length; c++) {
+        var child = children[c];
+        if (child.getName && child.getName() == name) {
+            found = child;
+        }
+        var foundChild = cc.BuilderAnimationManager10.getDescendentByName(child, name);
+        if (foundChild) {
+            found = foundChild;
+        }
+        if (found) {
+            return found;
+        }
+    }
+}
+
+/**
+ * @return Depth first animation manager in tree.
+ */
+cc.BuilderAnimationManager10.getManager = function(rootNode)
+{
+    var animationManager = rootNode.animationManager;
+    if (animationManager) {
+        return animationManager;
+    }
+    var children = rootNode.getChildren();
+    for (var c = 0; c < children.length; c++) {
+        var child = children[c];
+        animationManager = cc.BuilderAnimationManager10.getManager(child);
+        if (animationManager) {
+            return animationManager;
+        }
+    }
+}
+
+cc.BuilderReader10.fontSubstitutions = cc.BuilderReader10.fontSubstitutions || {};
+
+/**
+ * SpriteBuilder does not show all the fonts.
+ */
+cc.BuilderReader10.substituteFont = function(fontTTF)
+{
+    var subs = cc.BuilderReader10.fontSubstitutions;
+    if (fontTTF in subs) {
+        fontTTF = subs[fontTTF];
+    }
+    return fontTTF;
+}

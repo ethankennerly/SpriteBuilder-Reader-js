@@ -104,16 +104,24 @@ Features
  * Ignore physics and joints.  
  
  * Expects joints are the last part of the file and are not read.
- 
+
+ * ControlButton callback.
+
+ * Basic label text.
+
 
 Extra Features
 --------------
 
  * Set parent variable to child names, like Flash instance names.
 
+ * Run animation on all descendents, like Flash MovieClip gotoAndPlay.
+
 
 Not supported
 -------------
+
+ * Name on root node.
 
  * Timeline callback or sound effect.
 
