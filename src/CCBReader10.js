@@ -1462,9 +1462,11 @@ cc.BuilderReader10 = cc.Class.extend({
             var isExtraProp = (i >= numRegularProps);
             var type = ccbReader.readInt(false);
             var propertyName = ccbReader.readCachedString();
+            /*
             if (node instanceof cc.ControlButton || node instanceof cc.LabelTTF) {
                 cc.log("cc.BuilderReader10.readPropertiesForNode: " + propertyName);
             }
+             */
             var setProp = true;
 
             //forward properties for sub ccb files
@@ -1644,10 +1646,16 @@ cc.BuilderReader10 = cc.Class.extend({
                             ccNodeLoader.onHandlePropTypeColor3(node, parent, propertyName, c4, ccbReader);
                         }
                         // Test case.  Load label.  outlineColor alpha 0.  Expect to see text.  Got no text.
-                        var opacityValids = {"color": 1, "fontColor": 1};
-                        if (propertyName in opacityValids) {
+                        /* Opacity */
+                        var isFontColor = node instanceof cc.LabelTTF && "fontColor" == propertyName;
+                        var isColor = (node instanceof cc.Sprite || node instanceof cc.Scale9Sprite) 
+                            && !(node instanceof cc.LabelTTF) 
+                            && !(node instanceof cc.ControlButton) 
+                            && "color" == propertyName;
+                        if (isFontColor || isColor) {
                             ccNodeLoader.onHandlePropTypeByte(node, parent, PROPERTY_OPACITY, c4.a, ccbReader);
                         }
+                        // Opacity */
                     }
                     break;
                 }
@@ -3031,6 +3039,7 @@ cc.BuilderReader10.tryCreate = function(nodeClass, logClassName)
             }
         }
         catch (err) {
+            cc.log('cc.BuilderReader10._readNodeGraph: failed to create class name "' + logClassName + '"');
         }
     }
     return node;
@@ -3339,11 +3348,11 @@ cc.BuilderAnimationManager10 = cc.Class.extend({
                         if(target.onResolveCCBCCCallFuncSelector != null)
                             selCallFunc = targetAsCCBSelectorResolver.onResolveCCBCCCallFuncSelector(target, selectorName);
                         if(selCallFunc == 0)
-                            cc.log("Skipping selector '" + selectorName + "' since no CCBSelectorResolver is present.");
+                            cc.log("cc.BuilderAnimationManager10.getActionForCallbackChannel: Skipping selector '" + selectorName + "' since no CCBSelectorResolver is present.");
                         else
                             actions.push(cc.CallFunc.create(selCallFunc,target));
                     } else {
-                        cc.log("Unexpected empty selector.");
+                        cc.log("cc.BuilderAnimationManager10.getActionForCallbackChannel: Unexpected empty selector.");
                     }
                 }
             }
@@ -3792,12 +3801,16 @@ cc.BuilderAnimationManager10 = cc.Class.extend({
  */
 cc.BuilderAnimationManager10.setState = function(rootNode, sequenceName)
 {
-    var isGoing = false;
+    var isChanging = false;
     if (sequenceName != rootNode.currentState) {
-        isGoing = cc.BuilderAnimationManager10.gotoAndPlay(rootNode, sequenceName)
         rootNode.currentState = sequenceName;
+        var isRunning = rootNode.animationManager 
+            && sequenceName == rootNode.animationManager.getRunningSequenceName();
+        if (!isRunning) {
+            isChanging = cc.BuilderAnimationManager10.gotoAndPlay(rootNode, sequenceName);
+        }
     }
-    return isGoing;
+    return isChanging;
 }
 
 /**

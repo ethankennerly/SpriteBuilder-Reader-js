@@ -117,6 +117,8 @@ Extra Features
 
  * Run animation on all descendents, like Flash MovieClip gotoAndPlay.
 
+ * Substitute fonts.
+
 
 Not supported
 -------------
